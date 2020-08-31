@@ -10,7 +10,17 @@ anyone interested in doing something similar. Applications of this Python
 development paradigm could be for scientific computing or anything that needs to
 be fast or do a lot of low-level stuff [#]_.
 
-.. [#] Other options could be the use of Cython__ or numba__.
+Includes a test suite that also illustrates the difference in speed between
+operating on NumPy array elements directly in C versus iterating through the
+elements in Python and using ctypes__ to call the C function.
+
+In the future, there should also be a small pytest__ test suite that can be run.
+
+.. [#] Other options could be the use of ctypes, Cython__ or numba__.
+
+.. __: https://docs.python.org/3/library/ctypes.html
+
+.. __: https://docs.pytest.org/en/stable/contents.html
 
 .. __: https://cython.readthedocs.io/en/latest/index.html
 
