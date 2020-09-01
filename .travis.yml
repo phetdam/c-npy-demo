@@ -11,7 +11,7 @@ os: linux
 dist: bionic
 
 # pre-install updates
-before_install: ./travis/before_install.sh
+before_install: bash travis/before_install.sh
 
 # depends on numpy only
 install: pip3 install --upgrade numpy
@@ -19,7 +19,7 @@ install: pip3 install --upgrade numpy
 # build and run tests
 script:
   # script can't be sourced so we have to cd manually
-  - ./travis/build_ext.sh && cd build
+  - bash travis/build_ext.sh && cd build
   # run tests
   #- pytest
 
