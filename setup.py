@@ -23,8 +23,8 @@ def _setup():
     # get version
     with open("VERSION", "r") as vf: version = vf.read().rstrip()
     # short and long descriptions
-    short_desc = ("A toy Python package demoing the use of ctypes, an extension"
-                  "module, and the NumPy C API.")
+    short_desc = ("A toy Python package demoing the combined use of ctypes, an "
+                  "extension module, and the NumPy C API.")
     with open("README.rst", "r") as rf: long_desc = rf.read()
     # perform setup
     setup(name = _PACKAGE_NAME,
