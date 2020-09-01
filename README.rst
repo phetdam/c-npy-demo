@@ -37,4 +37,9 @@ To be added.
 
 Building from this (unstable) repo will probably only work on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
-Travis CI virtual machines are done on Ubuntu 18.04 with gcc 7.4.
+Travis CI virtual machines are done on Ubuntu 18.04 with gcc 7.4. There is also
+an implicit dependency on the gcc version being high enough such that an OpenMP
+implementation is included [#]_. For example, I have ``libgomp.so.1.0.0`` in
+``/usr/lib/x86_64-linux-gnu/``, with appropriate symbolic links.
+
+.. [#] OpenMP may not be involved in this project. This is not final.
