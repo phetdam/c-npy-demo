@@ -10,5 +10,5 @@ then
     exit
 fi
 
-# build c_numpy_demo.cext, where package is in directory build
-python3 setup.py build --build-lib build
+# build c_numpy_demo.cext, where package is in directory pkg_test (see Makefile)
+make build

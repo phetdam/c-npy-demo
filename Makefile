@@ -3,7 +3,7 @@
 CC          = gcc
 CFLAGS      =
 PYTHON      = python3
-SETUP_FLAGS = #--compiler=mingw32
+SETUP_FLAGS = --build-lib pkg_test
 
 # phony targets
 .PHONY: build clean dummy dist
@@ -18,7 +18,8 @@ clean:
 	@rm -vrf ./c_numpy_demo.egg-info
 	@rm -vrf ./dist
 
-# build np_touch module locally (in ./build) from source files, running setup.py
+# build np_touch module locally (in ./build) from source files with setup.py.
+# currently configured to move built package into directory pkg_test.
 build: $(CDEPS)
 	@$(PYTHON) setup.py build $(SETUP_FLAGS)
 
