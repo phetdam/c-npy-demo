@@ -6,7 +6,8 @@ PKG_NAME    = c_numpy_demo
 
 CC          = gcc
 # for building shared object
-CFLAGS      = -o $(PKG_NAME)/implied_vol.so -shared -fPIC
+CDEPS       = $(PKG_NAME)/cext/gauss.c $(PKG_NAME)/cext/euro_options.c
+CFLAGS      = -o $(PKG_NAME)/_ivlib.so -shared -fPIC
 PYTHON      = python3
 SETUP_FLAGS = --build-lib $(TEST_DIR)
 
@@ -27,8 +28,8 @@ clean:
 # build np_touch module locally (in ./build) from source files with setup.py
 # and build standalone shared object and move into pkg_test.
 # currently configured to move built package into directory pkg_test.
-build: $(CDEPS)
-	@$(CC) $(CFLAGS) $(PKG_NAME)/cext/implied_vol.c
+build:
+	@$(CC) $(CFLAGS) $(CDEPS)
 	@$(PYTHON) setup.py build $(SETUP_FLAGS)
 
 # make source and wheel

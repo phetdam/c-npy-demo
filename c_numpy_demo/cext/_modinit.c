@@ -26,7 +26,7 @@ PyMethodDef cext_methods[] = {
 /* definition of module cext */
 struct PyModuleDef cext_module = {
   PyModuleDef_HEAD_INIT,
-  "np_touch", /* module name */
+  "cext", /* module name */
   "Demo module for interfacing with NumPy arrays in C", /* module docstring */
   -1, /* something about the per-interpreter module state? -1 makes it global */
   cext_methods /* static pointer to methods */

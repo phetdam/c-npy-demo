@@ -23,7 +23,7 @@ def _setup():
     # get version
     with open("VERSION", "r") as vf: version = vf.read().rstrip()
     # short and long descriptions
-    short_desc = ("A toy Python package demoing the combined use of ctypes, an "
+    short_desc = ("A Python package demoing the combined use of ctypes, an "
                   "extension module, and the NumPy C API.")
     with open("README.rst", "r") as rf: long_desc = rf.read()
     # perform setup
@@ -47,7 +47,7 @@ def _setup():
           python_requires = ">=3.6",
           packages = [_PACKAGE_NAME],
           # note: need to change in future
-          package_data = {_PACKAGE_NAME: ["implied_vol.so"]},
+          package_data = {_PACKAGE_NAME: ["_ivlib.so"]},
           install_requires = ["numpy>=1.15"],
           ext_package = _PACKAGE_NAME,
           ext_modules = _get_ext_modules()

@@ -1,8 +1,9 @@
 __doc__ = "Module for ``ctypes`` and C extension demos."
 
 import ctypes
-import os.path
 import numpy as np
+
+from . import _ivlib
 
 # demo data for implied volatility computation, recorded on 2020-31-08.
 
@@ -45,6 +46,7 @@ Maturities are, in order: 1 Mo, 2 Mo, 3 Mo, 6 Mo, 1 Yr, 2 Yr, 3 Yr, 5 Yr, 7 Yr,
 10 Yr, 20 Yr, 30 Yr.
 """
 
+
 def black_price(fwd, strike, ttm, ivol, df = 1, is_call = True):
     """Return the Black model option price.
     
@@ -61,13 +63,5 @@ def black_price(fwd, strike, ttm, ivol, df = 1, is_call = True):
     """
     # convert is_call to int
     is_call = 1 if True else -1
-    # placed right next to this file
-    ivlib = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) +
-                                    "/implied_vol.so")
-    # set arg and return types for black_price
-    ivlib.black_price.argtypes = [ctypes.c_double, ctypes.c_double,
-                                  ctypes.c_double, ctypes.c_double,
-                                  ctypes.c_double, ctypes.c_int]
-    ivlib.black_price.restype = ctypes.c_double
     # return black price
-    return ivlib.black_price(fwd, strike, ttm, ivol, df, is_call)
+    return _ivlib.black_price(fwd, strike, ttm, ivol, df, is_call)
