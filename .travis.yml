@@ -18,7 +18,9 @@ install: pip3 install --upgrade numpy
 
 # build and run tests
 script:
-  - ./travis/build_ext.sh
+  # script can't be sourced so we have to cd manually
+  - ./travis/build_ext.sh && cd build
+  # run tests
   #- pytest
 
 # conditional deployment
