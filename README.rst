@@ -3,6 +3,10 @@
 c_numpy_demo
 ============
 
+.. image:: https://img.shields.io/travis/phetdam/c_numpy_demo?logo=travis
+   :target: https://travis-ci.org/github/phetdam/c_numpy_demo
+   :alt: Travis (.org)
+
 A demo Python package including a toy extension module using the NumPy C API. I
 personally struggled for a bit on how to integrate extension modules written in
 C, pure Python code, and the NumPy C API, so I hope this will be useful for
@@ -25,3 +29,10 @@ In the future, there should also be a small pytest__ test suite that can be run.
 .. __: https://cython.readthedocs.io/en/latest/index.html
 
 .. __: https://numba.readthedocs.io/en/stable/index.html
+
+Installation
+------------
+
+To be added. Building from this (unstable) repo will probably only work on Linux
+systems. Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while
+builds on Travis CI virtual machines are done on Ubuntu 18.04 with gcc 7.4.
