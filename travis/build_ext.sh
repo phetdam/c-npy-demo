@@ -12,3 +12,4 @@ fi
 
 # build c_numpy_demo.cext, where package is in directory pkg_test (see Makefile)
 make build
+ls pkg_test/c_numpy_demo
