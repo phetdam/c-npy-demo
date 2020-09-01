@@ -1,9 +1,14 @@
 # Makefile for c_numpy_demo build + install.
 
+# test dir where all our build binaries and .py files come together
+TEST_DIR    = pkg_test
+PKG_NAME    = c_numpy_demo
+
 CC          = gcc
-CFLAGS      =
+# for building shared object
+CFLAGS      = -o $(TEST_DIR)/$(PKG_NAME)/implied_vol.so -shared -fPIC
 PYTHON      = python3
-SETUP_FLAGS = --build-lib pkg_test
+SETUP_FLAGS = --build-lib $(TEST_DIR)
 
 # phony targets
 .PHONY: build clean dummy dist
@@ -11,17 +16,20 @@ SETUP_FLAGS = --build-lib pkg_test
 dummy:
 	@echo "Please specify a target to build."
 
-# removes emacs autosave files and local build, dist, and egg-info directories
+# removes emacs autosave files and local build, dist, egg-info, test directories
 clean:
 	@rm -vf *~
-	@rm -vrf ./build
-	@rm -vrf ./c_numpy_demo.egg-info
-	@rm -vrf ./dist
+	@rm -vrf build
+	@rm -vrf c_numpy_demo.egg-info
+	@rm -vrf dist
+	@rm -vrf $(TEST_DIR)
 
-# build np_touch module locally (in ./build) from source files with setup.py.
+# build np_touch module locally (in ./build) from source files with setup.py,
+# then build standalone shared object and move into pkg_test
 # currently configured to move built package into directory pkg_test.
 build: $(CDEPS)
 	@$(PYTHON) setup.py build $(SETUP_FLAGS)
+	@$(CC) $(CFLAGS) $(PKG_NAME)/cext/implied_vol.c
 
 # make source and wheel
 dist: build
