@@ -33,6 +33,8 @@ In the future, there should also be a small pytest__ test suite that can be run.
 Installation
 ------------
 
-To be added. Building from this (unstable) repo will probably only work on Linux
-systems. Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while
-builds on Travis CI virtual machines are done on Ubuntu 18.04 with gcc 7.4.
+To be added.
+
+Building from this (unstable) repo will probably only work on Linux systems.
+Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
+Travis CI virtual machines are done on Ubuntu 18.04 with gcc 7.4.
