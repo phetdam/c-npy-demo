@@ -12,11 +12,11 @@ def _get_ext_modules():
     :rtype: list
     """
     # use get_include to get numpy include directory
-    cmod_ext = Extension(name = "cext",
-                         sources = [_CEXT_SRC_PATH + "/_modinit.c",
-                                    _CEXT_SRC_PATH + "/np_demo.c"],
-                         include_dirs = [get_include()])
-    return [cmod_ext]
+    cext = Extension(name = "cext",
+                     sources = [_CEXT_SRC_PATH + "/_modinit.c",
+                                _CEXT_SRC_PATH + "/np_demo.c"],
+                     include_dirs = [get_include()])
+    return [cext]
 
 
 def _setup():
@@ -46,7 +46,8 @@ def _setup():
           },
           python_requires = ">=3.6",
           packages = [_PACKAGE_NAME],
-          package_data = {_PACKAGE_NAME: ["*.so"]}, # use specific name later
+          # note: need to change in future
+          package_data = {_PACKAGE_NAME: ["implied_vol.so"]},
           install_requires = ["numpy>=1.15"],
           ext_package = _PACKAGE_NAME,
           ext_modules = _get_ext_modules()
