@@ -101,7 +101,7 @@ _ivlib.bachelier_vol_obj_d1.argtypes = [ctypes.c_double, ctypes.c_void_p]
 _ivlib.bachelier_vol_obj_d1.restype = ctypes.c_double
 _ivlib.bachelier_vol_obj_d2.argtypes = [ctypes.c_double, ctypes.c_void_p]
 _ivlib.bachelier_vol_obj_d2.restype = ctypes.c_double
-# set arg and return types for _halley_newton method
+# set arg and return types for _halley_newton method (don't use!)
 _ivlib._halley_newton.argtypes = [ctypes.c_void_p, ctypes.c_double,
                                   ctypes.c_void_p, ctypes.c_void_p,
                                   ctypes.c_void_p, ctypes.c_double,

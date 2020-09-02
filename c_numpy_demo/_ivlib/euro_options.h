@@ -6,6 +6,8 @@
 #ifndef IMPLIED_VOL_H
 #define IMPLIED_VOL_H
 
+#include "root_find.h"
+
 // create using macro (substitution) as auto variable. faster than using malloc.
 #define vol_obj_args_anew(a, b, c, d, e, f) {a, b, c, d, e, f}
 
@@ -54,5 +56,16 @@ double black_vol_obj_d1(double ivol, void *_args);
 double black_vol_obj_d2(double ivol, void *_args);
 double bachelier_vol_obj_d1(double ivol, void *_args);
 double bachelier_vol_obj_d2(double ivol, void *_args);
+
+// functions to compute
+/*
+scl_rf_res _halley_newton(scl_func_wargs obj, double x0, scl_func_wargs obj_d1,
+  scl_func_wargs obj_d2, void *_args, double tol, double rtol, int maxiter,
+  bool debug);
+*/
+scl_rf_res black_vol(vol_obj_args *odata, const char *method, double tol,
+  double rtol, int maxiter);
+scl_rf_res bachelier_vol(vol_obj_args *odta, const char *method, double tol,
+  double rtol, int maxiter);
 
 #endif /* IMPLIED_VOL_H */

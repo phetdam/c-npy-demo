@@ -2,13 +2,15 @@
 
 # test dir where all our build binaries and .py files come together
 TEST_DIR    = pkg_test
+# package name, extension module source, _ivlib.so source
 PKG_NAME    = c_numpy_demo
 CEXT_DIR    = $(PKG_NAME)/cext
+_IVLIB_DIR  = $(PKG_NAME)/_ivlib
 
 CC          = gcc
 # for building shared object
-CDEPS       = $(CEXT_DIR)/gauss.c $(CEXT_DIR)/euro_options.c \
-              $(CEXT_DIR)/root_find.c
+CDEPS       = $(_IVLIB_DIR)/gauss.c $(_IVLIB_DIR)/euro_options.c \
+              $(_IVLIB_DIR)/root_find.c
 CFLAGS      = -o $(PKG_NAME)/_ivlib.so -shared -fPIC
 PYTHON      = python3
 SETUP_FLAGS = --build-lib $(TEST_DIR)

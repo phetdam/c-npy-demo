@@ -1,11 +1,11 @@
 __doc__ = "Module for ``ctypes`` and C extension demos."
 
-import ctypes
+import datetime
 import numpy as np
 
 from ._cwraps import _ivlib
 
-# demo data for implied volatility computation, recorded on 2020-31-08.
+# demo data for implied volatility computation, recorded on 2020-08-31.
 
 FUT_PRICE = 99.72
 """EDH23 price on Aug 31, 2020, in IMM index points [#]_.
@@ -16,6 +16,15 @@ the third Wednesday of the month.
 
 .. [#] IMM index points have the same units as percentage.
 """
+
+RECORD_DATE = datetime.date(2020, 8, 31)
+"Date when the data was recorded."
+
+OPT_EXP_DATE = datetime.date(2021, 3, 12)
+"Options' expiration date."
+
+FUT_EXP_DATE = datetime.date(2023, 3, 13)
+"Options' underlying futures' expiration date."
 
 CALL_PRICES = np.array([61.5, 49.5, 38, 27, 17.5, 9.5, 5, 3, 2, 1.5])
 """2EH21 call prices on Aug 31, 2020, in IMM index points.
