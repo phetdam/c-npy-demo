@@ -3,7 +3,7 @@ __doc__ = "Module for ``ctypes`` and C extension demos."
 import ctypes
 import numpy as np
 
-from . import _ivlib
+from ._cwraps import _ivlib
 
 # demo data for implied volatility computation, recorded on 2020-31-08.
 

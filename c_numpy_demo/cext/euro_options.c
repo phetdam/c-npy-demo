@@ -164,40 +164,148 @@ double bachelier_price(double fwd, double strike, double ttm, double ivol,
 /**
  * Bachelier option vega.
  * 
- * @note
- * Dummy parameter allows us to use a function pointer in rootfind.c. If you
- * need to call this directly, it is better to use the macro without underscore.
- * 
  * @param fwd Current level of the forward (underlying) in units of price
  * @param strike Option strike, must be same units as fwd
  * @param ttm Time to maturity in years
  * @param ivol Bachelier implied volatility, usually bps / 100 if price is in
  *             IMM index points.
  * @param df Optional discount factor in (0, 1].
- * @param is_call +1 for call, -1 for put. Dummy parameter.
  * @returns Bachelier option vega.
  */
-double _bachelier_vega(double fwd, double strike, double ttm, double ivol,
-  double df, int is_call) {
+double bachelier_vega(double fwd, double strike, double ttm, double ivol,
+  double df) {
   return df * std_normal_pdf((fwd - strike) / (ivol * sqrt(ttm)));
 }
 
 /**
  * Bachelier option volga.
  * 
- * @note Dummy parameter makes function pointer in rootfind.c.
- * 
  * @param fwd Current level of the forward (underlying) in units of price
  * @param strike Option strike, must be same units as fwd
  * @param ttm Time to maturity in years
  * @param ivol Bachelier implied volatility, usually bps / 100 if price is in
  *             IMM index points.
  * @param df Optional discount factor in (0, 1].
- * @param is_call +1 for call, -1 for put. Dummy parameter.
  * @returns Bachelier option volga.
  */
-double _bachelier_volga(double fwd, double strike, double ttm, double ivol,
-  double df, int is_call) {
+double bachelier_volga(double fwd, double strike, double ttm, double ivol,
+  double df) {
   return bachelier_vega(fwd, strike, ttm, ivol, df) *
     pow((fwd - strike) / (ivol * sqrt(ttm)), 2) / ivol;
+}
+
+/**
+ * Create new vol_obj_args struct using malloc.
+ * 
+ * @note Use the macro to get a struct as an auto variable, which is faster.
+ * 
+ * @param price The true option price.
+ * @param fwd Current level of the forward (underlying) in units of price
+ * @param strike Option strike, must be same units as fwd
+ * @param ttm Time to maturity in years
+ * @param df Optional discount factor in (0, 1].
+ * @param is_call +1 for call, -1 for put.
+ * @returns vol_obj_args *
+ */
+vol_obj_args *vol_obj_args_mnew(double price, double fwd, double strike,
+  double ttm, double df, int is_call) {
+  vol_obj_args *out;
+  out = (vol_obj_args *) malloc(sizeof(vol_obj_args));
+  out->price = price;
+  out->fwd = fwd;
+  out->strike = strike;
+  out->ttm = ttm;
+  out->df = df;
+  out->is_call = is_call;
+  return out;
+}
+
+/**
+ * Objective function to solve for Black implied vol, the function's root.
+ * 
+ * @param ivol Level of Black implied vol used to guess the option price.
+ * @param args Pointer to vol_obj_args struct
+ * @returns Difference between actual and guessed Black price.
+ */
+double black_vol_obj(double ivol, void *_args) {
+  vol_obj_args *args;
+  args = (vol_obj_args *) _args;
+  // get a guess price
+  double guess;
+  guess = black_price(args->fwd, args->strike, args->ttm, ivol, args->df,
+    args->is_call);
+  // return difference (derivative of obj has same sign as derivative of guess)
+  return guess - args->price;
+}
+
+/**
+ * Objective function to solve for Bachelier implied vol, the function's root.
+ * 
+ * @param ivol Level of Bachelier implied vol used to guess the option's price.
+ * @param args Pointer to vol_obj_args struct
+ * @returns Difference between actual and guess Bachelier price.
+ */
+double bachelier_vol_obj(double ivol, void *_args) {
+  vol_obj_args *args;
+  args = (vol_obj_args *) _args;
+  // get a guess price
+  double guess;
+  guess = bachelier_price(args->fwd, args->strike, args->ttm, ivol, args->df,
+    args->is_call);
+  // return difference (derivative of obj has same sign as derivative of guess)
+  return guess - args->price;
+}
+
+/**
+ * First derivative of Black objective function.
+ * 
+ * @param ivol Level of Black implied vol used to guess the option price.
+ * @param args Pointer to vol_obj_args struct
+ * @returns First derivative of guessed Black price.
+ */
+double black_vol_obj_d1(double ivol, void *_args) {
+  vol_obj_args *args;
+  args = (vol_obj_args *) _args;
+  return black_vega(args->fwd, args->strike, args->ttm, ivol, args->df,
+    args->is_call);
+}
+
+/**
+ * Second derivative of Black objective function.
+ * 
+ * @param ivol Level of Black implied vol used to guess the option price.
+ * @param args Pointer to vol_obj_args struct
+ * @returns Second derivative of guessed Black price.
+ */
+double black_vol_obj_d2(double ivol, void *_args) {
+  vol_obj_args *args;
+  args = (vol_obj_args *) _args;
+  return black_volga(args->fwd, args->strike, args->ttm, ivol, args->df,
+    args->is_call);
+}
+
+/**
+ * First derivative of Bachelier objective function.
+ * 
+ * @param ivol Level of Bachelier implied vol used to guess the option price.
+ * @param args Pointer to vol_obj_args struct
+ * @returns First derivative of guessed Bachelier price.
+ */
+double bachelier_vol_obj_d1(double ivol, void *_args) {
+  vol_obj_args *args;
+  args = (vol_obj_args *) _args;
+  return bachelier_vega(args->fwd, args->strike, args->ttm, ivol, args->df);
+}
+
+/**
+ * Second derivative of Bachelier objective function.
+ * 
+ * @param ivol Level of Bachelier implied vol used to guess the option price.
+ * @param args Pointer to vol_obj_args struct
+ * @returns Second derivative of guessed Bachelier price.
+ */
+double bachelier_vol_obj_d2(double ivol, void *_args) {
+  vol_obj_args *args;
+  args = (vol_obj_args *) _args;
+  return bachelier_volga(args->fwd, args->strike, args->ttm, ivol, args->df);
 }
