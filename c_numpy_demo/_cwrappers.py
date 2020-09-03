@@ -10,6 +10,7 @@ the ``vol_obj_args`` struct defined in ``euro_options.h``.
 import ctypes
 import os.path
 
+
 class vol_obj_args(ctypes.Structure):
     """C struct holding the fixed arguments used when solving for implied vol.
     
@@ -101,9 +102,12 @@ _ivlib.bachelier_vol_obj_d1.argtypes = [ctypes.c_double, ctypes.c_void_p]
 _ivlib.bachelier_vol_obj_d1.restype = ctypes.c_double
 _ivlib.bachelier_vol_obj_d2.argtypes = [ctypes.c_double, ctypes.c_void_p]
 _ivlib.bachelier_vol_obj_d2.restype = ctypes.c_double
-# set arg and return types for _halley_newton method (don't use!)
-_ivlib._halley_newton.argtypes = [ctypes.c_void_p, ctypes.c_double,
-                                  ctypes.c_void_p, ctypes.c_void_p,
-                                  ctypes.c_void_p, ctypes.c_double,
+# set arg and return types for _black_vol and _bachelier_vol
+_ivlib._black_vol.argtypes = [ctypes.POINTER(vol_obj_args), ctypes.c_int,
+                              ctypes.c_double, ctypes.c_double, ctypes.c_double,
+                              ctypes.c_int, ctypes.c_bool]
+_ivlib._black_vol.restype = ctypes.POINTER(scl_rf_res)
+_ivlib._bachelier_vol.argtypes = [ctypes.POINTER(vol_obj_args), ctypes.c_int,
+                                  ctypes.c_double, ctypes.c_double,
                                   ctypes.c_double, ctypes.c_int, ctypes.c_bool]
-_ivlib._halley_newton.restype = ctypes.POINTER(scl_rf_res)
+_ivlib._bachelier_vol.restype = ctypes.POINTER(scl_rf_res)
