@@ -12,13 +12,21 @@ I personally struggled to figure out how to integrate extension modules written
 in C, pure Python code, and the NumPy C API, so I hope this will be useful for
 anyone interested in doing something similar. Applications of this Python
 development paradigm could be for scientific computing or anything that needs to
-be fast or do a lot of low-level stuff [#]_.
+be fast or do a lot of things close to the metal [#]_.
 
-Includes a test suite [#]_ that also illustrates the difference in speed between
-operating on NumPy array elements directly in C versus iterating through the
-elements in Python and using ctypes__ to call the C function.
+Includes a demo script [#]_ that performs a comparison of execution speed for
+the iterative computation of Black and Bachelier implied volatility using
+Halley's and Newton's methods. The script compares the time taken to solve the
+Black and Bachelier implied volatilities of 10 million European option prices
+for a pure Python implementation using ``scipy.optimize.minimize``, a mixed 
+implementation where a minimalistic C implementation of Halley's/Newton's method
+is used to solve for the price but iteration through prices is done in Python,
+and a pure C implementation that directly uses the NumPy C API. The script
+illustrates the difference in speed between operating on NumPy array elements
+directly in C versus iterating through the prices in Python and using ctypes__
+to call the C function for each price.
 
-In the future, there should also be a small pytest__ test suite that can be run.
+There is a small test suite that can be run with pytest__ after installation.
 
 .. [#] Other options could be the use of ctypes, Cython__ or numba__.
 
