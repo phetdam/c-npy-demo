@@ -21,7 +21,7 @@ script:
   # script can't be sourced so we have to cd manually
   - bash travis/build_ext.sh && cd build
   # run tests
-  #- pytest
+  - pytest
 
 # conditional deployment
 deploy:

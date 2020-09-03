@@ -10,8 +10,8 @@
 
 #include "root_find.h"
 
-// create using macro (substitution) as auto variable. faster than using malloc.
-#define vol_obj_args_anew(a, b, c, d, e, f) {a, b, c, d, e, f}
+// bump implied vol to machine epsilon if it is 0
+#define BUMP_VOL(x) x = (x == 0) ? 2.22e-16 : x;
 
 // price, vega, and volga functions for black and bachelier model
 double black_price(double fwd, double strike, double ttm, double ivol,
@@ -44,6 +44,9 @@ typedef struct {
   double df;       // discount factor in (0, 1]
   int is_call;     // +/-1 for call/put
 } vol_obj_args;
+
+// create using macro (substitution) as auto variable. faster than using malloc.
+#define vol_obj_args_anew(a, b, c, d, e, f) {a, b, c, d, e, f}
 
 // create new vol_obj_args using malloc
 vol_obj_args *vol_obj_args_mnew(double price, double fwd, double strike,

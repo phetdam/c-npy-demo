@@ -106,8 +106,9 @@ _ivlib.bachelier_vol_obj_d2.restype = ctypes.c_double
 _ivlib._black_vol.argtypes = [ctypes.POINTER(vol_obj_args), ctypes.c_int,
                               ctypes.c_double, ctypes.c_double, ctypes.c_double,
                               ctypes.c_int, ctypes.c_bool]
-_ivlib._black_vol.restype = ctypes.POINTER(scl_rf_res)
+# note: not ctypes.POINTER(scl_rf_res) since the actual struct is returned
+_ivlib._black_vol.restype = scl_rf_res
 _ivlib._bachelier_vol.argtypes = [ctypes.POINTER(vol_obj_args), ctypes.c_int,
                                   ctypes.c_double, ctypes.c_double,
                                   ctypes.c_double, ctypes.c_int, ctypes.c_bool]
-_ivlib._bachelier_vol.restype = ctypes.POINTER(scl_rf_res)
+_ivlib._bachelier_vol.restype = scl_rf_res

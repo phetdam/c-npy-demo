@@ -150,7 +150,7 @@ scl_rf_res _halley_newton(scl_func_wargs obj, double x0, scl_func_wargs obj_d1,
   if (debug) {
     printf("%s: execution successful. results:\n\n"
       "res:       %f\niters:     %d\nconverged: %s\nmethod:    %s\nflag:      "
-      "%s\n", _HALLEY_NEWTON_NAME, res.res, res.iters,
+      "%s\n\n", _HALLEY_NEWTON_NAME, res.res, res.iters,
       res.converged ? "true" : "false", res.method, res.flag);
   }
   return res;
