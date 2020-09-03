@@ -22,9 +22,9 @@ for a pure Python implementation using ``scipy.optimize.minimize``, a mixed
 implementation where a minimalistic C implementation of Halley's/Newton's method
 is used to solve for the price but iteration through prices is done in Python,
 and a pure C implementation that directly uses the NumPy C API. The script
-illustrates the difference in speed between operating on NumPy array elements
-directly in C versus iterating through the prices in Python and using ctypes__
-to call the C function for each price.
+illustrates the difference in speed between operating on NumPy arrays directly
+in C versus iterating through the prices in Python and using ctypes__ to call
+the C function for each price.
 
 There is a small test suite that can be run with pytest__ after installation.
 
