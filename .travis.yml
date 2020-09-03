@@ -18,8 +18,8 @@ install: pip3 install --upgrade numpy
 
 # build and run tests
 script:
-  # script can't be sourced so we have to cd manually
-  - bash travis/build_ext.sh && cd build
+  # script can't be sourced so use new shell
+  - bash travis/build_ext.sh
   # run tests
   - pytest
 
