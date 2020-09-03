@@ -1,6 +1,6 @@
 # setup.py for building c_numpy_demo package
 
-from setuptools import setup, Extension
+from setuptools import Extension, setup
 from numpy import get_include
 
 _PACKAGE_NAME = "c_numpy_demo"
@@ -45,7 +45,7 @@ def _setup():
               "Source": "https://github.com/phetdam/c_numpy_demo"
           },
           python_requires = ">=3.6",
-          packages = [_PACKAGE_NAME],
+          packages = ["c_numpy_demo", "c_numpy_demo.tests"],
           # note: need to change in future
           package_data = {_PACKAGE_NAME: ["_ivlib.so"]},
           install_requires = ["numpy>=1.15"],

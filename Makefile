@@ -25,14 +25,14 @@ dummy:
 clean:
 	@rm -vf *~
 	@rm -vrf build
-	@rm -vrf c_numpy_demo.egg-info
+	@rm -vrf $(PKG_NAME).egg-info
 	@rm -vrf dist
 	@rm -vrf $(TEST_DIR)
 
 # build np_touch module locally (in ./build) from source files with setup.py
-# and build standalone shared object and move into pkg_test.
+# and build standalone shared object and move into pkg_test. force clean build.
 # currently configured to move built package into directory pkg_test.
-build:
+build: clean $(CDEPS)
 	@$(CC) $(CFLAGS) $(CDEPS)
 	@$(PYTHON) setup.py build $(SETUP_FLAGS)
 
