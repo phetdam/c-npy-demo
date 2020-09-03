@@ -1,6 +1,6 @@
 /**
  * @file euro_options.c
- * @brief European option price and related functions.
+ * @brief European option price, implied volatility, and related functions.
  * @note No longer trivial code. Will most likely be used in py-impvol.
  */
 
@@ -10,6 +10,7 @@
 
 #include "gauss.h"
 #include "euro_options.h"
+#include "root_find.h"
 
 /**
  * Compute the Black price of a European option.
@@ -309,4 +310,78 @@ double bachelier_vol_obj_d2(double ivol, void *_args) {
   vol_obj_args *args;
   args = (vol_obj_args *) _args;
   return bachelier_volga(args->fwd, args->strike, args->ttm, ivol, args->df);
+}
+
+/**
+ * Computes the Black implied volatility for an option represented by a
+ * vol_obj_args struct pointer. Use the macros black_vol for non-debug runs and
+ * black_vold to call this function with default values.
+ * 
+ * @note Default arguments are the same as those used by scipy.optimize.newton.
+ * 
+ * @param odata vol_obj_args struct pointer holding data on a European option
+ * @param method Solving method, must be either HALLEY_FLAG or NEWTON_FLAG
+ * @param x0 Initial guess for the Black implied vol. 0.5 in black_vold.
+ * @param tol Absolute tolerance before stopping. 1.48e-8 in black_vold.
+ * @param rtol Relative tolerance before stopping. 0 in black_vold.
+ * @param maxiter Maximum iterations before stopping. 50 in black_vold.
+ * @param debug true for verbose debug mode, false for silence except on error.
+ */
+scl_rf_res _black_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
+  double tol, double rtol, int maxiter, bool debug) {
+  // optimization result struct
+  scl_rf_res res;
+  // execute _halley_newton based on method flag (does type checking)
+  if (method == HALLEY_FLAG) {
+    res = _halley_newton(&black_vol_obj, x0, &black_vol_obj_d1,
+      &black_vol_obj_d2, (void *) odata, tol, rtol, maxiter, debug);
+  }
+  else if (method == NEWTON_FLAG) {
+    res = _halley_newton(&black_vol_obj, x0, &black_vol_obj_d1, NULL,
+      (void *) odata, tol, rtol, maxiter, debug);
+  }
+  // else assign invalid parameter result using HALLEY_NEWTON_INVALID_PARAM_RES
+  else {
+    fprintf(stderr, "%s: method flag must be HALLEY_FLAG or NEWTON_FLAG\n",
+      _BLACK_VOL_NAME);
+    HALLEY_NEWTON_INVALID_PARAM_RES(res, x0);
+  }
+  return res;
+}
+
+/**
+ * Computes the Bachelier implied volatility for an option represented by a
+ * vol_obj_args struct pointer. Use the macros bachelier_vol for non-debug runs
+ * and bachelier_vold to call this function with default values.
+ * 
+ * @note Default arguments are the same as those used by scipy.optimize.newton.
+ * 
+ * @param odata vol_obj_args struct pointer holding data on a European option
+ * @param method Solving method, must be either HALLEY_FLAG or NEWTON_FLAG
+ * @param x0 Initial guess for the Bachelier implied vol. 0.5 in bachelier_vold.
+ * @param tol Absolute tolerance before stopping. 1.48e-8 in bachelier_vold.
+ * @param rtol Relative tolerance before stopping. 0 in bachelier_vold.
+ * @param maxiter Maximum iterations before stopping. 50 in bachelier_vold.
+ * @param debug true for verbose debug mode, false for silence except on error.
+ */
+scl_rf_res _bachelier_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
+  double tol, double rtol, int maxiter, bool debug) {
+  // optimization result struct
+  scl_rf_res res;
+  // execute _halley_newton based on method flag (does type checking)
+  if (method == HALLEY_FLAG) {
+    res = _halley_newton(&bachelier_vol_obj, x0, &bachelier_vol_obj_d1,
+      &bachelier_vol_obj_d2, (void *) odata, tol, rtol, maxiter, debug);
+  }
+  else if (method == NEWTON_FLAG) {
+    res = _halley_newton(&bachelier_vol_obj, x0, &bachelier_vol_obj_d1, NULL,
+      (void *) odata, tol, rtol, maxiter, debug);
+  }
+  // else assign invalid parameter result using HALLEY_NEWTON_INVALID_PARAM_RES
+  else {
+    fprintf(stderr, "%s: method flag must be HALLEY_FLAG or NEWTON_FLAG\n",
+      _BACHELIER_VOL_NAME);
+    HALLEY_NEWTON_INVALID_PARAM_RES(res, x0);
+  }
+  return res;
 }

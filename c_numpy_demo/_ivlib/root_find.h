@@ -8,9 +8,14 @@
 
 #include <stdbool.h>
 
-// name of method used to find root
+// name of method used to find root and more efficient int flags for them
 #define HALLEY "halley"
 #define NEWTON "newton"
+#define HALLEY_FLAG 0
+#define NEWTON_FLAG 1
+
+// typedef int as scl_opt_flag to make function signature more clear
+typedef int scl_opt_flag;
 
 // function name
 #define _HALLEY_NEWTON_NAME "_halley_newton"

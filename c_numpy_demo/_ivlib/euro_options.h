@@ -6,6 +6,8 @@
 #ifndef IMPLIED_VOL_H
 #define IMPLIED_VOL_H
 
+#include <stdbool.h>
+
 #include "root_find.h"
 
 // create using macro (substitution) as auto variable. faster than using malloc.
@@ -57,15 +59,19 @@ double black_vol_obj_d2(double ivol, void *_args);
 double bachelier_vol_obj_d1(double ivol, void *_args);
 double bachelier_vol_obj_d2(double ivol, void *_args);
 
-// functions to compute
-/*
-scl_rf_res _halley_newton(scl_func_wargs obj, double x0, scl_func_wargs obj_d1,
-  scl_func_wargs obj_d2, void *_args, double tol, double rtol, int maxiter,
-  bool debug);
-*/
-scl_rf_res black_vol(vol_obj_args *odata, const char *method, double tol,
-  double rtol, int maxiter);
-scl_rf_res bachelier_vol(vol_obj_args *odta, const char *method, double tol,
-  double rtol, int maxiter);
+// names of the implied volatility functions
+#define _BLACK_VOL_NAME "_black_vol"
+#define _BACHELIER_VOL_NAME "_bachelier_vol"
+
+// functions + macros to compute implied volatilities from vol_obj_args data
+scl_rf_res _black_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
+  double tol, double rtol, int maxiter, bool debug);
+scl_rf_res _bachelier_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
+  double tol, double rtol, int maxiter, bool debug);
+
+#define black_vol(a, b, c, d, e) _black_vol(a, b, c, d, e, false)
+#define black_vold(a, b) black_vol(a, b, 0.5, 1.48e-8, 0, 50)
+#define bachelier_vol(a, b, c, d, e) _bachelier_vol(a, b, c, d, e, false)
+#define bachelier_vold(a, b) bachelier_vol(a, b, 0.5, 1.48e-8, 0, 50)
 
 #endif /* IMPLIED_VOL_H */
