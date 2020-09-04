@@ -10,6 +10,7 @@
 #define PY_SSIZE_T_CLEAN
 #endif
 
+#include <math.h>
 #include "Python.h"
 
 /** 
@@ -17,7 +18,7 @@
  * called in a C file. import_array only called by module init function.
  * */
 #define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL NP_TOUCH_ARRAY_API
+#define PY_ARRAY_UNIQUE_SYMBOL _IVMOD_ARRAY_API
 #include "numpy/arrayobject.h"
 
 #include "np_demo.h"
@@ -31,10 +32,12 @@
  */ 
 PyObject *PyObject_type(PyObject *self, PyObject *args) {
   PyObject *obj;
-  /* parse arguments with PyArg_ParseTuple, positional args only */
+  // parse arguments with PyArg_ParseTuple, positional args only
   if (!PyArg_ParseTuple(args, "O", &obj)) {
+    /*
     PyErr_SetString(PyExc_RuntimeError, "PyObject_type: expected only one arg" \
 		    " of type PyObject *");
+    */
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -63,28 +66,54 @@ PyObject *PyObject_type(PyObject *self, PyObject *args) {
 PyObject *PyArrayObject_sum(PyObject * self, PyObject *args) {
   PyArrayObject *ar;
   PyObject *obj;
-  /* check args */
+  // check args
   if (!PyArg_ParseTuple(args, "O", &obj)) {
     PyErr_SetString(PyExc_TypeError, "expected exactly one numpy.ndarray");
     Py_INCREF(Py_None);
     return Py_None;
   }
   ar = (PyArrayObject *) obj;
-  /* error checking for incref */
+  // error checking for incref
   if (ar == NULL) {
     fprintf(stderr, "PyArrayObject_sum: ar is NULL\n");
     Py_INCREF(Py_None);
     return Py_None;
   }
-  /* check type */
+  // check type
   if (!PyArray_ISINTEGER(ar) && !PyArray_ISFLOAT(ar)) {
     PyErr_SetString(PyExc_TypeError, "numpy.ndarray must contain int or float" \
 		    " members");
     Py_INCREF(Py_None);
     return Py_None;
   }
-  /* compute and return the sum of the elements across all axes */
+  // compute and return the sum of the elements across all axes
   PyObject *ar_sum;
   ar_sum = PyArray_Sum(ar, NPY_MAXDIMS, PyArray_TYPE(ar), NULL);
   return ar_sum;
+}
+
+/**
+ * (Reusing old name) Return new numpy array from object. allow only list/tuple.
+ */
+PyObject *loop(PyObject *self, PyObject *args) {
+  PyObject *obj;
+  // only parse a single integer object
+  if (!PyArg_ParseTuple(args, "O", &obj)) {
+    PyErr_SetString(PyExc_ValueError, "expected only one positional arg");
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  /*
+  // check for list/tuple type
+  if (!PyList_Check(obj) && !PyTuple_Check(obj)) {
+    PyErr_SetString(PyExc_TypeError, "arg must be list- or tuple-like");
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  */
+  // convert into NumPy array and return
+  PyArrayObject *ar;
+  PyArray_Converter(obj, (PyObject **) &ar);
+  PyArray_XDECREF(ar);
+  return PyFloat_FromDouble(NAN);
 }

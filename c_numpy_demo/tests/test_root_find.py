@@ -284,4 +284,4 @@ def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, method, guess,
         print(f"iters:\n{iters}")
     # test that results are identical for both implementations
     same_roots = list(map(lambda x: almost_equal(*x), vols))
-    assert sum(same_roots) == n_pts, "Not all roots results were identical"
+    assert sum(same_roots) == n_pts, "Not all roots results were almost equal"

@@ -47,6 +47,10 @@ typedef struct {
 
 // create using macro (substitution) as auto variable. faster than using malloc.
 #define vol_obj_args_anew(a, b, c, d, e, f) {a, b, c, d, e, f}
+// populate an already existing vol_obj_args voa
+#define vol_obj_args_afill(voa, a, b, c, d, e, f) \
+  voa.price = a; voa.fwd = b; voa.strike = c; voa.ttm = d; voa.df = e; \
+  voa.is_call = f
 
 // create new vol_obj_args using malloc
 vol_obj_args *vol_obj_args_mnew(double price, double fwd, double strike,
@@ -72,9 +76,9 @@ scl_rf_res _black_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
 scl_rf_res _bachelier_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
   double tol, double rtol, int maxiter, bool debug);
 
-#define black_vol(a, b, c, d, e) _black_vol(a, b, c, d, e, false)
+#define black_vol(a, b, c, d, e, f) _black_vol(a, b, c, d, e, f, false)
 #define black_vold(a, b) black_vol(a, b, 0.5, 1.48e-8, 0, 50)
-#define bachelier_vol(a, b, c, d, e) _bachelier_vol(a, b, c, d, e, false)
+#define bachelier_vol(a, b, c, d, e, f) _bachelier_vol(a, b, c, d, e, f, false)
 #define bachelier_vold(a, b) bachelier_vol(a, b, 0.5, 1.48e-8, 0, 50)
 
 #endif /* IMPLIED_VOL_H */

@@ -8,5 +8,6 @@
 
 PyObject *PyObject_type(PyObject *self, PyObject *args);
 PyObject *PyArrayObject_sum(PyObject *self, PyObject *args);
+PyObject *loop(PyObject *self, PyObject *args);
 
 #endif /* NP_DEMO_H */
