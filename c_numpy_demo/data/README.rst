@@ -31,9 +31,8 @@ strike
 dfactor
    The option's discount factor. Note that these are approximate ballpark
    estimates based off of my own experience, as I do not have a model for
-   calibrating discount curves. Discount factors are more important when it
-   comes to longer-date options, so being accurate is not really an issue with
-   current data.
+   calibrating discount curves. Discount factors are typically more important
+   when it comes to longer-dated options, however.
 
 call_put
    +/-1 call/put indicator, where +1 for a call, -1 for a put.
