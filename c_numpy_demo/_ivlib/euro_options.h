@@ -10,8 +10,8 @@
 
 #include "root_find.h"
 
-// bump implied vol to machine epsilon if it is 0
-#define BUMP_VOL(x) x = (x == 0) ? 2.22e-16 : x;
+// bump implied vol to machine epsilon if it is <= 0
+#define BUMP_VOL(x) x = (x <= 0) ? 2.22e-16 : x;
 
 // price, vega, and volga functions for black and bachelier model
 double black_price(double fwd, double strike, double ttm, double ivol,

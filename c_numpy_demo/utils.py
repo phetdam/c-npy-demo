@@ -230,3 +230,16 @@ def ndarray2vol_obj_args_tuple(ar):
         out[i] = vol_obj_args(price, fwd, strike, ttm , df, is_call)
     # return as tuple
     return tuple(out)
+
+
+def almost_equal(x, y, tol = 1e-15):
+    """``True`` if ``|x - y| <= tol``, ``False`` otherwise.
+    
+    :param x: First value to compare
+    :type x: float
+    :param y: Second value to compare
+    :type y: float
+    :param tol: Tolerance, defaults to ``1e-15``.
+    :type tol: float, optional
+    """
+    return True if abs(x - y) <= tol else False

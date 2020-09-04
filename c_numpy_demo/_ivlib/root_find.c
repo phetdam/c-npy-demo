@@ -4,7 +4,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -22,7 +21,7 @@
  * else Halley's method will be used by default.
  * @param _args Pointer to a struct containing fixed arguments for obj, obj_d1,
  * and obj_d2 is it is not NULL.
- * @param tol Absolute tolerance of difference between guess and actual root.
+ * @param tol Absolute tolerance of closeness to 0 (function value).
  * @param rtol Relative tolerance of difference between guesses.
  * @param maxiter Maximum number of iterations to run before termination.
  * @param debug true to print debug messages, false for silence except on error.
@@ -100,6 +99,13 @@ scl_rf_res _halley_newton(scl_func_wargs obj, double x0, scl_func_wargs obj_d1,
   while ((cur_tol > tol) && (cur_rtol > rtol) && (iternum < maxiter)) {
     // evaluate function and first derivative at guess
     fval = (*obj)(guess, _args);
+    // if 0, then we have the correct answer already
+    if (fval == 0) {
+      cur_tol = 0;
+      iternum = 1;
+      // break to finish populating struct and return
+      break;
+    }
     d1_val = (*obj_d1)(guess, _args);
     // if first derivative is 0, immediately return after populating res
     if (d1_val == 0) {
@@ -125,8 +131,8 @@ scl_rf_res _halley_newton(scl_func_wargs obj, double x0, scl_func_wargs obj_d1,
         (2 * pow(d1_val, 2) - fval * d2_val);
     }
     // record cur_tol and cur_rtol
-    cur_tol = abs(guess - x0);
-    cur_rtol = abs(guess - prev_guess);
+    cur_tol = fabs(fval);
+    cur_rtol = fabs(guess - prev_guess);
 
     // increment iteration count
     iternum = iternum + 1;
