@@ -34,13 +34,13 @@ def options_demo_data():
     
     Note that the data in each row will be in the parameter order specified by
     :class:`vol_obj_args`. Assumes that there are 365 days in a year. Only uses
-    the ATM options data from ``data/edo_atm_data.csv`` for brevity.
+    the near the money options data from ``data/edo_ntm_data.csv`` for brevity.
     
     :returns: A :class:`numpy.ndarray` of options data, shape ``(20, 6)``.
     :rtype: :class:`numpy.ndarray`
     """
     return options_csv_to_ndarray(os.path.dirname(__file__) + 
-                                  "/../data/edo_atm_data.csv")
+                                  "/../data/edo_ntm_data.csv")
 
 
 @pytest.fixture(scope = "module")
