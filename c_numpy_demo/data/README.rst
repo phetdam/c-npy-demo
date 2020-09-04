@@ -37,10 +37,10 @@ call_put
    +/-1 call/put indicator, where +1 for a call, -1 for a put.
 
 opt_exp
-   The option's yyyy-mm-dd expiration date.
+   The option's ``yyyy-mm-dd`` expiration date.
 
 fut_exp
-   The underlying's, here the future contract's, yyyy-mm-dd expiration date.
+   The underlying's, here the future contract's, ``yyyy-mm-dd`` expiration date.
    Although this field is not used, it is a useful bookkeeping field as some of
    the options used are Eurodollar mid-curve options, which expiring forward of
    the futures contract they are written on.
