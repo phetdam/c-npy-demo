@@ -62,13 +62,13 @@ listed options contracts are 2EH21, the two-year mid-curve Eurodollar option
 edo_ntm_data.csv
    Contains data on Eurodollar options that are close to the at-the-money point,
    namely the five closest strikes above and below the at-the-money point. This
-   file contains 20 rows and 9 columns of data.
+   file contains 80 rows and 9 columns of data.
 
 edo_full_data.csv
    Contains data on Eurodollar options on a much wider range of strikes and is a
    superset of the data in ``edo_atm_data.csv``. Note that extremely deep
    in-the-money options will end up with nonsensical implied volatilities.
-   The file contains 136 rows and 9 columns of data.
+   The file contains 422 rows and 9 columns of data.
 
 Options contracts used
 ----------------------
@@ -82,3 +82,11 @@ Below are the listed options contracts used in the data files described above.
 0EU21
    One-year mid-curve Eurodollar option expiring on September 10, 2021.
    Underlying futures expires on September 19, 2022.
+
+3EM21
+   Three-year mid-curve Eurodollar option expiring on Jun 11, 2021. Underlying
+   futures expires on June 17, 2024.
+
+EDZ22
+   Quarterly Eurodollar option expiring on December 19, 2022. Underlying futures
+   expires on the same date.
