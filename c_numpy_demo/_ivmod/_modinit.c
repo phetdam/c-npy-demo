@@ -23,18 +23,18 @@
 #define PyObject_type_doc "Docstring for PyObject_type.\n\nTBD lorem ipsum"
 #define PyArrayObject_sum_doc "Docstring for PyArrayObject_sum.\n\nTBD lorem" \
   " ipsum"
-#define _black_vol_np_doc \
-"Computes Black implied volatility for broadcastable arguments.\n\n" \
+#define _implied_vol_np_doc \
+"Computes implied volatilities for numpy broadcastable arguments.\n\n" \
 "    Do not call directly. Implied volatility is computed by a C\n" \
 "    implementation of either Halley's or Newton's method, depending on the\n" \
-"    method flag specified."
+"    method flag specified. Black or Bachelier volatility can be specified."
 
 // static array of module methods
 PyMethodDef mod_methods[] = {
   {"PyObject_type", PyObject_type, METH_VARARGS, PyObject_type_doc},
   {"PyArrayObject_sum", PyArrayObject_sum, METH_VARARGS, PyArrayObject_sum_doc},
   {"loop", loop, METH_VARARGS, "do a dumb loop"},
-  {"_black_vol_np", _black_vol_np, METH_VARARGS, _black_vol_np_doc},
+  {"_implied_vol_np", _implied_vol_np, METH_VARARGS, _implied_vol_np_doc},
   {NULL, NULL, 0, NULL} // not sure why we need the sentinel here
 };
 
