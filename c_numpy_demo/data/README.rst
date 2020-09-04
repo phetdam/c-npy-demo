@@ -55,8 +55,8 @@ rec_date
 Data files
 ----------
 
-Both data files contain options data pulled from CME Group's website. The
-listed options contracts are 2EH21, the two-year mid-curve Eurodollar option
+Both data files contain options data pulled from CME Group's website. Brief
+descriptions are below.
 
 edo_ntm_data.csv
    Contains data on Eurodollar options that are close to the at-the-money point,
