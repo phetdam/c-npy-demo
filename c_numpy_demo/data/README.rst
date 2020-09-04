@@ -68,8 +68,9 @@ edo_ntm_data.csv
 edo_full_data.csv
    Contains data on Eurodollar options on a wider range of strikes and is a
    superset of the data in ``edo_atm_data.csv``. Contains additional data on
-   Eurodollar options on a much wider range of strikes recorded on September 3,
-   2020, with the specific contract being the 0EU21 contract, the one-year
-   mid-curve Eurodollar option expiring on September 10, 2021. The underlying
-   futures expires on September 19, 2022. The file contains 136 rows and 9
-   columns of data.
+   Eurodollar options recorded on September 3, 2020, with the specific contract
+   being the 0EU21 contract, the one-year mid-curve Eurodollar option expiring
+   on September 10, 2021. The underlying futures expires on September 19, 2022.
+   Note that the extremely deep in-the-money options will inevitably end up with
+   nonsensical implied volatility values since they are often stale. The file
+   contains 136 rows and 9 columns of data.
