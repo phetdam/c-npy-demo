@@ -1,4 +1,4 @@
-__doc__ = "Module for ``ctypes`` and C extension demos."
+__doc__ = "Module for ``_ivlib.so`` and C extension demonstrations."
 
 import datetime
 import numpy as np
@@ -77,7 +77,7 @@ def black_price(fwd, strike, ttm, ivol, df = 1, is_call = True):
     :param is_call: ``True`` if call option, ``False`` otherwise.
     :type is_call: bool or iterable, optional
     :returns: Black implied volatilities.
-    :rtype: :class:`numpy.ndarray`
+    :rtype: float or :class:`numpy.ndarray`
     """
     ## decorated, so treat all args as numpy.ndarray ##
     # flatten and convert is_call to int
@@ -115,7 +115,7 @@ def bachelier_price(fwd, strike, ttm, ivol, df = 1, is_call = True):
     :param is_call: ``True`` if call option, ``False`` otherwise.
     :type is_call: bool or iterable, optional
     :returns: Bachelier implied volatilities.
-    :rtype: :class:`numpy.ndarray`
+    :rtype: float or :class:`numpy.ndarray`
     """
     ## decorated, so treat all args as numpy.ndarray ##
     # flatten and convert is_call to int

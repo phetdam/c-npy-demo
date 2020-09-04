@@ -7,12 +7,11 @@ __doc__ = """Test ``_halley_newton`` function defined in ``root_find.c``.
 
 import ctypes
 import numpy as np
+import os.path
 import pytest
 
 from .._cwrappers import _ivlib, scl_rf_res, vol_obj_args
-#from .ctests
-from ..demo import (CALL_PRICES, FUT_PRICE, OPT_EXP_DATE, PUT_PRICES,
-                    RECORD_DATE, STRIKES)
+from ..utils import ndarray2vol_obj_args_tuple, options_csv_to_ndarray
 
 ## -- Fixtures -----------------------------------------------------------------
 
@@ -31,51 +30,32 @@ def rf_stop_defaults():
 
 @pytest.fixture(scope = "module")
 def options_demo_data():
+    """Creates a small panel of options test data for testing functions with.
+    
+    Note that the data in each row will be in the parameter order specified by
+    :class:`vol_obj_args`. Assumes that there are 365 days in a year. Only uses
+    the ATM options data from ``data/edo_atm_data.csv`` for brevity.
+    
+    :returns: A :class:`numpy.ndarray` of options data, shape ``(20, 6)``.
+    :rtype: :class:`numpy.ndarray`
+    """
+    return options_csv_to_ndarray(os.path.dirname(__file__) + 
+                                  "/../data/edo_atm_data.csv")
+
+
+@pytest.fixture(scope = "module")
+def options_full_data():
     """Creates a panel of options test data for testing functions with.
     
     Note that the data in each row will be in the parameter order specified by
-    :class:`vol_obj_args`. Assumes that there are 365 days in a year.
+    :class:`vol_obj_args`. Assumes that there are 365 days in a year. Uses the
+    the full options data from ``data/edo_full_data.csv``.
     
-    :returns: A :class:`numpy.ndarray` of options data, shape ``(n_obs, 6)``.
+    :returns: A :class:`numpy.ndarray` of options data, shape ``(136, 6)``.
     :rtype: :class:`numpy.ndarray`
     """
-    # get all prices together and reshape into column vector
-    opt_prices = np.concatenate((CALL_PRICES, PUT_PRICES))
-    opt_prices = opt_prices.reshape((opt_prices.shape[0], 1))
-    # get forward level (constant) as column vector
-    fwds = FUT_PRICE * np.ones(opt_prices.shape)
-    # get strikes (need to double count) as column vector
-    strikes = np.concatenate((STRIKES, STRIKES)).reshape(opt_prices.shape)
-    # get expiration date in years and turn into column array
-    ttms = (OPT_EXP_DATE - RECORD_DATE).days / 365 * np.ones(opt_prices.shape)
-    # assume discount factors are 0.99765
-    dfs = 0.99765 * np.ones(opt_prices.shape)
-    # get call/put flags as column vector
-    cp_flags = np.concatenate((np.ones((CALL_PRICES.shape[0], 1)),
-                               np.ones((PUT_PRICES.shape[0], 1))))
-    # get output and return concatenated on axis 1
-    return np.concatenate((opt_prices, fwds, strikes, ttms, 
-                           dfs, cp_flags), axis = 1)
-
-
-# note that params
-@pytest.fixture(scope = "module")
-def vol_obj_args_tuple(options_demo_data):
-    """Create a tuple of :class:`vo_obj_args` from :func:`options_demo_data`.
-    
-    :param options_demo_data: :func:`options_demo_data` ``pytest`` fixture.
-    :type options_demo_data: :class:`numpy.ndarray`
-    :rtype: tuple
-    """
-    out = [None for _ in range(options_demo_data.shape[0])]
-    for i in range(options_demo_data.shape[0]):
-        price, fwd, strike, ttm, df, is_call = options_demo_data[i]
-        # need to convert is_call to int
-        is_call = int(is_call)
-        # write to out
-        out[i] = vol_obj_args(price, fwd, strike, ttm , df, is_call)
-    # return as tuple
-    return tuple(out)
+    return options_csv_to_ndarray(os.path.dirname(__file__) +
+                                  "/../data/edo_full_data.csv")
 
 
 ## -- Tests --------------------------------------------------------------------
@@ -85,14 +65,14 @@ def vol_obj_args_tuple(options_demo_data):
 @pytest.mark.parametrize("guess", [0.5])
 @pytest.mark.parametrize("max_pts", [np.inf])
 @pytest.mark.parametrize("debug", [False]) # True to allow C function printf
-def test_c_black_vol(vol_obj_args_tuple, rf_stop_defaults, method, guess,
+def test_c_black_vol(options_demo_data, rf_stop_defaults, method, guess,
                      max_pts, debug):
-    """Test solving for Black volatility using :func:`vol_obj_args_tuple`.
+    """Test solving for Black volatility using :func:`options_demo_data` data.
     
     Directly calls the ``_black_vol`` function from ``_ivlib.so``.
     
-    :param vol_obj_args_tuple: :func:`vol_obj_args_tuple` ``pytest`` fixture.
-    :type vol_obj_args_tuple: tuple
+    :param options_demo_data: :func:`options_demo_data` ``pytest`` fixture.
+    :type options_demo_data: :class:`numpy.ndarray`
     :param rf_stop_defaults: :func:``rf_stop_defaults` ``pytest`` fixture.
     :type rf_stop_defaults: tuple
     :param method: Method to use to solve. Only supports ``"halley"`` and
@@ -101,20 +81,23 @@ def test_c_black_vol(vol_obj_args_tuple, rf_stop_defaults, method, guess,
     :type method: str
     :param guess: Starting guess for Black implied volatility.
     :type guess: float
-    :param max_pts: Maximum number of data points from
-        :func:`vol_obj_args_tuple` to run tests with. Must be positive, and if
-        larger than ``len(vol_obj_args_tuple)``, will be set to
-        ``len(vol_obj_args_tuple)`` automatically.
+    :param max_pts: Maximum number of data points (rows) from
+        :func:`options_demo_data` to run tests with. Must be positive, and if
+        larger than ``options_demo_data.shape[0]``, will be set to
+        ``options_demo_data.shape[0]`` automatically.
     :type max_pts: int
     :param debug: ``True`` for debugging output (print to ``stdout``) from C
         function, ``False`` for silence except upon error.
     :type debug: bool
     """
+    # convert ndarray options_demo_data to tuple of vol_obj_args
+    voas = ndarray2vol_obj_args_tuple(options_demo_data)
+    # convert method to int
     method = 0 if "halley" else (1 if "newton" else -1)
     assert method in (0, 1), "method flag must be 0 (halley) or 1 (newton)"
     # change method to int since method is determined with flags
-    # get min of max_pts and length of vol_obj_args_tuple
-    n_pts = min(max_pts, len(vol_obj_args_tuple))
+    # get min of max_pts and length of voas
+    n_pts = min(max_pts, len(voas))
     # implied volatility results (struct), values (vols), convergences, flags
     vol_structs = [None for _ in range(n_pts)]
     vols = np.zeros(n_pts)
@@ -126,7 +109,7 @@ def test_c_black_vol(vol_obj_args_tuple, rf_stop_defaults, method, guess,
     iters = np.zeros(n_pts)
     # for the first n_pts, find the black vol
     for i in range(n_pts):
-        vol_args = vol_obj_args_tuple[i]
+        vol_args = voas[i]
         # get result struct
         vol_structs[i] = _ivlib._black_vol(ctypes.byref(vol_args), method,
                                            guess, *rf_stop_defaults, debug)
