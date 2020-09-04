@@ -13,8 +13,10 @@ dist: bionic
 # pre-install updates
 before_install: bash travis/before_install.sh
 
-# depends on numpy only
-install: pip3 install --upgrade numpy
+# depends on numpy and scipy
+install:
+  - pip3 install --upgrade numpy
+  - pip3 install --upgrade scipy
 
 # build and run tests
 script:
