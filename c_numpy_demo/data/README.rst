@@ -71,6 +71,6 @@ edo_full_data.csv
    Eurodollar options recorded on September 3, 2020, with the specific contract
    being the 0EU21 contract, the one-year mid-curve Eurodollar option expiring
    on September 10, 2021. The underlying futures expires on September 19, 2022.
-   Note that the extremely deep in-the-money options will inevitably end up with
-   nonsensical implied volatility values since they are often stale. The file
-   contains 136 rows and 9 columns of data.
+   Note that extremely deep in-the-money options will end up with nonsensical
+   implied volatilities since their prices are often stale. The file contains
+   136 rows and 9 columns of data.
