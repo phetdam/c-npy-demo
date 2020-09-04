@@ -31,7 +31,9 @@ strike
 dfactor
    The option's discount factor. Note that these are approximate ballpark
    estimates based off of my own experience, as I do not have a model for
-   calibrating discount curves.
+   calibrating discount curves. Discount factors are more important when it
+   comes to longer-date options, so being accurate is not really an issue with
+   current data.
 
 call_put
    +/-1 call/put indicator, where +1 for a call, -1 for a put.
@@ -62,7 +64,7 @@ edo_ntm_data.csv
    These values were record on Aug 31, 2020, with the specific options contract
    in question 2EH21, the two-year mid-curve Eurodollar option expiring on March
    12, 2021. The underlying futures expires on March 13, 2023. This file
-   contains 20 rows of data.
+   contains 20 rows and 9 columns of data.
 
 edo_full_data.csv
    Contains data on Eurodollar options on a wider range of strikes and is a
@@ -70,4 +72,5 @@ edo_full_data.csv
    Eurodollar options on a much wider range of strikes recorded on September 3,
    2020, with the specific contract being the 0EU21 contract, the one-year
    mid-curve Eurodollar option expiring on September 10, 2021. The underlying
-   futures expires on September 19, 2022. The file contains 136 rows of data.
+   futures expires on September 19, 2022. The file contains 136 rows and 9
+   columns of data.
