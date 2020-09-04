@@ -4,8 +4,7 @@ Options data
 ============
 
 This ``README.rst`` gives some information on the CSV data files included in
-this package, which contain data on Eurodollar options used in the test suite
-and in the benchmark tests [#]_.
+this package used in the test suite and in the benchmark tests [#]_.
 
 .. [#] This benchmark test has yet to be written.
 
