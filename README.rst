@@ -75,10 +75,15 @@ languages need to be used together.
 
 1. Keep Python and C stuff as far away from each other as possible.
 2. The GIL breathes much harder down your neck when you start using the Python
-   C API, especially if you are trying to venture into multithreading. See 1.
+   C API, especially if you are trying to venture into multithreading with
+   external libraries like OpenMP. See 1.
 3. The NumPy C API is unforgiving. Be sure to check for ``NULL`` pointers.
 4. If you aren't fluent in both languages, you will spend a lot of time
    frustrated.
 5. Conversely, the satisfaction gained from building code that not only gains
    the speed of C but also exposes a pretty Python API may be more than enough
    to make up for all your struggles.
+
+This project ended up being relatively large, and I will be porting a lot of the
+code written here for one of my future planned projects, although I won't be
+able to get started on that for a while.
