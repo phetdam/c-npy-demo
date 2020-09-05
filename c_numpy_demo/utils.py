@@ -1,11 +1,13 @@
 __doc__ = "Utilities for the ``c_numpy_demo`` package."
 
+#import ctypes
 import datetime
 from functools import wraps
 import inspect
 import numpy as np
 
 from ._cwrappers import vol_obj_args
+from ._np_bcast import np_float64_bcast_1d_ext
 
 
 def _np_1d_broadcast(f, axis = 0, broadcast = True):
@@ -159,6 +161,66 @@ def np_1d_broadcast(f = None, axis = 0, broadcast = True):
     return _np_1d_broadcast(f, axis = axis, broadcast = broadcast)
 
 
+def _np_float64_bcast_1d(f, axis = 0):
+    """Decorate a function to broadcast args into 1D :class:`numpy.ndarray`.
+    
+    See :func:`np_float64_bcast_1d` for parameter details.
+    
+    .. note:: Do not call this directly. Use :func:`np_1d_broadcast` instead.
+    """
+    
+    @wraps(f)
+    def _broadcast_wrap(*args, **kwargs):
+        # get parameters from signature of f
+        params = dict(inspect.signature(f).parameters)
+        # for any params that have non empty defaults, add to kwargs if they
+        # don't already exist in kwargs
+        for key, val in params.items():
+            if val.default != inspect._empty:
+                kwargs.setdefault(key, val.default)
+        # convert args and kwargs using np_float64_bcast_1d_ext
+        args = np_float64_bcast_1d_ext(args, axis)
+        kwargs = np_float64_bcast_1d_ext(kwargs, axis)
+        # feed args back into original function and get result as ndarray
+        res = np.array(f(*args, **kwargs))
+        return res
+    
+    return _broadcast_wrap
+
+
+def np_float64_bcast_1d(f = None, axis = 0):
+    """Decorate a function to broadcast args into 1D :class:`numpy.ndarray`.
+    
+    Broadcasting will only work properly on one-dimensional iterables, strings,
+    numeric types, and bytes objects. It is assumed that all the arguments of
+    the decorated function are expected to be broadcasted to the same length.
+    
+    This is a wrapper around the C function ``np_float64_bcast_1d_ext`` which
+    converts Python objects into 1D float64 NumPy arrays, and is faster than
+    :func:`np_1d_broadcast`, although of course it can only convert to float64.
+    Lacks a ``broadcast`` parameter like :func:`np_1d_broadcast` since there is
+    no extra speed gain in this case.
+    
+    :param f: Function whose arguments are to be broadcasted.
+    :type f: function, optional
+    :param axis: Determines orientation of the broadcasted arrays. ``0`` for
+        arrays of shape ``(max_len,)``, ``1`` for arrays of shape
+        ``(max_len, 1)``. Defaults to ``0``.
+    :type axis: int, 
+    :returns: Function that broadcasts all its args into :class:`numpy.ndarray`.
+    :rtype: function
+    """
+    # if f is None, return decorator, else return decorated f
+    if f is None:
+        
+        def _wrapper(_f):
+            return _np_float64_bcast_1d(f, axis = axis)
+        
+        return _wrapper
+    
+    return _np_float64_bcast_1d(f, axis = axis)
+        
+    
 def options_csv_to_ndarray(fname):
     """Converts CSV file of European options data into :class:`numpy.ndarray`.
     
