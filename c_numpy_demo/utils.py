@@ -36,13 +36,19 @@ def _np_1d_broadcast(f, axis = 0, broadcast = True):
             if val.default != inspect._empty:
                 kwargs.setdefault(key, val.default)
         for key, val in kwargs.items():
-            if hasattr(val, "__iter__") and (not isinstance(arg, (str, bytes))):
+            if hasattr(val, "__iter__") and (not isinstance(val, (str, bytes))):
                 kwargs[key] = np.array(val)
             else: kwargs[key] = np.array([val])
         # get max length of args and kwargs and extend length-1 arrays
-        # args may be empty
-        if (broadcast == True) and (len(args) > 0):
-            max_len = max(tuple(map(lambda x: len(x), args)))
+        # note that args and/or kwargs may be empty
+        if broadcast == True:
+            max_len = 0
+            if len(args) > 0:
+                max_len = max(tuple(map(lambda x: len(x), args)))
+            if len(kwargs) > 0:
+                max_len = max(max(tuple(map(lambda x: len(x),
+                                            kwargs.values()))), max_len)
+            # lengths may be 0
             for i in range(len(args)):
                 arg = args[i]
                 if arg.shape[0] == 1:
@@ -51,18 +57,13 @@ def _np_1d_broadcast(f, axis = 0, broadcast = True):
                 else:
                     raise ValueError("args array shape mismatch: "
                                      f"{arg.shape[0]} != {max_len} (max_len)")
-        # kwargs may be empty
-        if (broadcast == True) and (len(kwargs) > 0):
-            # need to max with previous max_len
-            max_len = max(max(tuple(map(lambda x: len(x), kwargs.values()))),
-                          max_len)
             for key, val in kwargs.items():
                 if val.shape[0] == 1:
                     kwargs[key] = np.array([val[0] for _ in range(max_len)])
                 elif val.shape[0] == max_len: pass
                 else:
                     raise ValueError("kwargs array shape mismatch: "
-                                     f"{arg.shape[0]} != {max_len} (max_len)")
+                                     f"{val.shape[0]} != {max_len} (max_len)")
         # feed args back into original function and get result as ndarray
         res = np.array(f(*args, **kwargs))
         # if length of res is 1, return as scalar, else return
@@ -88,35 +89,34 @@ def _np_1d_broadcast(f, axis = 0, broadcast = True):
             if val.default != inspect._empty:
                 kwargs.setdefault(key, val.default)
         for key, val in kwargs.items():
-            if hasattr(val, "__iter__") and (not isinstance(arg, (str, bytes))):
+            if hasattr(val, "__iter__") and (not isinstance(val, (str, bytes))):
                 kwargs[key] = np.array(val).reshape((len(val), 1))
             else: kwargs[key] = np.array([val]).reshape((1, 1))
         # get max length of args and kwargs and extend length-1 arrays
-        # args may be empty
-        if len(args) > 0:
-            max_len = max(tuple(map(lambda x: len(x), args)))
+        # note that args and/or kwargs may be empty
+        if broadcast == True:
+            max_len = 0
+            if len(args) > 0:
+                max_len = max(tuple(map(lambda x: len(x), args)))
+            if len(kwargs) > 0:
+                max_len = max(max(tuple(map(lambda x: len(x),
+                                            kwargs.values()))), max_len)
+            # lengths may be 0
             for i in range(len(args)):
                 arg = args[i]
                 if arg.shape[0] == 1:
-                    arg = np.array([arg[0] for _ in range(max_len)])
-                    args[i] = arg.reshape((max_len, 1))
+                    args[i] = np.array([arg[0] for _ in range(max_len)])
                 elif arg.shape[0] == max_len: pass
                 else:
                     raise ValueError("args array shape mismatch: "
                                      f"{arg.shape[0]} != {max_len} (max_len)")
-        # kwargs may be empty
-        if len(kwargs) > 0:
-            # need to max with previous max_len
-            max_len = max(max(tuple(map(lambda x: len(x), kwargs.values()))),
-                          max_len)
             for key, val in kwargs.items():
                 if val.shape[0] == 1:
-                    val = np.array([val[0] for _ in range(max_len)])
-                    kwargs[key] = val.reshape((max_len, 1))
+                    kwargs[key] = np.array([val[0] for _ in range(max_len)])
                 elif val.shape[0] == max_len: pass
                 else:
                     raise ValueError("kwargs array shape mismatch: "
-                                     f"{arg.shape[0]} != {max_len} (max_len)")
+                                     f"{val.shape[0]} != {max_len} (max_len)")
         # feed args back into original function and get result as ndarray
         res = np.array(f(*args, **kwargs))
         # if length of res is 1, return as scalar, else return
@@ -214,7 +214,7 @@ def np_float64_bcast_1d(f = None, axis = 0):
     if f is None:
         
         def _wrapper(_f):
-            return _np_float64_bcast_1d(f, axis = axis)
+            return _np_float64_bcast_1d(_f, axis = axis)
         
         return _wrapper
     
