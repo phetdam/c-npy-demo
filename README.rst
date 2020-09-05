@@ -33,7 +33,8 @@ There is a small test suite that can be run with pytest__ after installation.
 
 .. [#] This does not exist yet.
 
-.. [#] There might also be a demonstration of
+.. [#] There might also be a demonstration of how true parallelism can speed up
+   such tasks, but the inclusion of OpenMP in this project is not finalized.
 
 .. __: https://docs.python.org/3/library/ctypes.html
 
@@ -67,11 +68,17 @@ calculations, and a Python extension module written in C.
 Lessons
 -------
 
+I learned a few lessons the hard way from doing this project. However, they are
+valuable not just in the context of mixed Python/C development, as they can be
+generalized to other mixed-language projects where higher and lower level
+languages need to be used together.
+
 1. Keep Python and C stuff as far away from each other as possible.
 2. The GIL breathes much harder down your neck when you start using the Python
    C API, especially if you are trying to venture into multithreading. See 1.
-3. If you aren't fluent in both languages, you will spend a lot of time
+3. The NumPy C API is unforgiving. Be sure to check for ``NULL`` pointers.
+4. If you aren't fluent in both languages, you will spend a lot of time
    frustrated.
-4. Conversely, the satisfaction gained from building code that not only gains
+5. Conversely, the satisfaction gained from building code that not only gains
    the speed of C but also exposes a pretty Python API may be more than enough
    to make up for all your struggles.
