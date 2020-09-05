@@ -7,6 +7,7 @@ from numpy import get_include
 _PACKAGE_NAME = "c_numpy_demo"
 _IVLIB_SRC_PATH = _PACKAGE_NAME + "/_ivlib"
 _IVMOD_SRC_PATH = _PACKAGE_NAME + "/_ivmod"
+_NP_BCAST_SRC_PATH = _PACKAGE_NAME + "/_np_bcast"
 
 
 def _get_ext_modules():
@@ -19,15 +20,23 @@ def _get_ext_modules():
     :rtype: list
     """
     # use get_include to get numpy include directory
+    # note: _ivmod is deprecated. gonna go away soon
     _ivmod = Extension(name = "_ivmod",
-                     sources = [_IVMOD_SRC_PATH + "/_modinit.c",
-                                _IVMOD_SRC_PATH + "/np_demo.c",
-                                _IVLIB_SRC_PATH + "/euro_options.c",
-                                _IVLIB_SRC_PATH + "/gauss.c",
-                                _IVLIB_SRC_PATH + "/root_find.c",
-                                _IVMOD_SRC_PATH + "/np_euro_options.c"],
-                     include_dirs = [get_include()])
-    return [_ivmod]
+                       sources = [_IVMOD_SRC_PATH + "/_modinit.c",
+                                  _IVMOD_SRC_PATH + "/np_demo.c",
+                                  _IVLIB_SRC_PATH + "/euro_options.c",
+                                  _IVLIB_SRC_PATH + "/gauss.c",
+                                  _IVLIB_SRC_PATH + "/root_find.c",
+                                  _NP_BCAST_SRC_PATH + "/np_broadcast.c",
+                                  _IVMOD_SRC_PATH + "/np_euro_options.c"],
+                       include_dirs = [get_include()],
+                       extra_compile_args = ["-fopenmp"],
+                       extra_link_args = ["-lgomp"])
+    _np_bcast = Extension(name = "_np_bcast",
+                          sources = [_NP_BCAST_SRC_PATH + "/np_broadcast.c",
+                                     _NP_BCAST_SRC_PATH + "/_modinit.c"],
+                          include_dirs = [get_include()])
+    return [_ivmod, _np_bcast]
 
 
 def _setup():
