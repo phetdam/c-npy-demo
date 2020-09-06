@@ -9,11 +9,11 @@ c_numpy_demo
 
 A demo Python package illustrating how to combine a compiled Python C extension,
 foreign compiled C code, ctypes__, and the NumPy and Python C APIs. I personally
-struggled to figure out how to integrate these components together, through a
-lot of trial error and reading of terrible documentation, so I hope this will be
-useful for anyone interested in doing something similar. This development
-paradigm could be applied to scientific computing or anything that needs to be
-fast or do a lot of things close to the metal [#]_.
+struggled to figure out how to integrate these components together through a
+lot of trial, error, and reading of dense and sometimes confusing documentation,
+so I hope this will be useful for anyone interested in doing something similar.
+This development paradigm could be applied to scientific computing or anything
+that needs to be fast or do a lot of things close to the metal [#]_.
 
 Includes a demo script [#]_ that performs a comparison of execution speed for
 the iterative computation of Black and Bachelier implied volatility using
