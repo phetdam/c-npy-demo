@@ -15,7 +15,7 @@ from ..utils import almost_equal, ndarray2vol_obj_args_array
 @pytest.mark.parametrize("n_threads", [-1])
 @pytest.mark.parametrize("method", ["halley", "newton"])
 @pytest.mark.parametrize("guess", [0.5, 0.7, 1]) # default guess is 0.5
-@pytest.mark.parametrize("mult", [1, 10, 100])
+@pytest.mark.parametrize("mult", [1, 10, 100]) # highest tested was 1000
 @pytest.mark.parametrize("py_debug", [False])
 def test_ntm_imp_vol_vec(options_ntm_data, rf_stop_defaults, method, guess,
                          n_threads, mult, py_debug):
@@ -39,9 +39,6 @@ def test_ntm_imp_vol_vec(options_ntm_data, rf_stop_defaults, method, guess,
     :param py_debug: ``True`` to print values to :class:`sys.stdout`, ``False``
         for silence.
     :type py_debug: bool
-
-    black_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0,
-                  maxiter = 50, n_threads = -1, mask_neg = True, debug = False):
     """
     # convert ndarray options data to ctypes array of vol_obj_args
     voas = ndarray2vol_obj_args_array(options_ntm_data, mult = mult)
