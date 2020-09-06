@@ -5,3 +5,4 @@
 **/*~
 **/*.so
 /pkg_test/*
+/.vscode
