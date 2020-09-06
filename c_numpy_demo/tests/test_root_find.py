@@ -11,7 +11,7 @@ import pytest
 import scipy.optimize
 
 from .fixtures import options_full_data, options_ntm_data, rf_stop_defaults
-from ..ivlib import _ivlib, vol_obj_args
+from ..ivlib import _ivlib
 from ..utils import almost_equal, ndarray2vol_obj_args_array
 
 
@@ -49,7 +49,7 @@ def test_c_ntm_black_vol(options_ntm_data, rf_stop_defaults, method, guess,
         single data points.
     :type c_debug: bool
     """
-    # convert ndarray options_ntm_data to tuple of vol_obj_args
+    # convert ndarray options_ntm_data to ctypes array of vol_obj_args
     voas = ndarray2vol_obj_args_array(options_ntm_data)
     # convert method to int
     method = 0 if "halley" else (1 if "newton" else -1)
@@ -123,7 +123,7 @@ def test_c_ntm_bachelier_vol(options_ntm_data, rf_stop_defaults, method, guess,
         single data points.
     :type c_debug: bool
     """
-    # convert ndarray options_ntm_data to tuple of vol_obj_args
+    # convert ndarray options_ntm_data to ctypes array of vol_obj_args
     voas = ndarray2vol_obj_args_array(options_ntm_data)
     # convert method to int
     method = 0 if "halley" else (1 if "newton" else -1)
@@ -191,7 +191,7 @@ def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, method, guess,
         chunks of data points at once.
     :type py_debug: bool
     """
-    # convert ndarray options_ntm_data to tuple of vol_obj_args
+    # convert ndarray options_ntm_data to ctypes array of vol_obj_args
     voas = ndarray2vol_obj_args_array(options_ntm_data)
     # method flag to pass to C method
     c_method = 0 if "halley" else (1 if "newton" else -1)

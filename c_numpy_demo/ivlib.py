@@ -122,7 +122,7 @@ _ivlib._imp_vol_vec.restype = None
 
 def black_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0,
                   maxiter = 50, n_threads = -1, mask_neg = True, debug = False):
-    """Computes Black implied volatility for an array of :class:`vol_obj_args`.
+    """Computes Black implied vol for an array of :class:`vol_obj_args`.
     
     Wraps the C function ``_imp_vol_vec`` with ``vol_type`` set to
     ``BLACK_VOL_FLAG``.
@@ -148,11 +148,50 @@ def black_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0,
     if method == -1:
         raise ValueError("method must be \"halley\" or \"newton\"")
     # create an array of c_doubles the same length as odata
-    _out = ctypes.c_double * n_pts
+    _out = (ctypes.c_double * n_pts)()
     # compute implied vols using _imp_vol_vec
     _ivlib._imp_vol_vec(
-        ctypes.byref(odata), ctypes.byref(_out), n_pts, 0, method, x0, tol,
-        rtol, maxiter, n_threads, mask_neg, debug
+        odata, _out, n_pts, 0, method, x0, tol, rtol, maxiter, n_threads,
+        mask_neg, debug
+    )
+    # return numpy array from _out
+    return np.ctypeslib.as_array(_out)
+
+
+def bachelier_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8,
+                      rtol = 0, maxiter = 50, n_threads = -1, mask_neg = True,
+                      debug = False):
+    """Computes Bachelier implied vol for an array of :class:`vol_obj_args`.
+    
+    Wraps the C function ``_imp_vol_vec`` with ``vol_type`` set to
+    ``BACHELIER_VOL_FLAG``.
+    
+    Docstring incomplete; see ``_ivlib/euro_options.c``.
+    
+    :param odata: A ``ctypes`` array of ``vol_obj_args``.
+    :type odata: :class:`__main__.vol_obj_args_Array_*`
+    :param method: The implied volatility solving method. Currently supports
+        only ``"halley"`` and ``"newton"``.
+    :type method: str, optional
+    :rtype: :class:`numpy.ndarray`
+    """
+    # get length of odata; must be positive
+    n_pts = len(odata)
+    if n_pts == 0:
+        raise ValueError("odata must have positive length")
+    # note that element type must be vol_obj_args
+    if (not hasattr(odata, "_type_")) or (odata._type_ != vol_obj_args):
+        raise TypeError("odata must be a ctypes array of vol_obj_args")
+    # only allow halley or newton
+    method = 0 if method == "halley" else (1 if method == "newton" else -1)
+    if method == -1:
+        raise ValueError("method must be \"halley\" or \"newton\"")
+    # create an array of c_doubles the same length as odata
+    _out = (ctypes.c_double * n_pts)()
+    # compute implied vols using _imp_vol_vec
+    _ivlib._imp_vol_vec(
+        odata, _out, n_pts, 1, method, x0, tol, rtol, maxiter, n_threads,
+        mask_neg, debug
     )
     # return numpy array from _out
     return np.ctypeslib.as_array(_out)

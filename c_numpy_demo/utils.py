@@ -266,32 +266,41 @@ def options_csv_to_ndarray(fname):
     return out
 
 
-def ndarray2vol_obj_args_array(ar):
+def ndarray2vol_obj_args_array(ar, mult = 1):
     """Create an array of :class:`vol_obj_args` from a :class:`numpy.ndarray`.
     
     ``ar`` should be given by :func:`options_csv_to_ndarray`. The returned array
-    is a ``ctypes`` array built from the :class:`vol_obj_args` type.
+    is a ``ctypes`` array built from the :class:`vol_obj_args` type. Optionally,
+    ``mult`` can be used to repeat the original array multiple times.
     
     :param ar: A :class:`numpy.ndarray`, shape ``(n_obs, 6)`` with data type
         :class:`numpy.float64`. This should be the output of
         :func:`options_csv_to_ndarray`.
     :type ar: :class:`numpy.ndarray`
+    :param mult: Number of times to repeat original data received from ``ar``.
+        This is useful if existing data is limited but scale needs to be tested.
+    :type mult: int, optional
     :returns: A ``ctypes`` array of ``n_obs`` :class:`vol_obj_args` structs.
     :rtype: :class:`__main__.vol_obj_args_Array_*`
     """
     # number of observations
     n_obs = ar.shape[0]
-    # output array; populate using data from ar
-    out = (vol_obj_args * n_obs)()
-    for i in range(n_obs):
-        # unpack a row of the ndarray
-        price, fwd, strike, ttm, df, is_call = ar[i, :]
-        # need to convert is_call to int
-        is_call = int(is_call)
-        # write new vol_obj_args struct to out
-        out[i] = vol_obj_args(price, fwd, strike, ttm , df, is_call)
-    # return as tuple
-    return tuple(out)
+    # mult must be positive
+    if mult < 1: raise ValueError("mult must be a positive int")
+    # output array; populate using data from ar mult times
+    # note: need to wrap n_obs and mult in parentheses or else the array ends
+    # up becoming a mult-size array of n_obs arrays, which is NOT what we want!
+    out = (vol_obj_args * (n_obs * mult))()
+    for m in range(mult):
+        for i in range(n_obs):
+            # unpack a row of the ndarray
+            price, fwd, strike, ttm, df, is_call = ar[i, :]
+            # need to convert is_call to int
+            is_call = int(is_call)
+            # write new vol_obj_args struct to out
+            out[m * n_obs + i] = vol_obj_args(price, fwd, strike, ttm , df,
+                                              is_call)
+    return out
 
 
 def almost_equal(x, y, tol = 1e-15):

@@ -3,40 +3,25 @@
 from setuptools import Extension, setup
 from numpy import get_include
 
-# package name and path for _ivlib and _ivmod source code
+# package name and path for _np_bcast extension source code
 _PACKAGE_NAME = "c_numpy_demo"
-_IVLIB_SRC_PATH = _PACKAGE_NAME + "/_ivlib"
-_IVMOD_SRC_PATH = _PACKAGE_NAME + "/_ivmod"
 _NP_BCAST_SRC_PATH = _PACKAGE_NAME + "/_np_bcast"
 
 
 def _get_ext_modules():
     """Returns a list of :class:`~setuptools.Extension` modules to build.
     
-    .. note:: The extensions need not even be true modules, i.e. define a
-       ``PyInit_*`` function. This allows building of shared objects that use
-       the Python and NumPy C API without actually being loadable modules.
+    .. note:: The extensions must be true modules, i.e. define a ``PyInit_*``
+       function. Use alternate means to build foreign C code.
     
     :rtype: list
     """
     # use get_include to get numpy include directory
-    # note: _ivmod is deprecated. gonna go away soon
-    _ivmod = Extension(name = "_ivmod",
-                       sources = [_IVMOD_SRC_PATH + "/_modinit.c",
-                                  _IVMOD_SRC_PATH + "/np_demo.c",
-                                  _IVLIB_SRC_PATH + "/euro_options.c",
-                                  _IVLIB_SRC_PATH + "/gauss.c",
-                                  _IVLIB_SRC_PATH + "/root_find.c",
-                                  _NP_BCAST_SRC_PATH + "/np_broadcast.c",
-                                  _IVMOD_SRC_PATH + "/np_euro_options.c"],
-                       include_dirs = [get_include()],
-                       extra_compile_args = ["-fopenmp"],
-                       extra_link_args = ["-lgomp"])
     _np_bcast = Extension(name = "_np_bcast",
                           sources = [_NP_BCAST_SRC_PATH + "/np_broadcast.c",
                                      _NP_BCAST_SRC_PATH + "/_modinit.c"],
                           include_dirs = [get_include()])
-    return [_ivmod, _np_bcast]
+    return [_np_bcast]
 
 
 def _setup():
@@ -66,7 +51,7 @@ def _setup():
           },
           python_requires = ">=3.6",
           packages = ["c_numpy_demo", "c_numpy_demo.tests"],
-          # adds implied vol shared object, 
+          # adds implied vol shared object, data files, and data README.rst
           package_data = {
               _PACKAGE_NAME: ["_ivlib.so", "data/*.csv", "data/*.rst"]
           },
