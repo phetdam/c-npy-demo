@@ -1,6 +1,6 @@
 .. README for c_numpy_demo
 
-c_numpy_demo
+c_npy_demo
 ============
 
 .. image:: https://img.shields.io/travis/phetdam/c_numpy_demo?logo=travis
