@@ -4,7 +4,7 @@ from setuptools import Extension, setup
 from numpy import get_include
 
 # package name and path for _np_bcast extension source code
-_PACKAGE_NAME = "c_numpy_demo"
+_PACKAGE_NAME = "c_npy_demo"
 _NP_BCAST_SRC_PATH = _PACKAGE_NAME + "/_np_bcast"
 
 
@@ -50,7 +50,7 @@ def _setup():
               "Source": "https://github.com/phetdam/c_numpy_demo"
           },
           python_requires = ">=3.6",
-          packages = ["c_numpy_demo", "c_numpy_demo.tests"],
+          packages = [_PACKAGE_NAME, _PACKAGE_NAME + ".tests"],
           # adds implied vol shared object, data files, and data README.rst
           package_data = {
               _PACKAGE_NAME: ["_ivlib.so", "data/*.csv", "data/*.rst"]

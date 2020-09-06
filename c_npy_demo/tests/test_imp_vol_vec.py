@@ -15,7 +15,7 @@ from ..utils import almost_equal, ndarray2vol_obj_args_array
 @pytest.mark.parametrize("n_threads", [-1])
 @pytest.mark.parametrize("method", ["halley", "newton"])
 @pytest.mark.parametrize("guess", [0.5, 0.7, 1]) # default guess is 0.5
-@pytest.mark.parametrize("mult", [1]) # highest tested was 1000
+@pytest.mark.parametrize("mult", [1, 10, 1000])
 @pytest.mark.parametrize("py_debug", [False])
 def test_ntm_imp_vol_vec(options_ntm_data, rf_stop_defaults, method, guess,
                          n_threads, mult, py_debug):
@@ -58,7 +58,7 @@ def test_ntm_imp_vol_vec(options_ntm_data, rf_stop_defaults, method, guess,
 @pytest.mark.parametrize("n_threads", [-1])
 @pytest.mark.parametrize("method", ["halley", "newton"])
 @pytest.mark.parametrize("guess", [0.5, 0.7, 1]) # default guess is 0.5
-@pytest.mark.parametrize("mult", [1]) # highest tested was 1000
+@pytest.mark.parametrize("mult", [1, 1000]) # highest tested was 1000
 @pytest.mark.parametrize("py_debug", [False])
 def test_full_imp_vol_vec(options_full_data, rf_stop_defaults, method, guess,
                          n_threads, mult, py_debug):
