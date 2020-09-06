@@ -33,8 +33,7 @@ There is a small test suite that can be run with pytest__ after installation.
 
 .. [#] This does not exist yet.
 
-.. [#] There might also be a demonstration of how true parallelism can speed up
-   such tasks, but the inclusion of OpenMP in this project is not finalized.
+.. [#] Should include a demo of how multithreading helps with large inputs.
 
 .. __: https://docs.python.org/3/library/ctypes.html
 
@@ -56,7 +55,7 @@ an implicit dependency on the gcc version being high enough such that an OpenMP
 implementation is included [#]_. For example, I have ``libgomp.so.1.0.0`` in
 ``/usr/lib/x86_64-linux-gnu/``, with appropriate symbolic links.
 
-.. [#] OpenMP may not be involved in this project. This is not final.
+.. [#] Fun exercise: Find where I have (sparingly) used OpenMP directives.
 
 Contents
 --------
