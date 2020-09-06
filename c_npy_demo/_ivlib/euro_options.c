@@ -177,7 +177,7 @@ double bachelier_price(double fwd, double strike, double ttm, double ivol,
  */
 double bachelier_vega(double fwd, double strike, double ttm, double ivol,
   double df) {
-  return df * std_normal_pdf((fwd - strike) / (ivol * sqrt(ttm)));
+  return df * ttm * std_normal_pdf((fwd - strike) / (ivol * sqrt(ttm)));
 }
 
 /**

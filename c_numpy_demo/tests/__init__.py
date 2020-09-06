@@ -1,1 +1,0 @@
-__doc__ = "``__init__.py`` for ``c_numpy_test`` test suite."

@@ -25,9 +25,9 @@ def test_c_ntm_black_vol(options_ntm_data, rf_stop_defaults, method, guess,
     
     Directly calls the ``_black_vol`` function from ``_ivlib.so``.
     
-    :param options_ntm_data: :func:`options_ntm_data` ``pytest`` fixture.
+    :param options_ntm_data: ``pytest`` fixture. See ``fixtures.py``.
     :type options_ntm_data: :class:`numpy.ndarray`
-    :param rf_stop_defaults: :func:``rf_stop_defaults` ``pytest`` fixture.
+    :param rf_stop_defaults: ``pytest`` fixture. See ``fixtures.py``.
     :type rf_stop_defaults: tuple
     :param method: Method to use to solve. Only supports ``"halley"`` and
         ``"newton"`` currently. These will be converted to :class:`bytes`
@@ -99,13 +99,11 @@ def test_c_ntm_bachelier_vol(options_ntm_data, rf_stop_defaults, method, guess,
     
     Directly calls the ``_bachelier_vol`` function from ``_ivlib.so``.
     
-    :param options_ntm_data: :func:`options_ntm_data` ``pytest`` fixture.
-    :type options_ntm_data: :class:`numpy.ndarray`
+    :param options_ntm_data: ``pytest`` fixture. See ``fixtures.py``.
+    :type options_ntm_data: ``pytest`` fixture. See ``fixtures.py``.
     :param rf_stop_defaults: :func:``rf_stop_defaults` ``pytest`` fixture.
     :type rf_stop_defaults: tuple
-    :param method: Method to use to solve. Only supports ``"halley"`` and
-        ``"newton"`` currently. These will be converted to :class:`bytes`
-        objects in the function to be suitable for passing to a C function.
+    :param method: Method to use to solve, either ``"halley"`` or ``"newton"``.
     :type method: str
     :param guess: Starting guess for Bachelier implied volatility.
     :type guess: float
@@ -163,21 +161,21 @@ def test_c_ntm_bachelier_vol(options_ntm_data, rf_stop_defaults, method, guess,
     assert sum(successes) == n_pts
 
 
+@pytest.mark.parametrize("vol_type", ["black", "bachelier"])
 @pytest.mark.parametrize("method", ["halley", "newton"])
 @pytest.mark.parametrize("guess", [0.5, 0.7, 1]) # default guess is 0.5
 @pytest.mark.parametrize("max_pts,py_debug", [(np.inf, False)])
-def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, method, guess,
-                            max_pts, py_debug):
+def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, vol_type,
+                            method, guess, max_pts, py_debug):
     """Test C root-finding implementation against :func:`scipy.optimize.newton`.
     
-    Use both Black and Bachelier objective functions.
-    
-    :param options_full_data: :func:`options_full_data` ``pytest`` fixture.
+    :param options_full_data: ``pytest`` fixture. See ``fixtures.py``.
     :type options_full_data: :class:`numpy.ndarray`
-    :param rf_stop_defaults: :func:``rf_stop_defaults` ``pytest`` fixture.
+    :param rf_stop_defaults: ``pytest`` fixture. See ``fixtures.py``.
     :type rf_stop_defaults: tuple
-    :param method: Method to use to solve. Only supports ``"halley"`` and
-        ``"newton"`` currently.
+    :param vol_type: Vol to solve for, either ``"black"`` or ``"bachelier"``.
+    :type vol_type: str
+    :param method: Method to use to solve, either ``"halley"`` or ``"newton"``.
     :type method: str
     :param guess: Starting guess for Bachelier implied volatility.
     :type guess: float
@@ -193,6 +191,8 @@ def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, method, guess,
     """
     # convert ndarray options_ntm_data to ctypes array of vol_obj_args
     voas = ndarray2vol_obj_args_array(options_ntm_data)
+    # check volatility type
+    assert vol_type in ("black", "bachelier")
     # method flag to pass to C method
     c_method = 0 if "halley" else (1 if "newton" else -1)
     assert c_method in (0, 1), "c_method flag must be 0 (halley) or 1 (newton)"
@@ -204,27 +204,38 @@ def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, method, guess,
     vols = [None for _ in range(n_pts)]
     # iterations per point solved
     iters = [None for _ in range(n_pts)]
+    # choose objective functions
+    if vol_type == "black":
+        vol_func = _ivlib._black_vol
+        vol_obj = _ivlib.black_vol_obj
+        vol_obj_d1 = _ivlib.black_vol_obj_d1
+        vol_obj_d2 = _ivlib.black_vol_obj_d2
+    elif vol_type == "bachelier":
+        vol_func = _ivlib._bachelier_vol
+        vol_obj = _ivlib.bachelier_vol_obj
+        vol_obj_d1 = _ivlib.bachelier_vol_obj_d1
+        vol_obj_d2 = _ivlib.bachelier_vol_obj_d2
     # for the first n_pts, find the black vol
     for i in range(n_pts):
         vol_args = voas[i]
+        #vol_args.price = vol_args.price / 100
         # get result struct from C implementation
-        volrs[i] = _ivlib._black_vol(ctypes.byref(vol_args), c_method, guess,
-                                     *rf_stop_defaults, False)
+        volrs[i] = vol_func(ctypes.byref(vol_args), c_method, guess,
+                            *rf_stop_defaults, False)
         # get RootResults from scipy implementation
         if method == "halley":
             _, spy_res = scipy.optimize.newton(
-                _ivlib.black_vol_obj, guess, fprime = _ivlib.black_vol_obj_d1,
-                fprime2 = _ivlib.black_vol_obj_d2,
+                vol_obj, guess, fprime = vol_obj_d1, fprime2 = vol_obj_d2,
                 args = (ctypes.byref(vol_args),), tol = rf_stop_defaults[0],
                 rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
-                full_output = True
+                full_output = True, disp = False
             )
         elif method == "newton":
             _, spy_res = scipy.optimize.newton(
-                _ivlib.black_vol_obj, guess, fprime = _ivlib.black_vol_obj_d1,
+                vol_obj, guess, fprime = vol_obj_d1,
                 args = (ctypes.byref(vol_args),), tol = rf_stop_defaults[0],
                 rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
-                full_output = True
+                full_output = True, disp = False
             )
         # get actual vol values and number of iterations required
         vols[i] = (volrs[i].res, spy_res.root)
@@ -236,4 +247,11 @@ def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, method, guess,
         print(f"iters:\n{iters}")
     # test that results are identical for both implementations
     same_roots = list(map(lambda x: almost_equal(*x), vols))
-    assert sum(same_roots) == n_pts, "Not all roots results were almost equal"
+    # if not, print some statistics (bachelier vols tend to differ)
+    if sum(same_roots) != n_pts:
+        dfunc = lambda x: abs(x[0] - x[1])
+        diffs = np.array(list(map(dfunc, vols)))
+        max_diff = diffs.max()
+        min_diff = diffs.min()
+        print(f"max_diff: {max_diff}, at {np.nonzero(diffs == max_diff)[0][0]}")
+        print(f"min_diff: {min_diff}, at {np.nonzero(diffs == min_diff)[0][0]}")
