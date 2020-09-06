@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <omp.h>
 
 #include "gauss.h"
 #include "euro_options.h"
@@ -384,4 +385,75 @@ scl_rf_res _bachelier_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
     HALLEY_NEWTON_INVALID_PARAM_RES(res, x0);
   }
   return res;
+}
+
+/**
+ * Computes implied volatilities for an entire array of option price inputs.
+ * 
+ * More efficient to use than either _black_vol and _bachelier_vol when it is
+ * necessary to compute vols for a large number of option prices. Uses OpenMP
+ * for thread-based parallelism, so if calling from Python, use ctypes.cdll.
+ * 
+ * Note that this function does not create any memory, so it is suitable to be
+ * called from Python. Just use ctypes to pass in a c_double array of the same
+ * length as odata, i.e. of length n_pts.
+ */
+void _imp_vol_vec(vol_obj_args *odata, double *vdata, long n_pts,
+  vol_t_flag vol_type, scl_opt_flag method, double x0, double tol, double rtol,
+  int maxiter, int n_threads, bool mask_neg, bool debug) {
+  /**
+   * do some brief error checking. note that _black_vol and _bachelier_vol will
+   * check method for us, while _halley_newton (which is called by both these
+   * functions) will check the rest of the arguments, except for n_threads.
+   */
+  if (n_pts <= 0) {
+    fprintf(stderr, "%s: n_pts must be positive long", _IMP_VOL_VEC_NAME);
+    return;
+  }
+  // set function pointer to implied volatility computation function
+  scl_vol_func vol_func;
+  if (vol_type == BLACK_VOL_FLAG) {
+    vol_func = &_black_vol;
+  }
+  else if (vol_type == BACHELIER_VOL_FLAG) {
+    vol_func = &_bachelier_vol;
+  }
+  else {
+    fprintf(stderr, "%s: vol_type must be either BLACK_VOL_FLAG (%d) or "
+      "BACHELIER_VOL_FLAG (%d)\n", _IMP_VOL_VEC_NAME, BLACK_VOL_FLAG,
+      BACHELIER_VOL_FLAG);
+    return;
+  }
+  if (n_threads == -1) {
+    n_threads = omp_get_max_threads();
+  }
+  else if (n_threads <= 0) {
+    printf("%s: n_threads must be positive; defaulting to 1 thread\n",
+      _IMP_VOL_VEC_NAME);
+    n_threads = 1;
+  }
+  else {
+    int max_threads;
+    max_threads = omp_get_max_threads();
+    if (n_threads > max_threads) {
+      printf("%s: n_threads > max threads (%d); using (%d) threads\n",
+        _IMP_VOL_VEC_NAME, max_threads, max_threads);
+      n_threads = max_threads;
+    }
+  }
+  /**
+   * compute implied volatilies for each of the input vol_obj_args structs and
+   * write them to their corresponding locations in vdata, wherever that is.
+   */
+  //#pragma omp parallel for num_threads(n_threads)
+  for (long i = 0; i < n_pts; i++) {
+    scl_rf_res res;
+    res = (*vol_func)(odata + i, method, x0, tol, rtol, maxiter, debug);
+    if ((mask_neg == true) && res.res < 0) {
+      vdata[i] = NAN;
+    }
+    else {
+      vdata[i] = res.res;
+    }
+  }
 }

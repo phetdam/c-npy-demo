@@ -46,11 +46,11 @@ typedef struct {
 } vol_obj_args;
 
 // create using macro (substitution) as auto variable. faster than using malloc.
-#define vol_obj_args_anew(a, b, c, d, e, f) {a, b, c, d, e, f}
+#define vol_obj_args_anew(p, f, s, t, d, i) {p, f, s, t, d, i}
 // populate an already existing vol_obj_args voa
-#define vol_obj_args_afill(voa, a, b, c, d, e, f) \
-  voa.price = a; voa.fwd = b; voa.strike = c; voa.ttm = d; voa.df = e; \
-  voa.is_call = f
+#define vol_obj_args_afill(voa, p, f, s, t, d, i) \
+  voa.price = p; voa.fwd = f; voa.strike = s; voa.ttm = t; voa.df = d; \
+  voa.is_call = i
 
 // create new vol_obj_args using malloc
 vol_obj_args *vol_obj_args_mnew(double price, double fwd, double strike,
@@ -76,9 +76,33 @@ scl_rf_res _black_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
 scl_rf_res _bachelier_vol(vol_obj_args *odata, scl_opt_flag method, double x0,
   double tol, double rtol, int maxiter, bool debug);
 
-#define black_vol(a, b, c, d, e, f) _black_vol(a, b, c, d, e, f, false)
-#define black_vold(a, b) black_vol(a, b, 0.5, 1.48e-8, 0, 50)
-#define bachelier_vol(a, b, c, d, e, f) _bachelier_vol(a, b, c, d, e, f, false)
-#define bachelier_vold(a, b) bachelier_vol(a, b, 0.5, 1.48e-8, 0, 50)
+#define black_vol(o, m, x, t, r, i) _black_vol(o, m, x, t, r, i, false)
+#define black_vold(o, m) black_vol(o, m, 0.5, 1.48e-8, 0, 50)
+#define bachelier_vol(o, m, x, t, r, i) _bachelier_vol(o, m, x, t, r, i, false)
+#define bachelier_vold(o, m) bachelier_vol(o, m, 0.5, 1.48e-8, 0, 50)
+
+// flags for indicating volatility type, function name, and another int typedef
+#define BLACK_VOL_FLAG 0
+#define BACHELIER_VOL_FLAG 1
+#define _IMP_VOL_VEC_NAME "imp_vol_vec"
+typedef int vol_t_flag;
+
+/**
+ * typedef for function pointer with same signature as _black_vol and
+ * _bachelier_vol for convenience. long signature.
+ */
+typedef scl_rf_res (*scl_vol_func)(vol_obj_args *, scl_opt_flag, double, double,
+  double, int, bool);
+
+// computes implied vol for an entire array of options data
+void _imp_vol_vec(vol_obj_args *odata, double *vdata, long n_pts,
+  vol_t_flag vol_type, scl_opt_flag method, double x0, double tol, double rtol,
+  int maxiter, int n_threads, bool mask_neg, bool debug);
+
+#define imp_vol_vec(o, np, v, m, x, t, r, i, nt) \
+  _imp_vol_vec(o, np, v, m, x, t, r, i, nt, false)
+#define imp_vol_vecd(o, np, v, m, nt) \
+  _imp_vol_vec(o, np, v, m, 0.5, 1.48e-8, 0, 50, nt, false)
+
 
 #endif /* IMPLIED_VOL_H */

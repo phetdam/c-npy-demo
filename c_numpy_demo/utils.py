@@ -6,7 +6,7 @@ from functools import wraps
 import inspect
 import numpy as np
 
-from ._cwrappers import vol_obj_args
+from .ivlib import vol_obj_args
 from ._np_bcast import np_float64_bcast_1d_ext
 
 

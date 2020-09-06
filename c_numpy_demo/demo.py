@@ -3,7 +3,7 @@ __doc__ = "Module for ``_ivlib.so`` and C extension demonstrations."
 import datetime
 import numpy as np
 
-from ._cwrappers import _ivlib
+from .ivlib import _ivlib
 from .utils import np_1d_broadcast
 
 

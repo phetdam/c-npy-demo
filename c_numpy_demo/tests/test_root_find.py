@@ -11,7 +11,7 @@ import os.path
 import pytest
 import scipy.optimize
 
-from .._cwrappers import _ivlib, vol_obj_args
+from ..ivlib import _ivlib, vol_obj_args
 from ..utils import (almost_equal, ndarray2vol_obj_args_tuple,
                      options_csv_to_ndarray)
 
