@@ -75,7 +75,12 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
       // tuple has ownership of old scalar (stole reference)
       args[_i] = tup;
     }
-    // convert args[_i] to ndarray and check for conversion error
+    /**
+     * convert args[_i] to ndarray and check for conversion error. note that we
+     * don't worry about calling Py_DECREF on the original object since we are
+     * only borrowing the reference anyways. on success, PyArray_FROM_OTF will
+     * return a new ndarray, so we have to Py_DECREF on error.
+     */
     args[_i] = (PyObject *) PyArray_FROM_OTF(args[_i], NPY_FLOAT64,
       NPY_ARRAY_IN_ARRAY);
     // don't set exception; let numpy function set the error indicator
@@ -86,7 +91,7 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
     if (PyArray_NDIM(args[_i]) != 1) {
       PyErr_Format(PyExc_ValueError, "Positional arg %d cannot be converted"
         " to 1D numpy.ndarray\n", _i + 1);
-      PyArray_XDECREF(args[_i]);
+      Py_DECREF(args[_i]);
       return NULL;
     }
   }
@@ -106,20 +111,28 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
   for (long _i = 0; _i < nargs; _i++) {
     local_len = PyArray_SHAPE(args[_i])[0];
     if (local_len == 1) {
-      // get base value as float, XDECREF original ndarray, create tuple
+      /**
+       * get base value as float, PyArray_XDECREF and Py_DECREF orig ndarray,
+       * create tuple. note that XDECREF only decrefs the objects in the array,
+       * so we still have to call Py_DECREF on the ndarray. PyArray_XDECREF is
+       * needed because the ndarray is wrapping a new 1-tuple we created.
+       */
       double base;
       base = *((double *) PyArray_DATA(args[_i]));
       PyArray_XDECREF((PyArrayObject *) args[_i]);
+      Py_DECREF(args[_i]);
       args[_i] = PyTuple_New((Py_ssize_t) shared_len);
       for (Py_ssize_t j = 0; j < shared_len; j++) {
         PyTuple_SetItem(args[_i], j, PyFloat_FromDouble(base));
       }
       // convert to ndarray with C order and aligned memory + check if error
+      PyObject *orig;
+      orig = args[_i];
       args[_i] = (PyObject *) PyArray_FROM_OTF(args[_i], NPY_FLOAT64,
         NPY_ARRAY_IN_ARRAY);
       // don't set exception; let numpy function set the error indicator
       if (args[_i] == NULL) {
-        Py_DECREF(args[_i]);
+        Py_DECREF(orig);
         return NULL;
       }
     }
@@ -127,7 +140,8 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
     else {
       PyErr_Format(PyExc_ValueError, "Could not broadcast (%ld,) to (%ld,)",
         (long) local_len, (long) shared_len);
-      PyArray_XDECREF((PyArrayObject *) args[_i]);
+      // the objects in the ndarray are borrowed, so no PyArray_XDECREF.
+      Py_DECREF(args[_i]);
       return NULL;
     }
   }
@@ -141,9 +155,18 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
     dims.ptr = new_shape;
     dims.len = 2;
     for (i = 0; i < nargs; i++) {
+      PyObject *orig;
+      orig = args[i];
       args[i] = PyArray_Newshape(args[i], &dims, NPY_CORDER);
       if (args[i] == NULL) {
         PyErr_Format(PyExc_RuntimeError, "Failed to reshape arg %d\n", i + 1);
+        // clean up
+        for (int j = 0; j < nargs; j++) {
+          if (args[i] != NULL) {
+            PyArray_XDECREF(args[i]);
+            Py_DECREF(args[i]);
+          }
+        }
         return NULL;
       }
     }

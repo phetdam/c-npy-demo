@@ -67,22 +67,85 @@ calculations, and a Python extension module written in C.
 Lessons
 -------
 
-I learned a few lessons the hard way from doing this project. However, they are
-valuable not just in the context of mixed Python/C development, as they can be
-generalized to other mixed-language projects where higher and lower level
-languages need to be used together.
+Remarks on a few lessons I learned the hard way from mixing Python code,
+foreign C code, the Python and NumPy C APIs, and Python C extension modules. It
+was definitely a difficult but rewarding journey.
 
-1. Keep Python and C stuff as far away from each other as possible.
-2. The GIL breathes much harder down your neck when you start using the Python
-   C API, especially if you are trying to venture into multithreading with
-   external libraries like OpenMP. See 1.
-3. The NumPy C API is unforgiving. Be sure to check for ``NULL`` pointers.
-4. If you aren't fluent in both languages, you will spend a lot of time
-   frustrated.
-5. Conversely, the satisfaction gained from building code that not only gains
-   the speed of C but also exposes a pretty Python API may be more than enough
-   to make up for all your struggles.
+- Python C extension modules are loaded in a very specific way, are under the
+  jurisdiction of the Python interpreter, and are subject to the GIL. When
+  writing C code for an extension module, make sure you at least have **really**
+  understood how to perform reference counting and exception handling from the
+  `C API documentation`__. It is also useful to read about
+  `initialization, finalizaton, and threads`__ if you are going to be using
+  multiple threads. You should not need to read too much of the
+  `memory management`__ documentation, as the Python interpreter should be
+  managing the memory of the Python objects for you.
+- The `NumPy C API documentation`__ [#]_ can be quite confusing sometimes, even
+  when compared to the Python C API documentation. However, there are some rules
+  of thumb that work pretty well. First, it is quite easy to use a function like
+  `PyArray_FROM_OTF`_ to create a new NumPy array from an existing Python
+  object. You just need to call `Py_DECREF`_ on the NumPy array if you are not
+  returning it. If the Python object you called `PyArray_FROM_OTF`_ on was newly
+  created in your function, then its reference also needs to be decremented,
+  typically by calling `PyArray_XDECREF`_ before `Py_DECREF`_ on the
+  ``PyObject *`` or ``PyArrayObject *`` pointing the NumPy array. If you want to
+  create a NumPy array from scratch, however, **do not** first ``malloc`` some
+  memory and then create a NumPy array around it using something like
+  `PyArray_SimpleNewFromData`_! That memory is **not** tracked by the Python
+  garbage collector and will result in a memory leak. Instead, use something
+  like `PyArray_SimpleNew`_ to get an uninitialized NumPy array, use the
+  `PyArray_DATA`_ macro to get a pointer to the first data element, and then
+  fill in the data buffer, using stride information from `PyArray_STRIDES`_
+  if necessary.
+- Writing code in two different languages can be very frustrating, especially
+  when it's something you are trying the first time. Be patient and don't rush;
+  with languages such as C that are not as beginner-friendly as Python and with
+  the added challenge of also having to understand Python design choices [#]_,
+  there will likely be many missteps. I don't think I am particularly sharp or
+  dull, but either way it was a humbling and trying experience.
+- However, there is a lot of satisfaction to be gained from building code that
+  not only gains the speed of C but also exposes a pretty Python API. The payoff
+  was very work intensive, but for me it made up for all the struggle. I learned
+  far more about CPython than I expected and have had my eyes opened to a new,
+  and much more interesting, development paradigm.
+
+.. __: https://docs.python.org/3/c-api/index.html
+
+.. __: https://docs.python.org/3/c-api/init.html
+
+.. __: https://docs.python.org/3/c-api/memory.html
+
+.. __: https://numpy.org/doc/stable/reference/c-api/
+
+.. _PyArray_FROM_OTF: https://numpy.org/doc/stable/reference/c-api/array.html#c.
+   PyArray_FROM_OTF
+
+.. _Py_DECREF: https://docs.python.org/3/c-api/refcounting.html#c.Py_DECREF
+
+.. _PyArray_XDECREF: https://numpy.org/doc/stable/reference/c-api/array.html#c.
+   PyArray_XDECREF
+
+.. _PyArray_SimpleNewFromData: https://numpy.org/doc/stable/reference/c-api/
+   array.html#c.PyArray_SimpleNewFromData
+
+.. _PyArray_SimpleNew: https://numpy.org/doc/stable/reference/c-api/array.html#
+   c.PyArray_SimpleNew
+
+.. _PyArray_DATA: https://numpy.org/doc/stable/reference/c-api/array.html#c.
+   PyArray_DATA
+
+.. _PyArray_STRIDES: https://numpy.org/doc/stable/reference/c-api/array.html#c.
+   PyArray_STRIDES
+
+https://numpy.org/doc/stable/reference/c-api/array.html#c.PyArray_SimpleNew
 
 This project ended up being relatively large, and I will be porting a lot of the
 code written here for one of my future planned projects, although I won't be
 able to get started on that for a while.
+
+.. [#] Case in point: reference counting.
+
+.. [#] There is a newer documentation version for the dev version of NumPy 1.20,
+   which may be found `here`__.
+
+.. __: https://numpy.org/devdocs/reference/c-api/
