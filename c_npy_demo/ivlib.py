@@ -134,6 +134,27 @@ def black_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0,
     :param method: The implied volatility solving method. Currently supports
         only ``"halley"`` and ``"newton"``.
     :type method: str, optional
+    :param x0: Initial guess for implied volatility values, defaults to ``0.5``.
+    :type x0: float, optional
+    :param tol: Absolute tolerance for solver convergence.
+    :type tol: float, optional
+    :param rtol: Relative tolerance for solver convergence, i.e. differences
+        between guesses. Defaults to ``0``.
+    :type rtol: float, optional
+    :param maxiter: Maximum number of iterations before convergence, default
+        ``50``.
+    :type maxiter: int, optional
+    :param n_threads: Number of threads to use if computing in parallel. Pass
+        ``-1`` to use all threads; defaults to ``-1``. Automatically caps the
+        number of threads used to the maximum number of threads on the system.
+    :type n_threads: int, optional
+    :param mask_neg: ``True`` to replace negative implied vols with ``NAN``,
+        ``False`` to keep all values. Defaults to ``True``.
+    :type mark_neg: bool, optional
+    :param debug: ``True`` for the solver to print its results for each data
+        point, ``False`` for silence. Defaults to ``True``.
+    :type debug: bool, optional
+    :returns: A :class:`numpy.ndarray` of Black implied volatilities.
     :rtype: :class:`numpy.ndarray`
     """
     # get length of odata; must be positive
@@ -165,14 +186,33 @@ def bachelier_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8,
     
     Wraps the C function ``_imp_vol_vec`` with ``vol_type`` set to
     ``BACHELIER_VOL_FLAG``.
-    
-    Docstring incomplete; see ``_ivlib/euro_options.c``.
-    
+
     :param odata: A ``ctypes`` array of ``vol_obj_args``.
     :type odata: :class:`__main__.vol_obj_args_Array_*`
     :param method: The implied volatility solving method. Currently supports
         only ``"halley"`` and ``"newton"``.
     :type method: str, optional
+    :param x0: Initial guess for implied volatility values, defaults to ``0.5``.
+    :type x0: float, optional
+    :param tol: Absolute tolerance for solver convergence.
+    :type tol: float, optional
+    :param rtol: Relative tolerance for solver convergence, i.e. differences
+        between guesses. Defaults to ``0``.
+    :type rtol: float, optional
+    :param maxiter: Maximum number of iterations before convergence, default
+        ``50``.
+    :type maxiter: int, optional
+    :param n_threads: Number of threads to use if computing in parallel. Pass
+        ``-1`` to use all threads; defaults to ``-1``. Automatically caps the
+        number of threads used to the maximum number of threads on the system.
+    :type n_threads: int, optional
+    :param mask_neg: ``True`` to replace negative implied vols with ``NAN``,
+        ``False`` to keep all values. Defaults to ``True``.
+    :type mark_neg: bool, optional
+    :param debug: ``True`` for the solver to print its results for each data
+        point, ``False`` for silence. Defaults to ``True``.
+    :type debug: bool, optional
+    :returns: A :class:`numpy.ndarray` of Black implied volatilities.
     :rtype: :class:`numpy.ndarray`
     """
     # get length of odata; must be positive
