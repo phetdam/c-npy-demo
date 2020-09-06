@@ -78,9 +78,8 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
     // convert args[_i] to ndarray and check for conversion error
     args[_i] = (PyObject *) PyArray_FROM_OTF(args[_i], NPY_FLOAT64,
       NPY_ARRAY_IN_ARRAY);
+    // don't set exception; let numpy function set the error indicator
     if (args[_i] == NULL) {
-      PyErr_Format(PyExc_RuntimeError, "Failed to convert arg %d to ndarray\n",
-        _i + 1);
       return NULL;
     }
     // check that number of dimensions is 1
@@ -118,9 +117,8 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
       // convert to ndarray with C order and aligned memory + check if error
       args[_i] = (PyObject *) PyArray_FROM_OTF(args[_i], NPY_FLOAT64,
         NPY_ARRAY_IN_ARRAY);
+      // don't set exception; let numpy function set the error indicator
       if (args[_i] == NULL) {
-        PyErr_Format(PyExc_RuntimeError,
-          "Failed to convert arg %d to ndarray\n", i + 1);
         Py_DECREF(args[_i]);
         return NULL;
       }
@@ -157,7 +155,8 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
 /**
  * Broadcasts Python objects into float64 1D ndarrays, if possible.
  * 
- * This is the Python user facing method.
+ * This is the Python user facing method. Note that np_float64_bcast_1d also
+ * raise Python exceptions, so when it errors we return NULL and don't raise.
  *
  * Resulting arrays are guaranteed aligned and C-contiguous. If the input
  * iterable is empty, then it is simply returned.
@@ -200,15 +199,18 @@ PyObject *np_float64_bcast_1d_ext(PyObject *self, PyObject *args) {
       return obj;
     }
     objs = (PyObject **) malloc(n_objs * sizeof(PyObject *));
+    if (objs == NULL) {
+      return PyErr_NoMemory();
+    }
     for (i = 0; i < n_objs; i++) {
       objs[i] = PyTuple_GetItem(obj, i);
     }
     // perform conversions using np_float64_bcast_1d
-    objs = np_float64_bcast_1d(objs, n_objs, axis);
-    // on error, free memory, set error, and return
-    if (objs == NULL) {
+    PyObject **new_objs;
+    new_objs = np_float64_bcast_1d(objs, n_objs, axis);
+    // on error, free memory, and return (np_float64_bcast_1d raised exception)
+    if (new_objs == NULL) {
       free(objs);
-      PyErr_SetString(PyExc_RuntimeError, "can't convert to float64");
       return NULL;
     }
     // make a new tuple
@@ -232,18 +234,24 @@ PyObject *np_float64_bcast_1d_ext(PyObject *self, PyObject *args) {
     }
     // malloc and copy over the keys and values.
     objs = (PyObject **) malloc(n_objs * sizeof(PyObject *));
+    if (objs == NULL) {
+      return PyErr_NoMemory();
+    }
     keys = (PyObject **) malloc(n_objs * sizeof(PyObject *));
+    if (keys == NULL) {
+      return PyErr_NoMemory();
+    }
     for (i = 0; i < n_objs; i++) {
       keys[i] = PyList_GetItem(_keys, i);
       objs[i] = PyList_GetItem(_vals, i);
     }
     // perform conversions using np_float64_bcast_1d
-    objs = np_float64_bcast_1d(objs, n_objs, axis);
-    // on error, free memory, set error, and return
-    if (objs == NULL) {
+    PyObject **new_objs;
+    new_objs = np_float64_bcast_1d(objs, n_objs, axis);
+    // on error, free memory, and return (np_float64_bcast_1d raised exception)
+    if (new_objs == NULL) {
       free(objs);
       free(keys);
-      PyErr_SetString(PyExc_RuntimeError, "can't convert to float64");
       return NULL;
     }
     // make a new dict
@@ -265,15 +273,18 @@ PyObject *np_float64_bcast_1d_ext(PyObject *self, PyObject *args) {
       return obj;
     }
     objs = (PyObject **) malloc(n_objs * sizeof(PyObject *));
+    if (objs == NULL) {
+      return PyErr_NoMemory();
+    }
     for (i = 0; i < n_objs; i++) {
       objs[i] = PyList_GetItem(obj, i);
     }
     // perform conversions using np_float64_bcast_1d
-    objs = np_float64_bcast_1d(objs, n_objs, axis);
-    // on error, free memory, set error, and return
-    if (objs == NULL) {
+    PyObject **new_objs;
+    new_objs = np_float64_bcast_1d(objs, n_objs, axis);
+    // on error, free memory, and return (np_float64_bcast_1d raised exception)
+    if (new_objs == NULL) {
       free(objs);
-      PyErr_SetString(PyExc_RuntimeError, "can't convert to float64");
       return NULL;
     }
     // make a new list
