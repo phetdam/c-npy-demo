@@ -33,7 +33,7 @@ deploy:
     password:
       secure: Ai7atsDoxe3F8fw2enkCelumS1S4cQwGUsgxBRfxGLYygtmGagdhwPB/V+7W5RRdUeVEU2sb9gOFuf/u0iVa751A4GhjSUj9pss4OZlEJ+zdTnoDx5k4IkDc98GaczFr0W6qrIHCr39QGx//xAEyCxa0wAkp+9C3LF8vfvKvQodITU7IV35BLFcmR8Mk9FQ42Cr8dlVk8MIo5BNK3vddpA4s4hbqCqJzRqzZMjmNIbfRg7j+FkzjX+0Us1mZEqxDSztrmAb2ZR3KyjTchEDw16d/Bk7TVdCj3UWFo8a5c67oHcXcrowEldAMEOt175lXswJCEm/VaNtMoy7uwbPWdAJLZT/iD9rQ63JewCCCX9xsg1jxivVH+1PqxlxtR6IoGq90f3dhbjne2eiH++S0n4bVELnwtKOxr0YWAFTRgGP7PcJtN18Ct26Br5qKM3zmLkPo0ugKNM6jHApmv/mWwEUXs02Vi8VBkk9sgiHGgrmqx9EiXse3iM53qTuV57tR0bvUefL5Nys8x0v7f8e1wm1JYes2b3ve9EsyaYJIW76LX5n3eE49H1pevj02bczThCxUYPm7R3w7AgbBTUd19dIVRLj1z4B65WjZkDIkqSMgI32k8Wa8GhPhiuIsYocK5i9c68eXTWst9HBBL+JCaco5j7o16NDfyk11LCaxehY=
     server: https://test.pypi.org/legacy/
-    distributions: sdist bdist_wheel
+    distributions: sdist
     skip_existing: true
     on:
       condition: -e DEPLOY_DRY
