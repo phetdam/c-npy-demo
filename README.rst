@@ -141,11 +141,11 @@ This project ended up being relatively large, and I will be porting a lot of the
 code written here for one of my future planned projects, although I won't be
 able to get started on that for a while.
 
-.. [#] Case in point: reference counting.
-
 .. [#] There is a newer documentation version for the dev version of NumPy 1.20,
    which may be found `here`__. To be fair, I did find `this page`__ in the
    NumPy documentation to be quite clear and helpful.
+
+.. [#] Case in point: reference counting.
 
 .. __: https://numpy.org/devdocs/reference/c-api/
 
