@@ -3,7 +3,7 @@
 # test dir where all our build binaries and .py files come together
 TEST_DIR    = pkg_test
 # package name, _ivlib.so source
-PKG_NAME    = c_numpy_demo
+PKG_NAME    = c_npy_demo
 _IVLIB_DIR  = $(PKG_NAME)/_ivlib
 
 CC          = gcc
