@@ -7,60 +7,12 @@ __doc__ = """Test ``_halley_newton`` function defined in ``root_find.c``.
 
 import ctypes
 import numpy as np
-import os.path
 import pytest
 import scipy.optimize
 
+from .fixtures import options_full_data, options_ntm_data, rf_stop_defaults
 from ..ivlib import _ivlib, vol_obj_args
-from ..utils import (almost_equal, ndarray2vol_obj_args_tuple,
-                     options_csv_to_ndarray)
-
-## -- Fixtures -----------------------------------------------------------------
-
-
-@pytest.fixture(scope = "module")
-def rf_stop_defaults():
-    """Default abs + rel tolerance and max iterations for iterative root-finder.
-    
-    Same as the defaults for :func:`scipy.optimize.newton`.
-    
-    :returns: Absolute tolerance, relative tolerance, max iterations.
-    :rtype: tuple
-    """
-    return (1.48e-8, 0, 50)
-
-
-@pytest.fixture(scope = "module")
-def options_ntm_data():
-    """Creates a small panel of near the money options test data.
-    
-    Note that the data in each row will be in the parameter order specified by
-    :class:`vol_obj_args`. Assumes that there are 365 days in a year. Only uses
-    the near the money options data from ``data/edo_ntm_data.csv`` for brevity.
-    
-    :returns: A :class:`numpy.ndarray` of options data, shape ``(20, 6)``.
-    :rtype: :class:`numpy.ndarray`
-    """
-    return options_csv_to_ndarray(os.path.dirname(__file__) + 
-                                  "/../data/edo_ntm_data.csv")
-
-
-@pytest.fixture(scope = "module")
-def options_full_data():
-    """Creates a panel of options test data for testing functions with.
-    
-    Note that the data in each row will be in the parameter order specified by
-    :class:`vol_obj_args`. Assumes that there are 365 days in a year. Uses the
-    the full options data from ``data/edo_full_data.csv``.
-    
-    :returns: A :class:`numpy.ndarray` of options data, shape ``(136, 6)``.
-    :rtype: :class:`numpy.ndarray`
-    """
-    return options_csv_to_ndarray(os.path.dirname(__file__) +
-                                  "/../data/edo_full_data.csv")
-
-
-## -- Tests --------------------------------------------------------------------
+from ..utils import almost_equal, ndarray2vol_obj_args_array
 
 
 @pytest.mark.parametrize("method", ["halley", "newton"])
@@ -98,7 +50,7 @@ def test_c_ntm_black_vol(options_ntm_data, rf_stop_defaults, method, guess,
     :type c_debug: bool
     """
     # convert ndarray options_ntm_data to tuple of vol_obj_args
-    voas = ndarray2vol_obj_args_tuple(options_ntm_data)
+    voas = ndarray2vol_obj_args_array(options_ntm_data)
     # convert method to int
     method = 0 if "halley" else (1 if "newton" else -1)
     assert method in (0, 1), "method flag must be 0 (halley) or 1 (newton)"
@@ -172,7 +124,7 @@ def test_c_ntm_bachelier_vol(options_ntm_data, rf_stop_defaults, method, guess,
     :type c_debug: bool
     """
     # convert ndarray options_ntm_data to tuple of vol_obj_args
-    voas = ndarray2vol_obj_args_tuple(options_ntm_data)
+    voas = ndarray2vol_obj_args_array(options_ntm_data)
     # convert method to int
     method = 0 if "halley" else (1 if "newton" else -1)
     assert method in (0, 1), "method flag must be 0 (halley) or 1 (newton)"
@@ -240,7 +192,7 @@ def test_rf_c_against_scipy(options_ntm_data, rf_stop_defaults, method, guess,
     :type py_debug: bool
     """
     # convert ndarray options_ntm_data to tuple of vol_obj_args
-    voas = ndarray2vol_obj_args_tuple(options_ntm_data)
+    voas = ndarray2vol_obj_args_array(options_ntm_data)
     # method flag to pass to C method
     c_method = 0 if "halley" else (1 if "newton" else -1)
     assert c_method in (0, 1), "c_method flag must be 0 (halley) or 1 (newton)"

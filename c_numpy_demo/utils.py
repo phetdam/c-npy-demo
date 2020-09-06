@@ -166,9 +166,8 @@ def _np_float64_bcast_1d(f, axis = 0):
     
     See :func:`np_float64_bcast_1d` for parameter details.
     
-    .. note:: Do not call this directly. Use :func:`np_1d_broadcast` instead.
+    .. note:: Do not call directly. Use :func:`np_float64_bcast_1d` instead.
     """
-    
     @wraps(f)
     def _broadcast_wrap(*args, **kwargs):
         # get parameters from signature of f
@@ -267,22 +266,23 @@ def options_csv_to_ndarray(fname):
     return out
 
 
-def ndarray2vol_obj_args_tuple(ar):
-    """Create a tuple of :class:`vol_obj_args` from :class:`numpy.ndarray`.
+def ndarray2vol_obj_args_array(ar):
+    """Create an array of :class:`vol_obj_args` from a :class:`numpy.ndarray`.
     
-    ``ar`` should be the output from :func:`options_csv_to_ndarray`.
+    ``ar`` should be given by :func:`options_csv_to_ndarray`. The returned array
+    is a ``ctypes`` array built from the :class:`vol_obj_args` type.
     
     :param ar: A :class:`numpy.ndarray`, shape ``(n_obs, 6)`` with data type
         :class:`numpy.float64`. This should be the output of
         :func:`options_csv_to_ndarray`.
     :type ar: :class:`numpy.ndarray`
-    :returns: A tuple of :class:`vol_obj_args` structs, length ``n_obs``.
-    :rtype: tuple
+    :returns: A ``ctypes`` array of ``n_obs`` :class:`vol_obj_args` structs.
+    :rtype: :class:`__main__.vol_obj_args_Array_*`
     """
     # number of observations
     n_obs = ar.shape[0]
     # output array; populate using data from ar
-    out = [None for _ in range(n_obs)]
+    out = (vol_obj_args * n_obs)()
     for i in range(n_obs):
         # unpack a row of the ndarray
         price, fwd, strike, ttm, df, is_call = ar[i, :]
