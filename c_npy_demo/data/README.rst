@@ -76,9 +76,8 @@ hh_ntm_data.csv
 
 hh_full_data.csv
    Contains data on Henry Hub natural gas options on a much wider range of
-   strikes and is a superset of the data in ``hh_ntm_data.csv``. Note that
-   extremely deep in-the-money options will end up with nonsensical implied
-   volatilities. The file contains 1282 rows and 9 columns of data.
+   strikes and is a superset of the data in ``hh_ntm_data.csv``. The file
+   contains 1282 rows and 9 columns of data.
 
 Options contracts used
 ----------------------
