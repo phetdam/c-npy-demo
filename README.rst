@@ -19,7 +19,7 @@ Includes a demo script [#]_ that performs a comparison of execution speed for
 the iterative computation of Black and Bachelier implied volatility using
 Halley's and Newton's methods. The script compares the time taken to solve the
 Black and Bachelier implied volatilities of 10 million European option prices
-for a pure Python implementation using ``scipy.optimize.minimize``, a mixed 
+for a pure Python implementation using `scipy.optimize.newton`__, a mixed 
 implementation where a minimalistic C implementation of Halley's/Newton's method
 is used to solve for the price but iteration through prices is still done in
 Python, and a ``ctypes`` wrapped pure C implementation. The script illustrates
@@ -36,6 +36,9 @@ There is a small test suite that can be run with pytest__ after installation.
 .. [#] Should include a demo of how multithreading helps with large inputs.
 
 .. __: https://docs.python.org/3/library/ctypes.html
+
+.. __: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.
+   newton.html
 
 .. __: https://docs.pytest.org/en/stable/contents.html
 
