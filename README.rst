@@ -3,8 +3,8 @@
 c_npy_demo
 ============
 
-.. image:: https://img.shields.io/travis/phetdam/c_numpy_demo?logo=travis
-   :target: https://travis-ci.org/github/phetdam/c_numpy_demo
+.. image:: https://img.shields.io/travis/phetdam/c_npy_demo?logo=travis
+   :target: https://travis-ci.org/github/phetdam/c_npy_demo
    :alt: Travis (.org)
 
 A demo Python package illustrating how to combine a compiled Python C extension,
