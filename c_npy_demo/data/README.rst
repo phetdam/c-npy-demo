@@ -55,8 +55,8 @@ rec_date
 Data files
 ----------
 
-Both data files contain options data pulled from CME Group's website. Brief
-descriptions are below.
+Data files contain options data from CME Group's website, manually copied and
+cleaned. Brief descriptions are below.
 
 edo_ntm_data.csv
    Contains data on Eurodollar options that are close to the at-the-money point,
@@ -68,6 +68,17 @@ edo_full_data.csv
    superset of the data in ``edo_atm_data.csv``. Note that extremely deep
    in-the-money options will end up with nonsensical implied volatilities.
    The file contains 422 rows and 9 columns of data.
+
+hh_ntm_data.csv
+   Contains data on Henry Hub natural gas options that are close to the at-the
+   money point, namely the five closest strikes above and below the at-the-money
+   point. This file contains 60 rows and 9 columns of data.
+
+hh_full_data.csv
+   Contains data on Henry Hub natural gas options on a much wider range of
+   strikes and is a superset of the data in ``hh_ntm_data.csv``. Note that
+   extremely deep in-the-money options will end up with nonsensical implied
+   volatilities. The file contains 1282 rows and 9 columns of data.
 
 Options contracts used
 ----------------------
@@ -89,3 +100,15 @@ Below are the listed options contracts used in the data files described above.
 EDZ22
    Quarterly Eurodollar option expiring on December 19, 2022. Underlying futures
    expires on the same date.
+
+LNZ20
+   Monthly Henry Hub natural gas option expiring on November 24, 2020.
+   Underlying futures expires on November 25, 2020.
+
+LNZ21
+   Monthly Henry Hub natural gas option expiring on November 24, 2021.
+   Underlying futures expires on November 26, 2021.
+
+LNN23
+   Monthly Henry Hub natural gas option expiring on June 27, 2023. Underlying
+   futures expires on June 28, 2023.
