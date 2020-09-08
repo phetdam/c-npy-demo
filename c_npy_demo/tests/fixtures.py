@@ -22,8 +22,10 @@ def rf_stop_defaults():
 
 
 @pytest.fixture(scope = "session")
-def options_ntm_data():
-    """Creates a small panel of near the money options test data.
+def edo_ntm_data():
+    """Creates a small panel of near the money Eurodollar options test data.
+    
+    Only use for testing Bachelier vol computation.
     
     Note that the data in each row will be in the parameter order specified by
     :class:`vol_obj_args`. Assumes that there are 365 days in a year. Only uses
@@ -37,8 +39,10 @@ def options_ntm_data():
 
 
 @pytest.fixture(scope = "session")
-def options_full_data():
-    """Creates a panel of options test data for testing functions with.
+def edo_full_data():
+    """Creates a panel of Eurodollar options test data across more strikes.
+    
+    Only use for testing Bachelier vol computation.
     
     Note that the data in each row will be in the parameter order specified by
     :class:`vol_obj_args`. Assumes that there are 365 days in a year. Uses the
@@ -49,3 +53,36 @@ def options_full_data():
     """
     return options_csv_to_ndarray(os.path.dirname(__file__) +
                                   "/../data/edo_full_data.csv")
+
+@pytest.fixture(scope = "session")
+def hh_ntm_data():
+    """Creates a small panel of near the money natural gas options test data.
+    
+    Only use for testing Black vol computation. Natural gas is from Henry Hub.
+    
+    Note that the data in each row will be in the parameter order specified by
+    :class:`vol_obj_args`. Assumes that there are 365 days in a year. Only uses
+    the near the money options data from ``data/hh_ntm_data.csv`` for brevity.
+    
+    :returns: A :class:`numpy.ndarray` of options data, shape ``(60, 6)``.
+    :rtype: :class:`numpy.ndarray`
+    """
+    return options_csv_to_ndarray(os.path.dirname(__file__) + 
+                                  "/../data/hh_ntm_data.csv")
+
+
+@pytest.fixture(scope = "session")
+def hh_full_data():
+    """Creates a panel of natural gas options test data across more strikes.
+    
+    Only use for testing Black vol computation. Natural gas is from Henry Hub.
+    
+    Note that the data in each row will be in the parameter order specified by
+    :class:`vol_obj_args`. Assumes that there are 365 days in a year. Uses the
+    the full options data from ``data/hh_full_data.csv``.
+    
+    :returns: A :class:`numpy.ndarray` of options data, shape ``(1282, 6)``.
+    :rtype: :class:`numpy.ndarray`
+    """
+    return options_csv_to_ndarray(os.path.dirname(__file__) +
+                                  "/../data/hh_full_data.csv")
