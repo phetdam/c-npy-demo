@@ -17,7 +17,7 @@ from ..utils import almost_equal, ndarray2vol_obj_args_array
 @pytest.mark.parametrize("method", ["halley", "newton"])
 @pytest.mark.parametrize("guess", [0.5, 0.7, 1]) # default guess is 0.5
 @pytest.mark.parametrize("mult", [1, 10]) # max tested was 1000
-@pytest.mark.parametrize("py_debug", [False])
+@pytest.mark.parametrize("py_debug", [True])
 def test_ntm_imp_vol_vec(edo_ntm_data, hh_ntm_data, rf_stop_defaults, method,
                          guess, n_threads, mult, py_debug):
     """Test ``_imp_vol_vec`` function from ``_ivlib.so`` on near-the-money data.
@@ -46,17 +46,17 @@ def test_ntm_imp_vol_vec(edo_ntm_data, hh_ntm_data, rf_stop_defaults, method,
     voas_hh = ndarray2vol_obj_args_array(hh_ntm_data, mult = mult)
     # test running black_vol_vec and bachelier_vol_vec on these inputs
     ntm_out_bl = black_vol_vec(
-        voas_edo, method = method, x0 = guess, tol = rf_stop_defaults[0],
-        rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
-        n_threads = n_threads, mask_neg = False
-    )
-    if py_debug == True: print(ntm_out_bl)
-    ntm_out_ba = bachelier_vol_vec(
         voas_hh, method = method, x0 = guess, tol = rf_stop_defaults[0],
         rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
         n_threads = n_threads, mask_neg = False
     )
-    if py_debug == True: print(ntm_out_ba)
+    if py_debug == True: print(f"black_vols:\n{ntm_out_bl}")
+    ntm_out_ba = bachelier_vol_vec(
+        voas_edo, method = method, x0 = guess, tol = rf_stop_defaults[0],
+        rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
+        n_threads = n_threads, mask_neg = False
+    )
+    if py_debug == True: print(f"bachelier vols:\n{ntm_out_ba}")
 
 
 @pytest.mark.parametrize("n_threads", [-1])
@@ -92,14 +92,14 @@ def test_full_imp_vol_vec(edo_full_data, hh_full_data, rf_stop_defaults, method,
     voas_hh = ndarray2vol_obj_args_array(hh_full_data, mult = mult)
     # test running black_vol_vec and bachelier_vol_vec on these inputs
     full_out_bl = black_vol_vec(
-        voas_edo, method = method, x0 = guess, tol = rf_stop_defaults[0],
-        rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
-        n_threads = n_threads, mask_neg = False
-    )
-    if py_debug == True: print(full_out_bl)
-    full_out_ba = bachelier_vol_vec(
         voas_hh, method = method, x0 = guess, tol = rf_stop_defaults[0],
         rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
         n_threads = n_threads, mask_neg = False
     )
-    if py_debug == True: print(full_out_ba)
+    if py_debug == True: print(f"black vols:\n{full_out_bl}")
+    full_out_ba = bachelier_vol_vec(
+        voas_edo, method = method, x0 = guess, tol = rf_stop_defaults[0],
+        rtol = rf_stop_defaults[1], maxiter = rf_stop_defaults[2],
+        n_threads = n_threads, mask_neg = False
+    )
+    if py_debug == True: print(f"bachelier vols:\n{full_out_ba}")

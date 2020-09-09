@@ -445,7 +445,7 @@ void _imp_vol_vec(vol_obj_args *odata, double *vdata, long n_pts,
    * compute implied volatilies for each of the input vol_obj_args structs and
    * write them to their corresponding locations in vdata, wherever that is.
    */
-  //#pragma omp parallel for num_threads(n_threads)
+  #pragma omp parallel for num_threads(n_threads)
   for (long i = 0; i < n_pts; i++) {
     scl_rf_res res;
     res = (*vol_func)(odata + i, method, x0, tol, rtol, maxiter, debug);
