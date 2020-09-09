@@ -9,8 +9,8 @@ run_tests() {
     # install
     make install
     # run extension and vol benchmarks, verbosely (with defaults)
-    python3 c_npy_demo.bench.ext -v
-    python3 c_npy_demo.bench.vol -v
+    c_npy_demo.bench.ext -v
+    c_npy_demo.bench.vol -v
 }
 
 # check if on travis or not
