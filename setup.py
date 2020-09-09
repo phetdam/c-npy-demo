@@ -55,10 +55,20 @@ def _setup():
           package_data = {
               _PACKAGE_NAME: ["_ivlib.so", "data/*.csv", "data/*.rst"]
           },
+          # benchmarking scripts
+          entry_points = {
+              "console_scripts": [
+                  (_PACKAGE_NAME + ".bench.ext = " + _PACKAGE_NAME +
+                   ".bench:bench_ext_main"),
+                  (_PACKAGE_NAME + ".bench.vol = " + _PACKAGE_NAME +
+                   ".bench:bench_vol_main")
+              ]
+          },
           install_requires = ["numpy>=1.15"],
           ext_package = _PACKAGE_NAME,
           ext_modules = _get_ext_modules()
     )
+
 
 if __name__ == "__main__":
     _setup()

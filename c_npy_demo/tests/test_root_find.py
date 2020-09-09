@@ -165,7 +165,7 @@ def test_c_ntm_bachelier_vol(edo_ntm_data, rf_stop_defaults, method, guess,
 @pytest.mark.parametrize("vol_type", ["black", "bachelier"])
 @pytest.mark.parametrize("method", ["halley", "newton"])
 @pytest.mark.parametrize("guess", [0.5, 0.7, 1]) # default guess is 0.5
-@pytest.mark.parametrize("max_pts,py_debug", [(np.inf, True)])
+@pytest.mark.parametrize("max_pts,py_debug", [(np.inf, False)])
 def test_rf_c_against_scipy(edo_ntm_data, hh_ntm_data, rf_stop_defaults,
                             vol_type, method, guess, max_pts, py_debug):
     """Test C root-finding implementation against :func:`scipy.optimize.newton`.
