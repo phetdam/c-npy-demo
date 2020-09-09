@@ -17,7 +17,7 @@ from ..utils import almost_equal, ndarray2vol_obj_args_array
 @pytest.mark.parametrize("method", ["halley", "newton"])
 @pytest.mark.parametrize("guess", [0.5, 0.7, 1]) # default guess is 0.5
 @pytest.mark.parametrize("mult", [1, 10]) # max tested was 1000
-@pytest.mark.parametrize("py_debug", [True])
+@pytest.mark.parametrize("py_debug", [False])
 def test_ntm_imp_vol_vec(edo_ntm_data, hh_ntm_data, rf_stop_defaults, method,
                          guess, n_threads, mult, py_debug):
     """Test ``_imp_vol_vec`` function from ``_ivlib.so`` on near-the-money data.
