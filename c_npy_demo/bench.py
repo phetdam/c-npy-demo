@@ -303,11 +303,11 @@ def echo(*args):
 
 
 _BENCH_EXT_DESC = \
-"""Micro benchmark to compare the decorators in c_npy_demo.utils,
-np_1d_broadcast and np_float64_bcast_1d. Both decorators essentially work by
-converting the args and kwargs passed to a function into 1D numpy arrays, if
-possible, although np_1d_broadcast is a little more general and not limited to
-just converting to float64 numpy arrays.
+"""Benchmark to compare the decorators in c_npy_demo.utils, np_1d_broadcast and
+np_float64_bcast_1d. Both decorators essentially work by converting the args and
+kwargs passed to a function into 1D numpy arrays, if possible, although
+np_1d_broadcast is a little more general and not limited to just converting to
+float64 numpy arrays like np_float64_bcast_1d.
 
 The benchmark will randomly generate nvecs Python lists of length vlen and ncons
 random constants, all taking values in [0, 1), use np_1d_broadcast and
@@ -320,13 +320,12 @@ will also be reported. See the usage for details on the variables mentioned.
 One should see that the C implementation is ~2 times faster than the Python
 implementation, although of course your mileage may vary.
 """
-
 _BENCH_EXT_SEED_HELP = "The seed for random number generation. Defaults to 7."
 _BENCH_EXT_NVECS_HELP = "Vectors to convert to numpy arrays, default 3"
 _BENCH_EXT_NCONS_HELP = "Constants to broadcast to numpy arrays, default 2"
 _BENCH_EXT_VLEN_HELP = "[Broadcast] [v]ector lengths, default 100000"
 _BENCH_EXT_NTRS_HELP = "Number of trials to run, default 5"
-_BENCH_EXT_VERBOSE_HELP = "Specify for verbose output, disabled by default."
+_BENCH_VERBOSE_HELP = "Specify for verbose output, disabled by default."
 
 
 def bench_ext_main(args = None):
@@ -355,7 +354,7 @@ def bench_ext_main(args = None):
     arp.add_argument("-nt", "--ntrs", default = 5, type = p_int,
                      help = _BENCH_EXT_NTRS_HELP)
     arp.add_argument("-v", "--verbose", action = "store_true",
-                     help = _BENCH_EXT_VERBOSE_HELP)
+                     help = _BENCH_VERBOSE_HELP)
     args = arp.parse_args(args = args)
     # extract args for convenience
     seed, nvecs, ncons, vlen, ntrs, verbose = (
@@ -375,7 +374,15 @@ def bench_ext_main(args = None):
     py_eval = timer(np_1d_broadcast(echo))
     c_eval = timer(np_float64_bcast_1d(echo))
     # if verbose, print statement on variables used in the benchmark
-    if verbose == True: pass
+    if verbose == True:
+        # get maximum number of digits contained in one of the variables
+        max_digits = max(list(map(lambda x: len(str(x)),
+                                  (seed, nvecs, ncons, vlen, ntrs))))
+        print(f"seed:                {seed:{max_digits}d}")
+        print(f"number of vectors:   {nvecs:{max_digits}d}")
+        print(f"number of constants: {ncons:{max_digits}d}")
+        print(f"vector length:       {vlen:{max_digits}d}")
+        print(f"number of trials:    {ntrs:{max_digits}d}")
     # call each ntrs times and record timing result
     for i in range(ntrs):
         py_res[i] = py_eval(*ins)
@@ -385,12 +392,27 @@ def bench_ext_main(args = None):
     c_time = min(c_res)
     print(f"best of {ntrs} for {py_eval}: {py_time:.3e} s")
     print(f"best of {ntrs} for {c_eval}: {c_time:.3e} s")
-    print(f"C func is {(py_time / c_time):.5f} times faster the Python func")
+    print(f"C func is {(py_time / c_time):.5f} times faster than Python func")
     # get total time and report it
     print(f"total runtime: {time() - time_a:5f} s")
 
 
-_BENCH_VOL_DESC = ""
+_BENCH_VOL_DESC = \
+"""Benchmark to compare the computation of Black and Bachelier implied vols
+with scipy.optimize.newton and a lightweight C implementation that can compute
+the values for several points in parallel using OpenMP for multithreading.
+
+"""
+_BENCH_VOL_MAX_PTS_HELP = ("Maximum number of points to compute during "
+                           "benchmark. Inputs are duplicated as many times as "
+                           "needed to form a vector with <= max_pts options "
+                           "data to send to solvers. Defaults to 1000000.")
+_BENCH_VOL_X0_HELP = "Initial solver guess, default 0.5"
+_BENCH_VOL_ABS_TOL_HELP = "Absolute solver tolerance, default 1.48e-8"
+_BENCH_VOL_REL_TOL_HELP = "Relative solver tolerance, default 0"
+_BENCH_VOL_MAX_ITER_HELP = "Maximum solver iterations, default 50"
+_BENCH_VOL_MAX_THREADS_HELP = ("Max number of threads C implementation can use,"
+                               " default -1 for all threads on system")
 
 
 def bench_vol_main(args = None):
@@ -401,8 +423,31 @@ def bench_vol_main(args = None):
     :param args: List of string arguments to pass, default ``None``.
     :type args: list, optional
     """
+    # overall routine execution time start
+    time_a = time()
+    # add arguments and parse
     arp = argparse.ArgumentParser(
         prog = "c_npy_demo.bench.vol", description = _BENCH_VOL_DESC,
         formatter_class = argparse.RawDescriptionHelpFormatter
+    )
+    arp.add_argument("-mp", "--max-pts", default = 1000000, type = p_int,
+                     help = _BENCH_VOL_MAX_PTS_HELP)
+    arp.add_argument("-x0", default = 0.5, type = float,
+                     help = _BENCH_VOL_X0_HELP)
+    arp.add_argument("-at", "--abs-tol", default = 1.48e-8, type = float,
+                     help = _BENCH_VOL_ABS_TOL_HELP)
+    arp.add_argument("-rt", "--rel-tol", default = 0, type = float,
+                     help = _BENCH_VOL_REL_TOL_HELP)
+    arp.add_argument("-mi", "--max-iter", default = 50, type = p_int,
+                     help = _BENCH_VOL_MAX_ITER_HELP)
+    arp.add_argument("-mt", "--max-threads", default = -1, type = p_int,
+                     help = _BENCH_VOL_MAX_THREADS_HELP)
+    arp.add_argument("-v", "--verbose", action = "store_true",
+                     help = _BENCH_VERBOSE_HELP)
+    args = arp.parse_args(args = args)
+    # extract args for convenience
+    max_pts, x0, abs_tol, rel_tol, max_iter, max_threads, verbose = (
+        args.max_pts, args.x0, args.abs_tol, args.rel_tol, args.max_iter,
+        args.max_threads, args.verbose
     )
     print("this doesn't do anything yet. oops!")

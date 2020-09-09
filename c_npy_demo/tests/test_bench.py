@@ -5,7 +5,9 @@ import pytest
 from ..bench import bench_ext_main, bench_vol_main
 
 
-@pytest.mark.skip(reason = "already tested; takes a few seconds to run")
+@pytest.mark.skip(reason = ("already tested, takes a while (~40 s) to run, and"
+                            "on travis we will test the script generated "
+                            "automatically by setuptools"))
 @pytest.mark.parametrize("seed", [7])
 @pytest.mark.parametrize("nvecs", [3, 7])
 @pytest.mark.parametrize("ncons", [2, 6])
