@@ -21,9 +21,9 @@ install:
 # build and run tests
 script:
   # script can't be sourced so use new shell
-  - bash travis/build_ext.sh
-  # run tests
-  - pytest
+  - bash travis/build_all.sh
+  # run tests and test setuptools-created scripts after installing package 
+  - bash travis/run_tests.sh
 
 # conditional deployment
 deploy:
