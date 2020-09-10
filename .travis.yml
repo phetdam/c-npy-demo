@@ -26,10 +26,11 @@ script:
   - >
     docker container run -e PLAT=$PLAT -e DOCKER_MNT=$DOCKER_MNT
     -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE bash $DOCKER_MNT/travis/build_dist.sh
+  - ls dist
   # for each python version, create venv on docker, run pytest, and
   - >
     docker container run --rm -e PLAT=$PLAT -e DOCKER_MNT=$DOCKER_MNT
-    -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE bash $DOCKER_MNT/travis/runt_tests.sh
+    -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE bash $DOCKER_MNT/travis/run_tests.sh
 
 # conditionally deploy based on DEPLOY_DRY and DEPLOY_WET tags. note that
 # PYPI_TOKEN and TESTPYPI_TOKEN are defined in travis. skip cleanup.
