@@ -20,9 +20,9 @@ then
     pip3 install --upgrade wheel
     pip3 install --upgrade twine
     # run script to build wheels on manylinux docker image. PLAT, DOCKER_IMAGE,
-    # and DOCKER_MNT are defined in .travis.yml.
+    # and DOCKER_MNT are defined in .travis.yml. use bash (no need for +x)
     docker container run --rm -e PLAT=$PLAT -e DOCKER_MNT=$DOCKER_MNT \
-        -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE $DOCKER_MNT/travis/build_dist.sh
+        -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE bash $DOCKER_MNT/travis/build_dist.sh
     # deploy to test pypi and/or pypi, depending on DEPLOY_DRY or DEPLOY_WET
     if [ -e DEPLOY_DRY ]
     then
