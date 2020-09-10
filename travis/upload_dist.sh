@@ -34,4 +34,6 @@ then
         twine upload --u __token__ -p $TOK_PYPI dist/*
         echo "uploaded to [real] PyPI"
     fi
+else
+    echo "deployment conditions not met. done"
 fi
