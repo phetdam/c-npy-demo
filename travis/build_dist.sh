@@ -14,7 +14,7 @@ build_cp3_wheels() {
     for PY_BIN in /opt/python/cp3*/bin
     do
         # only accept python versions 3.6-3.8
-        if $PY_BIN/python3 | grep "3\.[6-8]\.[0-9]"
+        if $PY_BIN/python3 --version | grep "3\.[6-8]\.[0-9]"
         then
             # build wheel for this python version. first install dependencies from
             # travis/requirements.txt, then run sdist bdist_wheel. this is because
