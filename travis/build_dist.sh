@@ -17,7 +17,7 @@ build_cp3_wheels() {
         # we mounted repository home to DOCKER_MNT.
         $PY_BIN/pip install -r $DOCKER_MNT/travis/requirements.txt
         # note that local Makefile uses python3; is python in manylinux1 image
-        make dist || PYTHON=python && make dist
+        make dist || make dist PYTHON=python
     done
 }
 

@@ -37,7 +37,7 @@ build_ff: $(CDEPS)
 # and build standalone shared object and move into pkg_test. force clean build.
 # currently configured to move built package into directory pkg_test.
 build: clean build_ff
-	$(PYTHON) setup.py build $(SETUP_FLAGS)
+	@$(PYTHON) setup.py build $(SETUP_FLAGS)
 
 # make source and wheel
 dist: build
