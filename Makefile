@@ -28,11 +28,14 @@ clean:
 	@rm -vrf dist
 	@rm -vrf $(TEST_DIR)
 
+# build external _ivlib.so
+build_ff: $(CDEPS)
+	@$(CC) $(CFLAGS) $(CDEPS)
+
 # build np_touch module locally (in ./build) from source files with setup.py
 # and build standalone shared object and move into pkg_test. force clean build.
 # currently configured to move built package into directory pkg_test.
-build: clean $(CDEPS)
-	@$(CC) $(CFLAGS) $(CDEPS)
+build: clean build_ff
 	@$(PYTHON) setup.py build $(SETUP_FLAGS)
 
 # make source and wheel
