@@ -6,7 +6,7 @@
 # exit if command has nonzero exit status
 set -e
 
-# subroutine to build cpython 3 wheels
+# subroutine to build cpython 3 wheels. note we use separate venvs to build,
 build_cp3_wheels() {
     echo "building cpython3 wheels"
     # on the manylinux1 images, python installed in /opt/python/*/bin. see
@@ -16,12 +16,18 @@ build_cp3_wheels() {
         # only accept python versions 3.6-3.8
         if $PY_BIN/python3 --version | grep "3\.[6-8]\.[0-9]"
         then
+            # start virtual environment in home
+            $PY_BIN/python3 -m venv ~/.venv
+            source $HOME/.venv/bin/activate
             # build wheel for this python version. first install dependencies 
             # from travis/requirements.txt, then run sdist bdist_wheel. this is
             # because we mounted repo home to DOCKER_MNT.
             $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt
             # use absolute path for python3
             make dist PYTHON=$PY_BIN/python3
+            # deactivate and remove virtual environment
+            deactivate
+            rm -rf ~/.venv
         else
             echo "no wheel will be built for `$PY_BIN/python3 --version`"
         fi

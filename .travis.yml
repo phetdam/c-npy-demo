@@ -1,5 +1,7 @@
-# using both c and python. different python versions used on docker image.
-language: minimal
+# using both c and python. different python versions used on docker image. need
+# to specify python version in order to use pip3.
+language: python
+python: 3.6
 
 # ubuntu bionic (18.04)
 os: linux

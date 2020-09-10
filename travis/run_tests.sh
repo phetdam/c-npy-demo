@@ -9,8 +9,8 @@ set -e
 run_venv_tests() {
     # directory for python executables
     PY_BIN=$1
-    # create virtual environment and activate it
-    $PY_BIN/python3 -m venv .venv
+    # create virtual environment in ~ and activate it
+    $PY_BIN/python3 -m venv ~/.venv
     source .venv/bin/activate
     echo "running `python3 --version` tests and benchmarks"
     # install requirements from requirements.txt and generated wheel
@@ -24,7 +24,7 @@ run_venv_tests() {
     c_npy_demo.bench.vol -v
     # deactivate and delete virtual environment
     deactivate
-    rm -rvf .venv
+    rm -rf ~/.venv
 }
 
 
@@ -41,10 +41,10 @@ then
     echo "should not be run on travis but on manylinux docker image. exiting"
 # else for python versions 3.6 to 3.8, run pytest on the built wheels
 else
-    # cd to $HOME so pytest cannot read pytest.ini
-    cd $HOME
+    # cd to home so pytest cannot read pytest.ini
+    cd ~
     # for python versions 3.6-3.8 (control using regex)
-    for PY_BIN in /opt/python/cp3*/bin:
+    for PY_BIN in /opt/python/cp3*/bin
     do
         if $PY_BIN/python3 --version | grep "3\.[6-8]\.[0-9]"
         then
