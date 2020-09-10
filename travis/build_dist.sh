@@ -36,7 +36,7 @@ repair_cp3_wheels() {
             echo "skipping non-platform wheel $PY_WHL"
         # else repair wheel with auditwheel
         else
-            echo "repairing $PY_WHL"
+            echo "repairing wheel $PY_WHL"
             auditwheel repair $PY_WHL --plat $PLAT -w $DIST_DIR
         fi
     done
