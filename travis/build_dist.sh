@@ -15,7 +15,7 @@ build_cp3_wheels() {
         # build wheel for this python version. first install dependencies from
         # travis/requirements.txt, then run sdist bdist_wheel. this is because
         # we mounted repository home to DOCKER_MNT.
-        $PY_BIN/pip install -f $DOCKER_MNT/travis/requirements.txt
+        $PY_BIN/pip install -r $DOCKER_MNT/travis/requirements.txt
         #"${PY_BIN}/python" $DOCKER_MNT/setup.py sdist bdist_wheel
         make dist
     done
