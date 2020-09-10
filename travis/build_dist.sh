@@ -16,8 +16,7 @@ build_cp3_wheels() {
         # travis/requirements.txt, then run sdist bdist_wheel. this is because
         # we mounted repository home to DOCKER_MNT.
         $PY_BIN/pip install -r $DOCKER_MNT/travis/requirements.txt
-        #"${PY_BIN}/python" $DOCKER_MNT/setup.py sdist bdist_wheel
-        make -f $DOCKER_MNT/Makefile dist
+        make dist
     done
 }
 
@@ -53,6 +52,8 @@ then
     echo "should not be run on travis but on manylinux docker image. exiting"
 # else run the wheel building and install process on manylinux1 docker image
 else
+    # cd to $DOCKER_MNT for convenience (can use relative paths, etc.)
+    cd $DOCKER_MNT
     # build wheels using Makefile
     build_cp3_wheels
     # repair wheels using auditwheel in manylinux1 image
