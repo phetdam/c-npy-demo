@@ -49,6 +49,7 @@ then
     echo "variable DOCKER_MNT not defined; exiting"
 # also exit if we are on travis
 elif [ $TRAVIS ]
+then
     echo "should not be run on travis but on manylinux docker image. exiting"
 # else run the wheel building and install process on manylinux1 docker image
 else
