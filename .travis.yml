@@ -1,10 +1,5 @@
-language: python
-
-# test a few python versions
-python:
-  - 3.6
-  - 3.7
-  - 3.8
+# using both c and python. different python versions used on docker image.
+language: minimal
 
 # ubuntu bionic (18.04)
 os: linux
@@ -19,23 +14,26 @@ env:
     - DOCKER_IMAGE=quay.io/pypa/manylinux1_i686 PLAT=manylinux1_i686
 
 # pre-install updates
-before_install: bash travis/before_install.sh
+#before_install: bash travis/before_install.sh
 
-# require numpy, scipy, and manylinux1 docker image (per env line)
-install:
-  - pip3 install -r travis/requirements.txt
-  - docker pull $DOCKER_IMAGE
+# require manylinux1 docker image
+install: docker pull $DOCKER_IMAGE
 
-# build and run tests
+# build on manylinux1 docker images and run tests
 script:
-  # script can't be sourced so use new shell. builds locally on travis.
-  - bash travis/build_local.sh
-  # run tests and test setuptools-created scripts after installing package 
-  - bash travis/run_tests.sh
+  # run script to build wheels on manylinux docker image. note we use bash so
+  # that we don't need to make the script executable.
+  - >
+    docker container run -e PLAT=$PLAT -e DOCKER_MNT=$DOCKER_MNT
+    -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE bash $DOCKER_MNT/travis/build_dist.sh
+  # for each python version, create venv on docker, run pytest, and
+  - >
+    docker container run --rm -e PLAT=$PLAT -e DOCKER_MNT=$DOCKER_MNT
+    -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE bash $DOCKER_MNT/travis/runt_tests.sh
 
 # conditionally deploy based on DEPLOY_DRY and DEPLOY_WET tags. note that
-# PYPI_TOKEN and TESTPYPI_TOKEN are defined in travis. will build source and
-# wheels on manylinux1 docker image
+# PYPI_TOKEN and TESTPYPI_TOKEN are defined in travis. skip cleanup.
 deploy:
   provider: script
   script: bash travis/upload_dist.sh
+  skip_cleanup: true

@@ -18,11 +18,10 @@ build_cp3_wheels() {
         then
             # build wheel for this python version. first install dependencies 
             # from travis/requirements.txt, then run sdist bdist_wheel. this is
-            # because we mounted repo home to DOCKER_MNT. use only binary dist.
-            $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt \
-                --only-binary :all:
-            # if can't find python3 use absolute path
-            make dist || make dist PYTHON=$PY_BIN/python3
+            # because we mounted repo home to DOCKER_MNT.
+            $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt
+            # use absolute path for python3
+            make dist PYTHON=$PY_BIN/python3
         else
             echo "no wheel will be built for `$PY_BIN/python3 --version`"
         fi
@@ -69,20 +68,5 @@ else
     build_cp3_wheels
     # repair wheels using auditwheel in manylinux1 image
     repair_cp3_wheels $DOCKER_MNT/dist
-    # for each python version, install from wheel and run benchmarks
-    for PY_BIN in /opt/python/cp3*/bin
-    do
-        # only accept python versions 3.6-3.8
-        if $PY_BIN/python3 --version | grep "3\.[6-8]\.[0-9]"
-        then
-            $PY_BIN/pip install c_npy_demo --no-index --only-binary :all: \
-                -f $DOCKER_MNT/dist
-            cd $HOME
-            # run extension and vol benchmarks, verbosely (with defaults)
-            c_npy_demo.bench.ext -v
-            c_npy_demo.bench.vol -v
-        else
-            echo "no wheel will be built for `$PY_BIN/python3 --version`"
-        fi
-    done
+    echo "wheel building and repair has been completed"
 fi
