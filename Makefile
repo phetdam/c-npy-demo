@@ -9,10 +9,11 @@ _IVLIB_DIR  = $(PKG_NAME)/_ivlib
 CC          = gcc
 # for building shared object. this is deprecated; we will use Extension later
 # to build the shared object (although it will not be a Python module)
-CDEPS       = $(addprefix $(_IVLIB_DIR)/,gauss.c euro_options.c root_find.c)
-CFLAGS      = -o $(PKG_NAME)/_ivlib.so -shared -fPIC -fopenmp -lgomp -std=gnu11
-PYTHON      = python3
-SETUP_FLAGS = --build-lib $(TEST_DIR)
+CDEPS        = $(addprefix $(_IVLIB_DIR)/,gauss.c euro_options.c root_find.c)
+CFLAGS       = -o $(PKG_NAME)/_ivlib.so -shared -fPIC -fopenmp -lgomp -std=gnu11
+# need this since on failure, we set PYTHON to plain python
+PYTHON      ?= python3
+SETUP_FLAGS  = --build-lib $(TEST_DIR)
 
 # phony targets
 .PHONY: build clean dummy dist
@@ -36,7 +37,7 @@ build_ff: $(CDEPS)
 # and build standalone shared object and move into pkg_test. force clean build.
 # currently configured to move built package into directory pkg_test.
 build: clean build_ff
-	@$(PYTHON) setup.py build $(SETUP_FLAGS)
+	$(PYTHON) setup.py build $(SETUP_FLAGS)
 
 # make source and wheel
 dist: build

@@ -16,7 +16,8 @@ build_cp3_wheels() {
         # travis/requirements.txt, then run sdist bdist_wheel. this is because
         # we mounted repository home to DOCKER_MNT.
         $PY_BIN/pip install -r $DOCKER_MNT/travis/requirements.txt
-        make dist
+        # note that local Makefile uses python3; is python in manylinux1 image
+        make dist || PYTHON=python && make dist
     done
 }
 
