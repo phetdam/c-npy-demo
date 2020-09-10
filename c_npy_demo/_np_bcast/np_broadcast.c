@@ -71,9 +71,17 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
     if (PyObject_is_numeric(args[_i])) {
       PyObject *tup;
       tup = PyTuple_New(1);
+      Py_INCREF(args[_i]);
       PyTuple_SetItem(tup, 0, args[_i]);
       // tuple has ownership of old scalar (stole reference)
       args[_i] = tup;
+    }
+    /**
+     * else increment reference count so it doesn't get freed when we return
+     * a numpy array reference from the existing object
+     */
+    else {
+      Py_INCREF(args[_i]);
     }
     /**
      * convert args[_i] to ndarray and check for conversion error. note that we
@@ -81,16 +89,23 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
      * only borrowing the reference anyways. on success, PyArray_FROM_OTF will
      * return a new ndarray, so we have to Py_DECREF on error.
      */
+    PyObject *orig;
+    orig = args[_i];
     args[_i] = (PyObject *) PyArray_FROM_OTF(args[_i], NPY_FLOAT64,
       NPY_ARRAY_IN_ARRAY);
     // don't set exception; let numpy function set the error indicator
     if (args[_i] == NULL) {
+      Py_DECREF(orig);
       return NULL;
     }
-    // check that number of dimensions is 1
+    /**
+     * check that number of dimensions is 1. note we have PyArray_XDECREF to
+     * decrement reference count of object underlying ndarray
+     */
     if (PyArray_NDIM(args[_i]) != 1) {
       PyErr_Format(PyExc_ValueError, "Positional arg %d cannot be converted"
         " to 1D numpy.ndarray\n", _i + 1);
+      PyArray_XDECREF(args[_i]);
       Py_DECREF(args[_i]);
       return NULL;
     }
@@ -140,7 +155,8 @@ PyObject **np_float64_bcast_1d(PyObject **args, Py_ssize_t nargs,
     else {
       PyErr_Format(PyExc_ValueError, "Could not broadcast (%ld,) to (%ld,)",
         (long) local_len, (long) shared_len);
-      // the objects in the ndarray are borrowed, so no PyArray_XDECREF.
+      // need to PyArray_XDECREF since we Py_INCREF the underlying object
+      PyArray_XDECREF(args[_i]);
       Py_DECREF(args[_i]);
       return NULL;
     }
@@ -273,6 +289,9 @@ PyObject *np_float64_bcast_1d_ext(PyObject *self, PyObject *args) {
     new_objs = np_float64_bcast_1d(objs, n_objs, axis);
     // on error, free memory, and return (np_float64_bcast_1d raised exception)
     if (new_objs == NULL) {
+      // Py_DECREF both _keys and _vals (they are new references)
+      Py_DECREF(_keys);
+      Py_DECREF(_vals);
       free(objs);
       free(keys);
       return NULL;
