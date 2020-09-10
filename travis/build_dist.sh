@@ -17,7 +17,7 @@ build_cp3_wheels() {
         # we mounted repository home to DOCKER_MNT.
         $PY_BIN/pip install -r $DOCKER_MNT/travis/requirements.txt
         #"${PY_BIN}/python" $DOCKER_MNT/setup.py sdist bdist_wheel
-        make dist
+        make -f $DOCKER_MNT/Makefile dist
     done
 }
 
