@@ -12,7 +12,7 @@ if ! [ $TRAVIS ]
 then
     echo "WARNING: script intended to be run on Travis CI. exiting"
 # if on travis, then check if we can deploy
-elif [ -e DEPLOY_DRY || -e DEPLOY_WET ]
+elif [ -e DEPLOY_DRY ] || [ -e DEPLOY_WET ]
 then
     echo "deployment sequence started"
     # upgrade setuptools, wheel, and twine
