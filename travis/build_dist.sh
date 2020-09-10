@@ -13,13 +13,19 @@ build_cp3_wheels() {
     # https://github.com/pypa/manylinux README.md for more details.
     for PY_BIN in /opt/python/cp3*/bin
     do
-        # build wheel for this python version. first install dependencies from
-        # travis/requirements.txt, then run sdist bdist_wheel. this is because
-        # we mounted repository home to DOCKER_MNT. use only binary dist.
-        $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt \
-            --only-binary :all:
-        # if can't find python3 use absolute path
-        make dist || make dist PYTHON=$PY_BIN/python3
+        # only accept python versions 3.6-3.8
+        if $PY_BIN/python3 | grep "3\.[6-8]\.[0-9]"
+        then
+            # build wheel for this python version. first install dependencies from
+            # travis/requirements.txt, then run sdist bdist_wheel. this is because
+            # we mounted repository home to DOCKER_MNT. use only binary dist.
+            $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt \
+                --only-binary :all:
+            # if can't find python3 use absolute path
+            make dist || make dist PYTHON=$PY_BIN/python3
+        else
+            echo "no wheel will be built for `$PY_BIN/python3 --version`"
+        fi
     done
 }
 
