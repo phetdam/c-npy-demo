@@ -32,7 +32,10 @@ script:
   - bash travis/build_local.sh
   # run tests and test setuptools-created scripts after installing package 
   - bash travis/run_tests.sh
-  # conditionally deploy based on DEPLOY_DRY and DEPLOY_WET tags. note that
-  # PYPI_TOKEN and TESTPYPI_TOKEN are defined in travis. will build source and
-  # wheels on manylinux1 docker image
-  - bash travis/upload_dist.sh
+
+# conditionally deploy based on DEPLOY_DRY and DEPLOY_WET tags. note that
+# PYPI_TOKEN and TESTPYPI_TOKEN are defined in travis. will build source and
+# wheels on manylinux1 docker image
+deploy:
+  provider: script
+  script: bash travis/upload_dist.sh
