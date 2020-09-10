@@ -10,7 +10,7 @@ CC          = gcc
 # for building shared object. this is deprecated; we will use Extension later
 # to build the shared object (although it will not be a Python module)
 CDEPS       = $(addprefix $(_IVLIB_DIR)/,gauss.c euro_options.c root_find.c)
-CFLAGS      = -o $(PKG_NAME)/_ivlib.so -shared -fPIC -fopenmp -lgomp
+CFLAGS      = -o $(PKG_NAME)/_ivlib.so -shared -fPIC -fopenmp -lgomp -std=gnu11
 PYTHON      = python3
 SETUP_FLAGS = --build-lib $(TEST_DIR)
 
