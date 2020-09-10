@@ -8,6 +8,7 @@ set -e
 
 # subroutine to build cpython 3 wheels
 build_cp3_wheels() {
+    echo "building cpython3 wheels"
     # on the manylinux1 images, python installed in /opt/python/*/bin. see
     # https://github.com/pypa/manylinux README.md for more details.
     for PY_BIN in /opt/python/cp3*/bin
@@ -23,6 +24,7 @@ build_cp3_wheels() {
 
 # subroutine to repair wheels using auditwheel (installed on manylinux1 images)
 repair_cp3_wheels() {
+    echo "repairing cpython3 wheels"
     # take first argument as name of distribution directory
     DIST_DIR=$1
     # for each of the wheels in DIST_DIR, repair
@@ -34,6 +36,7 @@ repair_cp3_wheels() {
             echo "skipping non-platform wheel $PY_WHL"
         # else repair wheel with auditwheel
         else
+            echo "repairing $PY_WHL"
             auditwheel repair $PY_WHL --plat $PLAT -w $DIST_DIR
         fi
     done
