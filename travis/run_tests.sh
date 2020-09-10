@@ -20,7 +20,7 @@ run_tests() {
 # check if on travis or not
 if ! [ $TRAVIS ]
 then
-    echo "WARNING: script intended to be run on Travis CI"
+    echo "WARNING: script intended to be run on Travis CI. exiting"
 else
     # check that pkg_test directory exists; if not print error and exit
     if ! [ -d pkg_test ]
