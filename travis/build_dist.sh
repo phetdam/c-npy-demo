@@ -16,8 +16,8 @@ build_cp3_wheels() {
         # travis/requirements.txt, then run sdist bdist_wheel. this is because
         # we mounted repository home to DOCKER_MNT.
         $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt
-        # echo python version
-        $PY_BIN/python3 --version
+        # echo gcc version
+        gcc --version
         # if can't find python3 use absolute path
         make dist || make dist PYTHON=$PY_BIN/python3
     done
