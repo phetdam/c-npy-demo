@@ -16,11 +16,13 @@ def _get_ext_modules():
     
     :rtype: list
     """
-    # use get_include to get numpy include directory
+    # use get_include to get numpy include directory + add -std=gnu11 so that
+    # the extension will build on older distros with old gcc like 4.8.2
     _np_bcast = Extension(name = "_np_bcast",
                           sources = [_NP_BCAST_SRC_PATH + "/np_broadcast.c",
                                      _NP_BCAST_SRC_PATH + "/_modinit.c"],
-                          include_dirs = [get_include()])
+                          include_dirs = [get_include()],
+                          extra_compile_args = ["-std=gnu11"])
     return [_np_bcast]
 
 
