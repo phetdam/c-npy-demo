@@ -1,6 +1,9 @@
 #!/usr/bin/bash
 # upgrade required packages. use in before_install in .travis.yml
 
+# exit if command has non-zero exit status
+set -e
+
 # before install function
 before_install() {
     # install newest gcc
@@ -13,6 +16,7 @@ before_install() {
     pip3 install --upgrade setuptools
     pip3 install --upgrade wheel
 }
+
 
 # if not on travis ci, exit
 if ! [ $TRAVIS ]

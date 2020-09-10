@@ -2,6 +2,9 @@
 # run tests on built package using pytest, install into root with pip3, and then
 # run the setuptools-generated scripts verbosely as test.
 
+# exit if command has non-zero exit status
+set -e
+
 # test built package with pytest and then test setuptools-generated benchmarks
 run_tests() {
     # run test suite; tests for setuptools-generated scripts are skipped
@@ -12,6 +15,7 @@ run_tests() {
     c_npy_demo.bench.ext -v
     c_npy_demo.bench.vol -v
 }
+
 
 # check if on travis or not
 if ! [ $TRAVIS ]
