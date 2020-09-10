@@ -23,8 +23,9 @@ build_cp3_wheels() {
             # from travis/requirements.txt, then run sdist bdist_wheel. this is
             # because we mounted repo home to DOCKER_MNT.
             $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt
-            # use absolute path for python3
-            make dist PYTHON=$PY_BIN/python3
+            # use absolute path for python3 and absolute dist path
+            make dist PYTHON=$PY_BIN/python3 \
+                DIST_FLAGS="--dist-dir $DOCKER_MNT/dist"
             # deactivate and remove virtual environment
             deactivate
             rm -rf ~/.venv

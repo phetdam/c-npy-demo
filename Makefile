@@ -14,7 +14,9 @@ CDEPS        = $(addprefix $(_IVLIB_DIR)/,gauss.c euro_options.c root_find.c)
 CFLAGS       = -o $(PKG_NAME)/_ivlib.so -shared -fPIC -fopenmp -lgomp -std=gnu11
 # need this since on failure, we set PYTHON to plain python
 PYTHON      ?= python3
-SETUP_FLAGS  = --build-lib $(TEST_DIR)
+BUILD_FLAGS  = --build-lib $(TEST_DIR)
+# directory to save distributions to; use absolute path on docker
+DIST_FLAGS   ?= --dist-dir ./dist
 
 # phony targets
 .PHONY: build clean dummy dist
@@ -38,11 +40,11 @@ build_ff: $(CDEPS)
 # and build standalone shared object and move into pkg_test. force clean build.
 # currently configured to move built package into directory pkg_test.
 build: clean build_ff
-	@$(PYTHON) setup.py build $(SETUP_FLAGS)
+	@$(PYTHON) setup.py build $(BUILD_FLAGS)
 
 # make source and wheel
 dist: build
-	@$(PYTHON) setup.py sdist bdist_wheel	
+	@$(PYTHON) setup.py sdist bdist_wheel $(DIST_FLAGS)
 
 # perform root install by default (intended for use with venv)
 install: install_root

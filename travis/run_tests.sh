@@ -15,7 +15,7 @@ run_venv_tests() {
     echo "running `python3 --version` tests and benchmarks"
     # install requirements from requirements.txt and generated wheel
     $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt
-    $PY_BIN/pip3 install c_npy_demo --no-index --only-binary :all: \
+    $PY_BIN/pip3 install c-npy-demo --no-index --only-binary :all: \
         -f $DOCKER_MNT/dist
     # run test suite; tests for setuptools-generated scripts are skipped
     pytest -rsxXP $DOCKER_MNT/c_npy_demo/tests
