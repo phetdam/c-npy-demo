@@ -17,7 +17,8 @@ run_venv_tests() {
     # install requirements from requirements.txt
     $PY_BIN/pip3 install -r $DOCKER_MNT/travis/requirements.txt
     # get last major + minor python version number
-    PY_VER=`$PY_BIN/python3 --version | cut -c 1-3 | sed s/"\."//`
+    PY_VER=`$PY_BIN/python3 --version | sed s/"Python "//`
+    PY_VER=`echo $PY_VER | cut -c 1-3 | sed s/"\."//`
     # try to find the wheel; if it can't be found, skip
     if find $WHEEL_DIR/c_npy_demo-*$PY_VER-$PY_VER*-manylinux*.whl
     then
