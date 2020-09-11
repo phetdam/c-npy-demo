@@ -22,12 +22,12 @@ then
     # deploy to test pypi and/or pypi, depending on DEPLOY_DRY or DEPLOY_WET
     if [ -e DEPLOY_DRY ]
     then
-        twine upload -r testpypi -u __token__ -p $TOK_TEST dist/*
+        twine upload -r testpypi -u __token__ -p $TOK_TEST dist/*manylinux*.whl
         echo "uploaded to Test PyPI"
     fi
     if [ -e DEPLOY_WET ]
     then
-        twine upload --u __token__ -p $TOK_PYPI dist/*
+        twine upload --u __token__ -p $TOK_PYPI dist/*manylinux*.whl
         echo "uploaded to [real] PyPI"
     fi
 else
