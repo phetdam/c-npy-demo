@@ -39,7 +39,7 @@ build_ff: $(CDEPS)
 # build np_touch module locally (in ./build) from source files with setup.py
 # and build standalone shared object and move into pkg_test. force clean build.
 # currently configured to move built package into directory pkg_test.
-build: clean build_ff
+build: build_ff
 	@$(PYTHON) setup.py build $(BUILD_FLAGS)
 
 # make source and wheel
