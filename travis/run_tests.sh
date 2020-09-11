@@ -33,13 +33,11 @@ run_venv_tests() {
         PY_WHL_BASE=`$PY_BIN/pip3 show c-npy-demo | grep "Location:"`
         PY_WHL_BASE=`echo $PY_WHL_BASE | sed s/"Location: "//`
         # note that manylinux image does not have PATH properly configured, so
-        # we need to run pytest as a module. (temp fix until we figure out
-        # where the files are installed in venv)
-        ls $PY_WHL_BASE
-        $PY_BIN/pytest -rsxXP $DOCKER_MNT/pkg_test/c_npy_demo/tests
+        # we need to run pytest as a module.
+        $PY_BIN/pytest -rsxXP $PY_WHL_BASE/c_npy_demo/tests
         # run extension and vol benchmarks, verbosely (with defaults)
-        c_npy_demo.bench.ext -v
-        c_npy_demo.bench.vol -v
+        $PY_BIN/c_npy_demo.bench.ext -v
+        $PY_BIN/c_npy_demo.bench.vol -v
     else
         echo "couldn't find `$PY_BIN/python3 --version` manylinux wheel"
     fi
