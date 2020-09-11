@@ -15,8 +15,8 @@ env:
     - DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64 PLAT=manylinux1_x86_64
     - DOCKER_IMAGE=quay.io/pypa/manylinux1_i686 PLAT=manylinux1_i686
 
-# pre-install updates
-#before_install: bash travis/before_install.sh
+# pre-install is just updating of pip
+before_install: pip3 install --upgrade pip
 
 # require manylinux1 docker image
 install: docker pull $DOCKER_IMAGE

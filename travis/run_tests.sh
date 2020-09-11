@@ -35,7 +35,8 @@ run_venv_tests() {
         # note that manylinux image does not have PATH properly configured, so
         # we need to run pytest as a module. (temp fix until we figure out
         # where the files are installed in venv)
-        $PY_BIN/pytest -rsxXP $PY_WHL_BASE/c-npy-demo/tests
+        ls $PY_WHL_BASE
+        $PY_BIN/pytest -rsxXP $DOCKER_MNT/pkg_test/c_npy_demo/tests
         # run extension and vol benchmarks, verbosely (with defaults)
         c_npy_demo.bench.ext -v
         c_npy_demo.bench.vol -v
