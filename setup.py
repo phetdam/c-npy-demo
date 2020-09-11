@@ -66,7 +66,7 @@ def _setup():
                    ".bench:bench_vol_main")
               ]
           },
-          install_requires = ["numpy>=1.15"],
+          install_requires = ["numpy>=1.15", "scipy>=1.4"],
           ext_package = _PACKAGE_NAME,
           ext_modules = _get_ext_modules()
     )
