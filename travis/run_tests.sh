@@ -21,7 +21,7 @@ run_venv_tests() {
     PY_VER=`$PY_BIN/python3 --version | sed s/"Python "//`
     PY_VER=`echo $PY_VER | cut -c 1-3 | sed s/"\."//`
     # try to find the wheel; if it can't be found, skip
-    if find $WHEEL_DIR/c_npy_demo-*$PY_VER-$PY_VER*-manylinux*.whl
+    if find $WHEEL_DIR/c_npy_demo-*cp$PY_VER-cp$PY_VER*-manylinux*.whl
     then
         # get the name of the wheel
         PY_WHL=`find $WHEEL_DIR/c_npy_demo-*cp$PY_VER-cp$PY_VER*-manylinux*.whl`
