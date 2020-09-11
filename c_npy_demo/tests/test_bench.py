@@ -37,10 +37,10 @@ def test_bench_ext(seed, nvecs, ncons, vlen, ntrs):
 def test_bench_vol():
     """Run :func:`~c_npy_demo.bench.bench_vol_main` verbosely with args.
     
-    Doesn't do anything interesting yet.
+    Doesn't do anything interesting yet. Uses dummy args.
     """
     # argument string
     #arg_str = f""
     # run bench_vol_main with specified arguments
     #bench_vol_main(arg_str.split())
-    bench_vol_main()
+    bench_vol_main(args = "-v".split())
