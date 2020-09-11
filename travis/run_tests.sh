@@ -29,12 +29,11 @@ run_venv_tests() {
         # install using pip3 directly from the wheel
         $PY_BIN/pip3 -v install $PY_WHL
         # run test suite; tests for setuptools-generated scripts are skipped.
-        echo $PYTHONPATH
-        echo $PATH
+        $PY_BIN/pip3 show c-npy-demo
         # note that manylinux image does not have PATH properly configured, so
         # we need to run pytest as a module. (temp fix until we figure out
         # where the files are installed in venv)
-        pytest -rsxXP $DOCKER_MNT/pkg_test/c_npy_demo/tests
+        $PY_BIN/pytest -rsxXP $DOCKER_MNT/pkg_test/c_npy_demo/tests
         # run extension and vol benchmarks, verbosely (with defaults)
         c_npy_demo.bench.ext -v
         c_npy_demo.bench.vol -v
