@@ -49,7 +49,8 @@ There is a small test suite that can be run with pytest__ after installation.
 Installation
 ------------
 
-To be added.
+From source
+~~~~~~~~~~~
 
 Building from this (unstable) repo will probably only work on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
@@ -59,6 +60,17 @@ implementation is included [#]_. For example, I have ``libgomp.so.1.0.0`` in
 ``/usr/lib/x86_64-linux-gnu/``, with appropriate symbolic links.
 
 .. [#] Fun exercise: Find where I have (sparingly) used OpenMP directives.
+
+From PyPI
+~~~~~~~~~
+
+Although this package is not on PyPI (yet), I have successfully built
+``manylinux1`` wheels using Travis CI on the ``manylinux1`` Docker images
+provided by PyPA, of which more information can be found at the
+`manylinux GitHub`__. In the near future, for those on [WSL] Linux distros, it
+should be possible to install by downloading the ``manylinux1`` wheel from PyPI.
+
+.. __: https://github.com/pypa/manylinux
 
 Contents
 --------

@@ -35,7 +35,7 @@ script:
     -v `pwd`:$DOCKER_MNT $DOCKER_IMAGE bash $DOCKER_MNT/travis/run_tests.sh
 
 # conditionally deploy based on DEPLOY_DRY and DEPLOY_WET tags. note that
-# PYPI_TOKEN and TESTPYPI_TOKEN are defined in travis. skip cleanup.
+# TOK_TEST and TOK_PYPI are defined in travis. skip cleanup.
 deploy:
   provider: script
   script: bash travis/upload_dist.sh
