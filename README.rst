@@ -67,8 +67,7 @@ From PyPI
 Although this package is not on PyPI (yet), I have successfully built
 ``manylinux1`` wheels using Travis CI on the ``manylinux1`` Docker images
 provided by PyPA, of which more information can be found at the
-`manylinux GitHub`__. In the near future, for those on [WSL] Linux distros, it
-should be possible to install by downloading the ``manylinux1`` wheel from PyPI.
+`manylinux GitHub`__.
 
 .. __: https://github.com/pypa/manylinux
 
