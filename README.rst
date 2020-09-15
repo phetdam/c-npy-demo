@@ -3,9 +3,9 @@
 c_npy_demo
 ============
 
-.. image:: https://img.shields.io/travis/phetdam/c_npy_demo?logo=travis
-   :target: https://travis-ci.org/github/phetdam/c_npy_demo
-   :alt: Travis (.org)
+.. image:: https://img.shields.io/travis/com/phetdam/c_npy_demo?logo=travis
+   :target: https://travis-ci.com/github/phetdam/c_npy_demo
+   :alt: Travis (.com)
 
 A demo Python package illustrating how to combine a compiled Python C extension,
 foreign compiled C code, ctypes__, and the NumPy and Python C APIs. I personally
