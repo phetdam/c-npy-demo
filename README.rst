@@ -7,7 +7,9 @@ c_npy_demo
    :target: https://travis-ci.com/github/phetdam/c_npy_demo
    :alt: Travis (.com)
 
-.. note::
+.. sometimes image doesn't display if there is indented block beneath directive
+
+   Note:
 
    CI/build/deploy workflow is being migrated to GitHub actions after the
    changes made to `Travis CI's pricing plans`__.
