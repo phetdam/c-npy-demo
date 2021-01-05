@@ -7,7 +7,8 @@ c_npy_demo
    :target: https://travis-ci.com/github/phetdam/c_npy_demo
    :alt: Travis (.com)
 
-.. sometimes image doesn't display if there is indented block beneath directive
+*We should forget about small efficiencies, say about 97% of the time: premature
+optimization is the root of all evil* [#]_
 
    Note:
 
@@ -35,6 +36,8 @@ versus iterating through the prices in Python and using ``ctypes`` to call the C
 function for each price [#]_.
 
 There is a small test suite that can be run with pytest__ after installation.
+
+.. [#] Attributed to Sir Tony Hoare, popularized by Donald Knuth.
 
 .. [#] Other options could be the use of ctypes, Cython__ or numba__.
 
