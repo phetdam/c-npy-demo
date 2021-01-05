@@ -7,6 +7,11 @@ c_npy_demo
    :target: https://travis-ci.com/github/phetdam/c_npy_demo
    :alt: Travis (.com)
 
+.. note::
+
+   CI/build/deploy workflow is being migrated to GitHub actions after the
+   changes made to `Travis CI's pricing plans`__.
+
 A demo Python package illustrating how to combine a compiled Python C extension,
 foreign compiled C code, ctypes__, and the NumPy and Python C APIs. I personally
 struggled to figure out how to integrate these components together through a
@@ -34,6 +39,9 @@ There is a small test suite that can be run with pytest__ after installation.
 .. [#] This does not exist yet.
 
 .. [#] Should include a demo of how multithreading helps with large inputs.
+
+.. __: https://www.jeffgeerling.com/blog/2020/travis-cis-new-pricing-plan-threw-
+   wrench-my-open-source-works
 
 .. __: https://docs.python.org/3/library/ctypes.html
 
