@@ -36,7 +36,7 @@ clean:
 	@rm -vrf dist
 	@rm -vrf $(TEST_DIR)
 
-# build external _ivlib.so from required C files
+# build external _ivlib.so from required C files (ff -> foreign function)
 build_ff: $(CDEPS)
 	@$(CC) $(CFLAGS) $(CDEPS)
 
