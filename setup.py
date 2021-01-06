@@ -50,7 +50,7 @@ def _setup():
         author = "Derek Huang",
         author_email = "djh458@stern.nyu.edu",
         license = "MIT",
-        url = "https://github.com/phetdam/c_numpy_demo",
+        url = "https://github.com/phetdam/c_npy_demo",
         classifiers = [
             "License :: OSI Approved :: MIT License",
             "Operating System :: POSIX :: Linux",
@@ -59,7 +59,7 @@ def _setup():
             "Programming Language :: Python :: 3.8"
         ],
         project_urls = {
-            "Source": "https://github.com/phetdam/c_numpy_demo"
+            "Source": "https://github.com/phetdam/c_npy_demo"
         },
         python_requires = ">=3.6",
         packages = [_PACKAGE_NAME, _PACKAGE_NAME + ".tests"],
