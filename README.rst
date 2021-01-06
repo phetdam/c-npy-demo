@@ -91,6 +91,14 @@ TBA. Currently looks like some pure Python code, ``pytest`` test suite,
 demo module to run benchmarks, separate C shared library for implied volatility
 calculations, and a Python extension module written in C.
 
+Documentation
+-------------
+
+In progress, and will be eventually be hosted on `Read the Docs`__. For now,
+the ``doc`` directory probably only has ``conf.py`` and ``index.rst``.
+
+.. __: https://readthedocs.org/
+
 Lessons
 -------
 

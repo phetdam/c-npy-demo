@@ -1,1 +1,1 @@
-__doc__ = "Top-level ``c_numpy_demo`` ``__init__.py``."
+__doc__ = "Top-level ``c_npy_demo`` ``__init__.py``."

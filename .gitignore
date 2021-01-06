@@ -6,3 +6,4 @@
 **/*.so
 /pkg_test/*
 /.vscode
+/doc/_build/*
