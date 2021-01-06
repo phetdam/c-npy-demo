@@ -1,8 +1,12 @@
-__doc__ = "Utilities for the ``c_numpy_demo`` package."
+__doc__ = """Utilities for the ``c_npy_demo`` package.
+
+These utilities are for internal use, but may be part of the public API.
+"""
 
 import datetime
 import numpy as np
 
+# pylint: disable=relative-beyond-top-level
 from .ivlib import vol_obj_args
         
     
@@ -10,7 +14,7 @@ def options_csv_to_ndarray(fname):
     """Converts CSV file of European options data into :class:`numpy.ndarray`.
     
     Array type is :class:`numpy.float64`. The CSV file format must have the
-    headers ``ccode``,  ``opt_price``, ``fut_price``, ``strike``, ``dfactor``,
+    headers ``ccode``, ``opt_price``, ``fut_price``, ``strike``, ``dfactor``,
     ``call_put``, ``opt_exp``, ``fut_exp``, ``rec_date``, in that order. The
     first column must be a string Bloomberg contract code, ex. EDZ22, the next
     4 columns must contain floating point values, ``call_put`` must contain
@@ -20,7 +24,6 @@ def options_csv_to_ndarray(fname):
     
     :param fname: Name of the CSV file to convert
     :type fname: str
-    
     :returns: A :class:`numpy.ndarray` with shape ``(n, 6)``, where ``n`` is the
         number of data points in the CSV file. All elements should be of type
         :class:`numpy.float64`.
@@ -28,8 +31,9 @@ def options_csv_to_ndarray(fname):
     """
     # read as ndarray of type string. first row (contract codes) is for
     # bookkeeping and is not needed, so drop it.
-    data = np.genfromtxt(fname, delimiter = ",", dtype = str,
-                         skip_header = 1)[:, 1:]
+    data = np.genfromtxt(
+        fname, delimiter = ",", dtype = str, skip_header = 1
+    )[:, 1:]
     # record number of data samples
     n_pts = data.shape[0]
     # yyyy-mm-dd str to date lambda
@@ -42,13 +46,18 @@ def options_csv_to_ndarray(fname):
     opt_exps = np.array(list(map(Ymd2date, data[:, -3])))
     rec_dates = np.array(list(map(Ymd2date, data[:, -1])))
     # get time to maturity in years, use 365. reshape into column
-    ttms = np.array(list(map(lambda x: x.days, (opt_exps - rec_dates)))
-                    ).astype(float).reshape((n_pts, 1)) / 365
+    ttms = np.array(
+        list(map(lambda x: x.days, (opt_exps - rec_dates)))
+    ).astype(float).reshape((n_pts, 1)) / 365
     # arrange columns in order: options price, underlying price, strike, ttm,
     # discount factor, call/put flag
-    out = np.concatenate((ffour[:, :3],
-                          np.concatenate((ttms, ffour[:, 3].reshape((n_pts, 1)),
-                                          cpflags), axis = 1)), axis = 1)
+    out = np.concatenate(
+        (
+            ffour[:, :3], np.concatenate(
+                (ttms, ffour[:, 3].reshape((n_pts, 1)), cpflags), axis = 1
+            )
+        ), axis = 1
+    )
     return out
 
 
@@ -84,14 +93,19 @@ def ndarray2vol_obj_args_array(ar, mult = 1):
             # need to convert is_call to int
             is_call = int(is_call)
             # write new vol_obj_args struct to out
-            out[m * n_obs + i] = vol_obj_args(price, fwd, strike, ttm , df,
-                                              is_call)
+            out[m * n_obs + i] = vol_obj_args(
+                price, fwd, strike, ttm , df, is_call
+            )
     return out
 
 
 def almost_equal(x, y, tol = 1e-15):
     """``True`` if ``|x - y| <= tol``, ``False`` otherwise.
-    
+
+    .. deprecated:: 0.0.1dev1
+
+       Use :func:`numpy.allclose` instead, which is more sophisticated.
+
     :param x: First value to compare
     :type x: float
     :param y: Second value to compare

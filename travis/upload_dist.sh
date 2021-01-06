@@ -27,7 +27,7 @@ then
     fi
     if [ -e DEPLOY_WET ]
     then
-        twine upload --u __token__ -p $TOK_PYPI dist/*manylinux*.whl
+        twine upload -u __token__ -p $TOK_PYPI dist/*manylinux*.whl
         echo "uploaded to [real] PyPI"
     fi
 else

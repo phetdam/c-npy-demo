@@ -29,9 +29,11 @@ class vol_obj_args(ctypes.Structure):
     :param is_call: +/- 1 for call/put
     :type is_call: :class:`~ctypes.c_int`
     """
-    _fields_ = [("price", ctypes.c_double), ("fwd", ctypes.c_double),
-                ("strike", ctypes.c_double), ("ttm", ctypes.c_double),
-                ("df", ctypes.c_double), ("is_call", ctypes.c_int)]
+    _fields_ = [
+        ("price", ctypes.c_double), ("fwd", ctypes.c_double),
+        ("strike", ctypes.c_double), ("ttm", ctypes.c_double),
+        ("df", ctypes.c_double), ("is_call", ctypes.c_int)
+    ]
 
 
 class scl_rf_res(ctypes.Structure):
@@ -54,49 +56,60 @@ class scl_rf_res(ctypes.Structure):
     :param flag: Gives reason for termination of ``_halley_newton``
     :type flag: :class:`~ctypes.c_char_p`
     """
-    _fields_ = [("res", ctypes.c_double), ("iters", ctypes.c_int),
-                ("converged", ctypes.c_bool), ("method", ctypes.c_char_p),
-                ("flag", ctypes.c_char_p)]
+    _fields_ = [
+        ("res", ctypes.c_double), ("iters", ctypes.c_int),
+        ("converged", ctypes.c_bool), ("method", ctypes.c_char_p),
+        ("flag", ctypes.c_char_p)
+    ]
 
 
 # load _ivlib.so and set argument types for its functions
 _ivlib = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "/_ivlib.so")
 # set arg and return types for black_price
-_ivlib.black_price.argtypes = [ctypes.c_double, ctypes.c_double,
-                               ctypes.c_double, ctypes.c_double,
-                               ctypes.c_double, ctypes.c_int]
+_ivlib.black_price.argtypes = [
+    ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+    ctypes.c_double, ctypes.c_int
+]
 _ivlib.black_price.restype = ctypes.c_double
 # set arg and return types for bachelier_price
-_ivlib.bachelier_price.argtypes = [ctypes.c_double, ctypes.c_double,
-                                   ctypes.c_double, ctypes.c_double,
-                                   ctypes.c_double, ctypes.c_int]
+_ivlib.bachelier_price.argtypes = [
+    ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+    ctypes.c_double, ctypes.c_int
+]
 _ivlib.bachelier_price.restype = ctypes.c_double
 # set arg and return types for black_vega and black_volga
-_ivlib.black_vega.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                              ctypes.c_double, ctypes.c_double, ctypes.c_int]
+_ivlib.black_vega.argtypes = [
+    ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+    ctypes.c_double, ctypes.c_int
+]
 _ivlib.black_vega.restype = ctypes.c_double
-_ivlib.black_volga.argtypes = [ctypes.c_double, ctypes.c_double,
-                               ctypes.c_double, ctypes.c_double,
-                               ctypes.c_double, ctypes.c_int]
+_ivlib.black_volga.argtypes = [
+    ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+    ctypes.c_double, ctypes.c_int
+]
 _ivlib.black_volga.restype = ctypes.c_double
 # set arg and return types for bachelier_vega and bachelier_volga
-_ivlib.bachelier_vega.argtypes = [ctypes.c_double, ctypes.c_double,
-                                  ctypes.c_double, ctypes.c_double,
-                                  ctypes.c_double]
+_ivlib.bachelier_vega.argtypes = [
+    ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
+    ctypes.c_double
+]
 _ivlib.bachelier_vega.restype = ctypes.c_double
-_ivlib.bachelier_volga.argtypes = [ctypes.c_double, ctypes.c_double,
-                                   ctypes.c_double, ctypes.c_double, 
-                                   ctypes.c_double]
+_ivlib.bachelier_volga.argtypes = [
+    ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double, 
+    ctypes.c_double
+]
 _ivlib.bachelier_volga.restype = ctypes.c_double
 # set arg and return types for _black_vol and _bachelier_vol. note that the
 # return type is not ctypes.POINTER(scl_rf_res) but the whole struct itself.
-_ivlib._black_vol.argtypes = [ctypes.POINTER(vol_obj_args), ctypes.c_int,
-                              ctypes.c_double, ctypes.c_double, ctypes.c_double,
-                              ctypes.c_int, ctypes.c_bool]
+_ivlib._black_vol.argtypes = [
+    ctypes.POINTER(vol_obj_args), ctypes.c_int, ctypes.c_double,
+    ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_bool
+]
 _ivlib._black_vol.restype = scl_rf_res
-_ivlib._bachelier_vol.argtypes = [ctypes.POINTER(vol_obj_args), ctypes.c_int,
-                                  ctypes.c_double, ctypes.c_double,
-                                  ctypes.c_double, ctypes.c_int, ctypes.c_bool]
+_ivlib._bachelier_vol.argtypes = [
+    ctypes.POINTER(vol_obj_args), ctypes.c_int, ctypes.c_double,
+    ctypes.c_double, ctypes.c_double, ctypes.c_int, ctypes.c_bool
+]
 _ivlib._bachelier_vol.restype = scl_rf_res
 # set arg and return types for black_vol_obj* and bachelier_vol_obj* methods
 _ivlib.black_vol_obj.argtypes = [ctypes.c_double, ctypes.c_void_p]
@@ -112,16 +125,18 @@ _ivlib.bachelier_vol_obj_d1.restype = ctypes.c_double
 _ivlib.bachelier_vol_obj_d2.argtypes = [ctypes.c_double, ctypes.c_void_p]
 _ivlib.bachelier_vol_obj_d2.restype = ctypes.c_double
 # set arg and return types for _imp_vol_vec
-_ivlib._imp_vol_vec.argtypes = [ctypes.POINTER(vol_obj_args),
-                                ctypes.POINTER(ctypes.c_double), ctypes.c_long,
-                                ctypes.c_int, ctypes.c_int, ctypes.c_double,
-                                ctypes.c_double, ctypes.c_double, ctypes.c_int,
-                                ctypes.c_int, ctypes.c_bool, ctypes.c_bool]
+_ivlib._imp_vol_vec.argtypes = [
+    ctypes.POINTER(vol_obj_args), ctypes.POINTER(ctypes.c_double),
+    ctypes.c_long, ctypes.c_int, ctypes.c_int, ctypes.c_double, ctypes.c_double,
+    ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_bool
+]
 _ivlib._imp_vol_vec.restype = None
 
 
-def black_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0,
-                  maxiter = 50, n_threads = -1, mask_neg = True, debug = False):
+def black_vol_vec(
+    odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0, maxiter = 50,
+    n_threads = -1, mask_neg = True, debug = False
+):
     """Computes Black implied vol for an array of :class:`vol_obj_args`.
     
     Wraps the C function ``_imp_vol_vec`` with ``vol_type`` set to
@@ -145,8 +160,8 @@ def black_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0,
         ``50``.
     :type maxiter: int, optional
     :param n_threads: Number of threads to use if computing in parallel. Pass
-        ``-1`` to use all threads; defaults to ``-1``. Automatically caps the
-        number of threads used to the maximum number of threads on the system.
+        ``-1`` to use all threads; defaults to ``1``. Automatically floors the
+        number of threads requested to the max number of threads on the system.
     :type n_threads: int, optional
     :param mask_neg: ``True`` to replace negative implied vols with ``NAN``,
         ``False`` to keep all values. Defaults to ``True``.
@@ -179,9 +194,10 @@ def black_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0,
     return np.ctypeslib.as_array(_out)
 
 
-def bachelier_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8,
-                      rtol = 0, maxiter = 50, n_threads = -1, mask_neg = True,
-                      debug = False):
+def bachelier_vol_vec(
+    odata, method = "halley", x0 = 0.5, tol = 1.48e-8, rtol = 0, maxiter = 50,
+    n_threads = 1, mask_neg = True, debug = False
+):
     """Computes Bachelier implied vol for an array of :class:`vol_obj_args`.
     
     Wraps the C function ``_imp_vol_vec`` with ``vol_type`` set to
@@ -203,8 +219,8 @@ def bachelier_vol_vec(odata, method = "halley", x0 = 0.5, tol = 1.48e-8,
         ``50``.
     :type maxiter: int, optional
     :param n_threads: Number of threads to use if computing in parallel. Pass
-        ``-1`` to use all threads; defaults to ``-1``. Automatically caps the
-        number of threads used to the maximum number of threads on the system.
+        ``-1`` to use all threads; defaults to ``1``. Automatically floors the
+        number of threads requested to the max number of threads on the system.
     :type n_threads: int, optional
     :param mask_neg: ``True`` to replace negative implied vols with ``NAN``,
         ``False`` to keep all values. Defaults to ``True``.

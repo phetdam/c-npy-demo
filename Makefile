@@ -6,7 +6,7 @@ TEST_DIR     = pkg_test
 PKG_NAME     = c_npy_demo
 _IVLIB_DIR   = $(PKG_NAME)/_ivlib
 _EXT_DIR     = $(PKG_NAME)/_np_bcast
-
+# c compiler, of course
 CC           = gcc
 # required C files for building our shared object.
 CDEPS        = $(wildcard $(_IVLIB_DIR)/*.c)
@@ -18,6 +18,7 @@ PYDEPS       = $(wildcard $(PKG_NAME)/*.py) $(wildcard $(PKG_NAME)/*/*.py)
 CFLAGS       = -o $(PKG_NAME)/_ivlib.so -shared -fPIC -fopenmp -lgomp -std=gnu11
 # set python; on docker specify PYTHON value externally using absolute path
 PYTHON      ?= python3
+# flags to pass to setup.py build
 BUILD_FLAGS  = --build-lib $(TEST_DIR)
 # directory to save distributions to; use absolute path on docker
 DIST_FLAGS  ?= --dist-dir ./dist
@@ -25,6 +26,7 @@ DIST_FLAGS  ?= --dist-dir ./dist
 # phony targets
 .PHONY: build clean dummy dist
 
+# triggered if no target is provided
 dummy:
 	@echo "Please specify a target to build."
 
@@ -40,11 +42,9 @@ clean:
 build_ff: $(CDEPS)
 	@$(CC) $(CFLAGS) $(CDEPS)
 
-# build np_touch module locally (in ./build) from source files with setup.py
-# and build standalone shared object and move into pkg_test. currently
-# configured to move built package into directory pkg_test. note that this
-# target is more or less triggered to execute when any of the files that are
-# required for the package are touched/modified (including data files).
+# build _np_bcast extension module locally in TEST_DIR from source files with
+# setup.py and build standalone shared object and move into TEST_DIR. triggers
+# when any of the files that are required are touched/modified (including data).
 build: build_ff $(PYDEPS) $(XDEPS) $(wildcard $(PKG_NAME)/data/*.csv)
 	@$(PYTHON) setup.py build $(BUILD_FLAGS)
 

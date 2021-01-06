@@ -29,9 +29,9 @@ run_venv_tests() {
         # install using pip3 directly from the wheel
         $PY_BIN/pip3 install $PY_WHL
         # get installation directory of PY_WHL
-        # run test suite; tests for setuptools-generated scripts are skipped.
         PY_WHL_BASE=`$PY_BIN/pip3 show c-npy-demo | grep "Location:"`
         PY_WHL_BASE=`echo $PY_WHL_BASE | sed s/"Location: "//`
+        # run test suite; tests for setuptools-generated scripts are skipped.
         # note that manylinux image does not have PATH properly configured, so
         # we need to run pytest as a module.
         $PY_BIN/pytest -rsxXP $PY_WHL_BASE/c_npy_demo/tests

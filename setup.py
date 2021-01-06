@@ -1,4 +1,5 @@
-# setup.py for building c_numpy_demo package
+# setup.py for building c_numpy_demo package. since extension modules can't be
+# built without setup.py, we can't use the new PEP 517 format.
 
 from setuptools import Extension, setup
 from numpy import get_include
@@ -33,8 +34,10 @@ def _setup():
     with open("VERSION", "r") as vf:
         version = vf.read().rstrip()
     # short and long descriptions
-    short_desc = ("A Python package demoing the combined use of ctypes, an "
-                  "extension module, and the NumPy C API.")
+    short_desc = (
+        "A Python package demoing the combined use of ctypes, an extension "
+        "module, and the NumPy C API."
+    )
     with open("README.rst", "r") as rf:
         long_desc = rf.read()
     # perform setup
@@ -50,7 +53,7 @@ def _setup():
         url = "https://github.com/phetdam/c_numpy_demo",
         classifiers = [
             "License :: OSI Approved :: MIT License",
-            "Operating System :: OS Independent",
+            "Operating System :: POSIX :: Linux",
             "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8"
@@ -67,10 +70,14 @@ def _setup():
         # benchmarking scripts
         entry_points = {
             "console_scripts": [
-                (_PACKAGE_NAME + ".bench.ext = " + _PACKAGE_NAME +
-                 ".bench:bench_ext_main"),
-                (_PACKAGE_NAME + ".bench.vol = " + _PACKAGE_NAME +
-                 ".bench:bench_vol_main")
+                (
+                    _PACKAGE_NAME + ".bench.ext = " + _PACKAGE_NAME +
+                    ".bench:bench_ext_main"
+                ),
+                (
+                    _PACKAGE_NAME + ".bench.vol = " + _PACKAGE_NAME +
+                    ".bench:bench_vol_main"
+                )
               ]
           },
         install_requires = ["numpy>=1.19", "scipy>=1.5"],
