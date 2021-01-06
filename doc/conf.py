@@ -29,12 +29,12 @@ release = version
 # specifiy minimum sphinx version (3)
 needs_sphinx = "3.0"
 
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your own.
+# need breathe to interpret doxygen output
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx"
+    "breathe"
 ]
 
 # Add any paths that contain templates here, relative to this directory.

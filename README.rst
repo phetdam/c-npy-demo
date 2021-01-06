@@ -15,6 +15,13 @@ optimization is the root of all evil* [#]_
    CI/build/deploy workflow is being migrated to GitHub actions after the
    changes made to `Travis CI's pricing plans`__.
 
+   Note:
+
+   The contents of this repository will see significant change in the near
+   future, as I have decided to greatly simplify the code being used. The
+   implied volatility stuff will be moved to a new repository, whose name will
+   be yet another play on snake-related stuff.
+
 A demo Python package illustrating how to combine a compiled Python C extension,
 foreign compiled C code, ctypes__, and the NumPy and Python C APIs. I personally
 struggled to figure out how to integrate these components together through a
