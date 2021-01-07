@@ -3,7 +3,9 @@
  * @brief Initializes the C extension module `c_npy_demo.cscale`.
  */
 
+#ifndef PY_SSIZE_T_CLEAN
 #define PY_SSIZE_T_CLEAN
+#endif
 #include "Python.h"
 
 // don't include deprecated numpy C API

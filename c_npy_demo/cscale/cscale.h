@@ -9,7 +9,6 @@
 #ifndef PY_SSIZE_T_CLEAN
 #define PY_SSIZE_T_CLEAN
 #endif
-
 #include "Python.h"
 
 // convenience method for checking if something is a numeric Python type

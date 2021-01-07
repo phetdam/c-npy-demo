@@ -1,7 +1,5 @@
 # Makefile for c_numpy_demo build + install.
 
-# test dir where for build binaries and .py files; used for local testing
-BUILD_DIR    = build
 # package name and source folder for extension source
 PKG_NAME     = c_npy_demo
 _EXT_DIR     = $(PKG_NAME)/cscale
@@ -14,7 +12,7 @@ PYDEPS       = $(wildcard $(PKG_NAME)/*.py) $(wildcard $(PKG_NAME)/*/*.py)
 # set python; on docker specify PYTHON value externally using absolute path
 PYTHON      ?= python3
 # flags to pass to setup.py build
-BUILD_FLAGS  = --build-lib $(BUILD_DIR)
+BUILD_FLAGS  =
 # directory to save distributions to; use absolute path on docker
 DIST_FLAGS  ?= --dist-dir ./dist
 
@@ -31,9 +29,8 @@ clean:
 	@rm -vrf build
 	@rm -vrf $(PKG_NAME).egg-info
 	@rm -vrf dist
-	@rm -vrf $(BUILD_DIR)
 
-# build extension module locally in BUILD_DIR from source files with setup.py
+# build extension module locally in ./build from source files with setup.py
 # triggers when any of the files that are required are touched/modified.
 build: $(PYDEPS) $(XDEPS)
 	@$(PYTHON) setup.py build $(BUILD_FLAGS)
