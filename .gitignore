@@ -1,9 +1,15 @@
+# ignore setup.py build/dist output
 /build/*
 /dist/*
 /*.egg-info/*
+# __pycahce__, emacs autosave files, shared objects, vs code settings
 **/__pycache__
 **/*~
 **/*.so
-/pkg_test/*
 /.vscode
+# ignore sphinx build output
 /doc/_build/*
+# other random files to ignore
+/test
+/test.c
+/.lessons.rst

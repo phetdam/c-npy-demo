@@ -38,7 +38,7 @@ def _setup():
         version = vf.read().rstrip()
     # short and long descriptions
     short_desc = (
-        "A tiny Python package showcasing speed differences betweehn the NumPy "
+        "A tiny Python package showcasing speed differences between NumPy's "
         "Python and C APIs."
     )
     with open("README.rst", "r") as rf:
