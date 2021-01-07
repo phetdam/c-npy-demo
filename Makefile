@@ -1,29 +1,24 @@
 # Makefile for c_numpy_demo build + install.
 
 # test dir where for build binaries and .py files; used for local testing
-TEST_DIR     = pkg_test
-# package name, _ivlib.so source folder, source folder for extension source
+BUILD_DIR    = build
+# package name and source folder for extension source
 PKG_NAME     = c_npy_demo
-_IVLIB_DIR   = $(PKG_NAME)/_ivlib
-_EXT_DIR     = $(PKG_NAME)/_np_bcast
+_EXT_DIR     = $(PKG_NAME)/cscale
 # c compiler, of course
 CC           = gcc
-# required C files for building our shared object.
-CDEPS        = $(wildcard $(_IVLIB_DIR)/*.c)
 # dependencies for the extension module
 XDEPS        = $(wildcard $(_EXT_DIR)/*.c)
 # required Python source files in the package (modules and tests)
 PYDEPS       = $(wildcard $(PKG_NAME)/*.py) $(wildcard $(PKG_NAME)/*/*.py)
-# specifically specify standard for gcc 4.8.2 on older linux distros
-CFLAGS       = -o $(PKG_NAME)/_ivlib.so -shared -fPIC -fopenmp -lgomp -std=gnu11
 # set python; on docker specify PYTHON value externally using absolute path
 PYTHON      ?= python3
 # flags to pass to setup.py build
-BUILD_FLAGS  = --build-lib $(TEST_DIR)
+BUILD_FLAGS  = --build-lib $(BUILD_DIR)
 # directory to save distributions to; use absolute path on docker
 DIST_FLAGS  ?= --dist-dir ./dist
 
-# phony targets
+# phony targets (need to look into why build sometimes doesn't trigger)
 .PHONY: build clean dummy dist
 
 # triggered if no target is provided
@@ -36,16 +31,11 @@ clean:
 	@rm -vrf build
 	@rm -vrf $(PKG_NAME).egg-info
 	@rm -vrf dist
-	@rm -vrf $(TEST_DIR)
+	@rm -vrf $(BUILD_DIR)
 
-# build external _ivlib.so from required C files (ff -> foreign function)
-build_ff: $(CDEPS)
-	@$(CC) $(CFLAGS) $(CDEPS)
-
-# build _np_bcast extension module locally in TEST_DIR from source files with
-# setup.py and build standalone shared object and move into TEST_DIR. triggers
-# when any of the files that are required are touched/modified (including data).
-build: build_ff $(PYDEPS) $(XDEPS) $(wildcard $(PKG_NAME)/data/*.csv)
+# build extension module locally in BUILD_DIR from source files with setup.py
+# triggers when any of the files that are required are touched/modified.
+build: $(PYDEPS) $(XDEPS)
 	@$(PYTHON) setup.py build $(BUILD_FLAGS)
 
 # make source and wheel

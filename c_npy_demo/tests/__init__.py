@@ -1,1 +1,1 @@
-__doc__ = "``__init__.py`` for ``c_numpy_test`` test suite."
+__doc__ = "``__init__.py`` for ``c_npy_demo`` test suite."
