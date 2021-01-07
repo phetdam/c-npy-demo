@@ -6,6 +6,7 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 
+// don't include deprecated numpy C API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL CSCALE_ARRAY_API
 #include "numpy/arrayobject.h"
@@ -35,7 +36,13 @@ PyDoc_STRVAR(
 
 // static array of module methods
 static PyMethodDef mod_methods[] = {
-  {"stdscale", stdscale, METH_VARARGS | METH_KEYWORDS, STDSCALE_DOC},
+  {
+    "stdscale",
+    // cast PyCFunctionWithKeywords to PyCFunction (silences compiler warning)
+    (PyCFunction) stdscale,
+    METH_VARARGS | METH_KEYWORDS,
+    STDSCALE_DOC
+  },
   {NULL, NULL, 0, NULL} // not sure why we need the sentinel here
 };
 
