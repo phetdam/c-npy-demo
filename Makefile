@@ -3,10 +3,14 @@
 # package name and source folder for extension source
 PKG_NAME     = c_npy_demo
 _EXT_DIR     = $(PKG_NAME)/cscale
+# directory for libcheck test runner code
+CHECK_DIR    = check
 # c compiler, of course
 CC           = gcc
 # dependencies for the extension module
 XDEPS        = $(wildcard $(_EXT_DIR)/*.c)
+# dependencies for test running code
+CHECK_DEPS   = $(wildcard $(CHECK_DIR)/*.c)
 # required Python source files in the package (modules and tests)
 PYDEPS       = $(wildcard $(PKG_NAME)/*.py) $(wildcard $(PKG_NAME)/*/*.py)
 # set python; on docker specify PYTHON value externally using absolute path
@@ -39,6 +43,12 @@ build: $(PYDEPS) $(XDEPS)
 # will show up in the directory PKG_NAME.
 build_inplace: $(XDEPS)
 	@$(PYTHON) setup.py build_ext --inplace
+
+# build test runner and run unit tests using check. no optimization needed. note
+# -lcheck to link libcheck, which for me is installed at /usr/local/lib.
+check: $(CHECK_DEPS)
+	@$(CC) -Wall -o $(CHECK_DIR)/runner $(CHECK_DEPS) -lcheck
+	./$(CHECK_DIR)/runner
 
 # make source and wheel
 dist: build
