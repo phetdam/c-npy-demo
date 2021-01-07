@@ -35,6 +35,11 @@ clean:
 build: $(PYDEPS) $(XDEPS)
 	@$(PYTHON) setup.py build $(BUILD_FLAGS)
 
+# build in-place with build_ext --inplace. shared object for extension module
+# will show up in the directory PKG_NAME.
+build_inplace: $(XDEPS)
+	@$(PYTHON) setup.py build_ext --inplace
+
 # make source and wheel
 dist: build
 	@$(PYTHON) setup.py sdist bdist_wheel $(DIST_FLAGS)
