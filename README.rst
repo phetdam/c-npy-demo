@@ -3,9 +3,10 @@
 c_npy_demo
 ==========
 
-.. image:: https://img.shields.io/travis/com/phetdam/c_npy_demo?logo=travis
-   :target: https://travis-ci.com/github/phetdam/c_npy_demo
-   :alt: Travis (.com)
+.. image:: https://img.shields.io/github/workflow/status/phetdam/c_npy_demo/
+   build?logo=github
+   :target: https://github.com/phetdam/c_npy_demo/actions
+   :alt: GitHub Workflow Status
 
 *We should forget about small efficiencies, say about 97% of the time: premature
 optimization is the root of all evil* [#]_
