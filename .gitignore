@@ -9,6 +9,8 @@
 /.vscode
 # ignore sphinx build output
 /doc/_build/*
+# ignore libcheck test runner
+/runner
 # other random files to ignore
 /test
 /test.c
