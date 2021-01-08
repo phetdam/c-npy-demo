@@ -64,10 +64,10 @@ then
 elif [ ! $DOCKER_IMAGE ]
 then
     echo "DOCKER_IMAGE not defined; exiting"
-# also exit if not on github actions runner
-elif [ ! $GITHUB_ACTIONS ]
+# also exit if on github actions runner
+elif [ $GITHUB_ACTIONS ]
 then
-    echo "should not be run on travis but on manylinux docker image. exiting"
+    echo "should only be run on manylinux docker image. exiting"
 # else run the wheel building and install process on manylinux1 docker image
 else
     # cd to $DOCKER_MNT for convenience (can use relative paths, etc.)
