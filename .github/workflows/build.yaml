@@ -1,0 +1,38 @@
+# build and test. need to be able to build on manylinux1 image + pass tests.
+# run after passing local unit tests using pytest wrapped with libcheck and
+# after valgrind has produced satisfactory results.
+name: build
+
+on: workflow_dispatch
+
+env:
+  # where to mount the top-level directory of the repo in docker
+  DOCKER_MNT: /_build
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        # docker images for manylinux building (i686 and x86_64)
+        docker_image:
+        - quay.io/pypa/manylinux1_x86_64
+        - quay.io/pypa/manylinux1_i686
+    steps:
+    - uses: actions/checkout@v2
+    - name: Pull manylinux1 docker image
+      run: docker pull ${{ matrix.docker_image }}
+    - name: Build manylinux1 wheel on docker image
+      # platform the wheel is built for is taken from matrix.docker_image.
+      # current dir is mounted in docker as $DOCKER_MNT. run script in bash
+      # shell so there's no need to make the file executable in docker image.
+      run: > 
+        docker container run -e DOCKER_MNT=$DOCKER_MNT -e
+        DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
+        ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/build_manylinux.sh
+    #- name: Install and test manylinux1 wheel on docker image with pytest
+      # use --rm option to clean up afterwards
+    #  run: >
+    #    docker container run --rm -e DOCKER_MNT=$DOCKER_MNT -e
+    #    DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
+    #    ${{ matrix.docker_image }} bash $DOCKER_MNT/# some filename here
