@@ -14,9 +14,8 @@
 
 // program usage, nothing much for now
 #define USAGE "usage: %s [-h]\n" \
-  "libcheck runner. runs pytest by embedding the Python interpreter. should\n" \
-  "be invoked with ./%s, i.e. from the same directory it is located in.", \
-  argv[0], argv[0]
+  "libcheck runner. runs pytest by embedding the Python interpreter. invoke\n" \
+  "with ./, i.e. from the same directory it is located in.\n", argv[0]
 
 int main(int argc, char **argv) {
   // if no arguments provided, just run
