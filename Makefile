@@ -24,8 +24,10 @@ DIST_FLAGS    ?= --dist-dir ./dist
 # passed because pythonx.y-config might pass a spec file to the -specs option
 # that essentially passes -fno-PIE if -r, -fpie, -fPIE, -fpic, -fPIC not passed
 # to gcc (i.e. no specification for some kind of position-independent code).
-PY_CFLAGS     ?= -fPIE $(shell python3.8-config --cflags)
-PY_LDFLAGS    ?= $(shell python3.8-config --ldflags)
+# note that --embed needs to be specified on ubuntu, else -lpythonx.y is omitted
+# by python3-config --ldflags and you will end up with a linker error
+PY_CFLAGS     ?= -fPIE $(shell python3-config --cflags)
+PY_LDFLAGS    ?= $(shell python3-config --embed --ldflags)
 # linker flags specifically for compiling the test runner
 CHECK_LDFLAGS  = $(PY_LDFLAGS) -lcheck
 
@@ -59,8 +61,8 @@ build_inplace: $(XDEPS)
 # -lpython3.8 as linker args to link to libpython3.8, which for me is located
 # in /usr/lib/x86_64-linux-gnu (system dir).
 check: $(CHECK_DEPS)
-	$(CC) $(PY_CFLAGS) -o $(CHECK_DIR)/runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
-	./$(CHECK_DIR)/runner
+	@$(CC) $(PY_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
+	@./runner
 
 # make source and wheel
 dist: build
