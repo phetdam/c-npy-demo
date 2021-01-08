@@ -3,14 +3,13 @@
  * @brief Embeds Python interpreter to run `pytest` tests and yield test suite.
  */
 
+// no header guards since this is first and only definition
+#define PY_SSIZE_T_CLEAN
+#include "Python.h"
+
 #include <stdio.h>
 
 #include <check.h>
-
-#ifndef PY_SSIZE_T_CLEAN
-#define PY_SSIZE_T_CLEAN
-#endif
-#include "Python.h"
 
 #include "pytest_suite.h"
 
