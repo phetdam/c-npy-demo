@@ -60,7 +60,7 @@ inplace: $(XDEPS)
 # need to pass -I/usr/include/python3.8 to correctly include Python.h and
 # -lpython3.8 as linker args to link to libpython3.8, which for me is located
 # in /usr/lib/x86_64-linux-gnu (system dir).
-check: $(CHECK_DEPS)
+check: $(CHECK_DEPS) inplace
 	@$(CC) $(PY_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
 	@./runner
 
