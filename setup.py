@@ -22,7 +22,6 @@ def _get_ext_modules():
     return [
         Extension(
             name = "cscale",
-            # fix this later
             sources = [
                 _EXT_SRC_PATH + "/cscale.c", _EXT_SRC_PATH + "/_modinit.c"
             ],
