@@ -3,7 +3,7 @@
 # after valgrind has produced satisfactory results.
 name: build
 
-on: workflow_dispatch
+on: push
 
 env:
   # where to mount the top-level directory of the repo in docker
