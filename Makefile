@@ -52,7 +52,7 @@ build: $(PYDEPS) $(XDEPS)
 
 # build in-place with build_ext --inplace. shared object for extension module
 # will show up in the directory PKG_NAME.
-build_inplace: $(XDEPS)
+inplace: $(XDEPS)
 	@$(PYTHON) setup.py build_ext --inplace
 
 # build test runner and run unit tests using check. no optimization needed. note
