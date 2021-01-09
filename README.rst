@@ -13,11 +13,6 @@ optimization is the root of all evil* [#]_
 
    Note:
 
-   CI/build/deploy workflow is being migrated to GitHub actions after the
-   changes made to `Travis CI's pricing plans`__.
-
-   Note:
-
    The contents of this repository will see significant change in the near
    future, as I have decided to greatly simplify the code being used. The
    implied volatility stuff will be moved to a new repository, whose name will
@@ -54,16 +49,16 @@ From source
 
 Building from this (unstable) repo will probably only work on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
-Travis CI virtual machines were [#]_ done on Ubuntu 18.04 with gcc 7.4. To
-build, you will need to have the latest `setuptools`__ [#]_ installed on your
-system, with `wheel`__ also installed if you like to create a prebuilt wheel for
-your own specific platform.
-
-.. [#] Now I'll be using GitHub actions due to the pricing change.
+GIthub Actions runners were done within the `manylinux1 Docker images`__
+provided by PyPA. To build, you will need to have the latest `setuptools`__ [#]_
+installed on your system, with `wheel`__ also installed if you like to create a
+prebuilt wheel for your own specific platform.
 
 .. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__, but
    since a (tiny) C extension module has to be built in this package the legacy
    ``setup.py`` method of building distributions still has to be used.
+
+.. __: https://github.com/pypa/manylinux
 
 .. __: https://setuptools.readthedocs.io/en/latest/
 
@@ -75,7 +70,7 @@ From PyPI
 ~~~~~~~~~
 
 Although this package is not on PyPI (yet), I have successfully built
-``manylinux1`` wheels using Travis CI on the ``manylinux1`` Docker images
+``manylinux1`` wheels using Github Actions on the ``manylinux1`` Docker images
 provided by PyPA, of which more information can be found at the
 `manylinux GitHub`__.
 
