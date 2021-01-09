@@ -35,6 +35,7 @@ build_cp3_wheels() {
 }
 
 # subroutine to repair wheels using auditwheel (installed on manylinux1 images)
+# and then remove the original linux wheels
 repair_cp3_wheels() {
     echo "repairing cpython3 wheels"
     # take first argument as name of distribution directory
@@ -48,10 +49,11 @@ repair_cp3_wheels() {
         if ! auditwheel show $PY_WHL
         then
             echo "skipping non-platform wheel $PY_WHL"
-        # else repair wheel with auditwheel
+        # else repair wheel with auditwheel and remove original linux wheel
         else
             echo "repairing wheel $PY_WHL"
             auditwheel repair $PY_WHL --plat $PLAT -w $DIST_DIR
+            rm -vf $PY_WHL
         fi
     done
 }

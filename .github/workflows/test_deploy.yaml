@@ -1,0 +1,40 @@
+# deploy to test PyPI. tests the same as the build workflow but also deploys.
+name: test_deploy
+
+on: workflow_dispatch
+
+env:
+  # where to mount the top-level directory of the repo in docker
+  DOCKER_MNT: /_build
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        # docker images for manylinux building (i686 and x86_64)
+        docker_image:
+        - quay.io/pypa/manylinux1_x86_64
+        - quay.io/pypa/manylinux1_i686
+    steps:
+    - uses: actions/checkout@v2
+    - name: Pull manylinux1 docker image
+      run: docker pull ${{ matrix.docker_image }}
+    - name: Build manylinux1 wheels on docker image
+      # see build.yaml for docker container run comments
+      run: > 
+        docker container run -e DOCKER_MNT=$DOCKER_MNT -e
+        DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
+        ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/build_manylinux.sh
+    - name: Install and test manylinux1 wheels on docker image with pytest
+      run: >
+        docker container run --rm -e DOCKER_MNT=$DOCKER_MNT -e
+        DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
+        ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/test_manylinux.sh
+    - name: Deploy manylinux1 wheels and tar.gz source to Test PyPI
+      uses: pypa/gh-action-pypi-publish@v1.4.1
+      with:
+        user: __token__
+        password: ${{ secrets.LOCAL_TESTPYPI_TOKEN}}
+        repository_url: https://test.pypi.org/legacy/
+        skip_existing: true
