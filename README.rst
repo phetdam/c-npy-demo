@@ -32,9 +32,6 @@ foreign C code, you can then multithread using OpenMP, etc.
 
 .. [#] Attributed to Sir Tony Hoare, popularized by Donald Knuth.
 
-.. __: https://www.jeffgeerling.com/blog/2020/travis-cis-new-pricing-plan-threw-
-   wrench-my-open-source-works
-
 .. __: https://numpy.org/devdocs/user/c-info.html
 
 .. __: https://docs.python.org/3/library/ctypes.html
