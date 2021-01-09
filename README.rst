@@ -21,14 +21,14 @@ optimization is the root of all evil* [#]_
 A tiny demo Python package comparing speed differences between NumPy's Python
 and C APIs that also serves as an example project for writing a C extension
 module that uses the `NumPy C API`__. I personally went through a decent amount
-of trial, error, and reading of dense and sometimes confusing documentation, so
-I hope this will be useful example for one interested in doing something
-similar. In my opinion, however, it's generally best to decouple C and Python
-code as much as possible, so if you want to use C to speed up your computations
-you are best off allocating memory in Python, passing that to your foreign C
-code using `ctypes`__, and then having your C function write to the memory
-allocated by the Python interpreter. Since the `GIL`__ is released when calling
-foreign C code, you can then multithread using OpenMP, etc.
+of pain, sweat, and tears to get this working, so I hope this will be useful
+example for one interested in doing something similar. However, I do think it's
+generally best to decouple C and Python code as much as possible, so for
+example, if you want speed increases by doing computations in C code, you should
+allocate memory in Python, pass pointers to your foreign C code using
+`ctypes`__, and then have your C function write to the memory allocated by the
+Python interpreter. Since the `GIL`__ is released when calling foreign C code,
+you can then multithread using OpenMP, etc.
 
 .. [#] Attributed to Sir Tony Hoare, popularized by Donald Knuth.
 
