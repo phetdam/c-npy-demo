@@ -22,9 +22,9 @@ jobs:
       max-parallel: 1
     steps:
     - uses: actions/checkout@v2
-    - name: Pull manylinux1 docker image
+    - name: Pull manylinux docker image
       run: docker pull ${{ matrix.docker_image }}
-    - name: Build manylinux1 wheels on docker image
+    - name: Build manylinux wheels on docker image
       # platform the wheels are built for is taken from matrix.docker_image.
       # current dir is mounted in docker as $DOCKER_MNT. run script in bash
       # shell so there's no need to make the file executable in docker image.
@@ -33,7 +33,7 @@ jobs:
         docker container run -e DOCKER_MNT=$DOCKER_MNT -e
         DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
         ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/build_manylinux.sh
-    - name: Install and test manylinux1 wheels on docker image with pytest
+    - name: Install and test manylinux wheels on docker image with pytest
       # use --rm option to clean up afterwards
       run: >
         docker container run -e DOCKER_MNT=$DOCKER_MNT -e

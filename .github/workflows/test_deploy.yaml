@@ -1,11 +1,7 @@
-# deploy to test PyPI. tests the same as the build workflow but also deploys.
+# deploy to test PyPI. use artifacts uploaded by build.yaml for distribution.
 name: test_deploy
 
 on: workflow_dispatch
-
-env:
-  # where to mount the top-level directory of the repo in docker
-  DOCKER_MNT: /_build
 
 jobs:
   test_deploy:
@@ -17,11 +13,9 @@ jobs:
       with:
         name: dist_artifact
         path: dist
-    - name: Deploy manylinux1 wheels and tar.gz source to Test PyPI
+    - name: Deploy manylinux wheels and tar.gz source to Test PyPI
       uses: pypa/gh-action-pypi-publish@v1.4.1
       with:
         user: __token__
-        password: ${{ secrets.LOCAL_TESTPYPI_TOKEN}}
+        password: ${{ secrets.LOCAL_TESTPYPI_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
-        # keep uploading tar.gz source since this is a matrix job
-        skip_existing: true

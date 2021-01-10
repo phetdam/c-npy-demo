@@ -1,0 +1,41 @@
+# deploy to PyPI after creation of a release
+name: deploy
+
+on:
+  release:
+    types: [published]
+
+env:
+  # where to mount the top-level directory of the repo in docker
+  DOCKER_MNT: /_build
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download .tar.gz and manylinux wheel artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: dist_artifact
+        path: dist
+    - name: Create environment variable with name of .tar.gz
+      # append this definition to the GITHUB_ENV environment file
+      run: echo 'SRC_ARTIFACT=`find dist/*.tar.gz`' >> $GITHUB_ENV
+    - name: Upload .tar.gz to release URL
+      uses: actions/upload-release-asset@v1
+      env:
+        # auto-created for authentication through actions
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # use URL of the triggering release event
+        upload_url: ${{ github.event.release.upload_url }}
+        # asset path and name come from newly-defined SRC_ARTIFACT variable
+        asset_path: dist/${{ env.SRC_ARTIFACT }}
+        asset_name: ${{ env.SRC_ARTIFACT }}
+        asset_content_type: application/gzip
+    - name: Deploy manylinux1 wheels and .tar.gz source to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.4.1
+      with:
+        user: __token__
+        password: ${{ secrets.LOCAL_PYPI_TOKEN }}
