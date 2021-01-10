@@ -18,8 +18,8 @@ jobs:
         docker_image:
         - quay.io/pypa/manylinux1_x86_64
         - quay.io/pypa/manylinux1_i686
-        # run sequentially so upload of tar.gz source isn't corrupted
-        max-parallel: 1
+      # run sequentially so upload of tar.gz source isn't corrupted
+      max-parallel: 1
     steps:
     - uses: actions/checkout@v2
     - name: Pull manylinux1 docker image
