@@ -37,3 +37,5 @@ jobs:
         user: __token__
         password: ${{ secrets.LOCAL_TESTPYPI_TOKEN}}
         repository_url: https://test.pypi.org/legacy/
+        # keep uploading tar.gz source since this is a matrix job
+        skip_existing: true
