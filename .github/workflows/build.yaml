@@ -18,6 +18,8 @@ jobs:
         docker_image:
         - quay.io/pypa/manylinux1_x86_64
         - quay.io/pypa/manylinux1_i686
+        # run sequentially so upload of tar.gz source isn't corrupted
+        max-parallel: 1
     steps:
     - uses: actions/checkout@v2
     - name: Pull manylinux1 docker image
@@ -34,6 +36,14 @@ jobs:
     - name: Install and test manylinux1 wheels on docker image with pytest
       # use --rm option to clean up afterwards
       run: >
-        docker container run --rm -e DOCKER_MNT=$DOCKER_MNT -e
+        docker container run -e DOCKER_MNT=$DOCKER_MNT -e
         DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
         ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/test_manylinux.sh
+    - name: Upload .tar.gz and manylinux wheel artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist_artifact
+        path: dist
+        # if no files, error
+        if-no-files-found: error
+        # can delete artifacts in the workflow summary page
