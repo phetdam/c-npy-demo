@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# install wheels in python venvs on docker and then run tests on built wheels
+# install wheels venvs on docker + run tests and benchmark on the wheels
 
 # exit if command has non-zero exit status
 set -e
@@ -34,6 +34,8 @@ run_venv_tests() {
         # manylinux image does not have PATH properly configured, so we need to
         # run pytest from the directory the python interpreter are located in.
         $PY_BIN/pytest -rsxXP --pyargs c_npy_demo.tests
+        # run the benchmark script (verify installation)
+        c_npy_demo.bench -s 20,10
     else
         echo "couldn't find `$PY_BIN/python3 --version` manylinux wheel"
     fi

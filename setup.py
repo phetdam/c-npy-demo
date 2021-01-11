@@ -65,9 +65,11 @@ def _setup():
         },
         python_requires = ">=3.6",
         packages = [_PACKAGE_NAME, _PACKAGE_NAME + ".tests"],
-        # benchmarking scripts (update later)
+        # benchmarking script
         entry_points = {
-            "console_scripts": []
+            "console_scripts": [
+                _PACKAGE_NAME + ".bench = " + _PACKAGE_NAME + ".bench:main"
+            ]
         },
         install_requires = ["numpy>=1.19"],
         ext_package = _PACKAGE_NAME,
