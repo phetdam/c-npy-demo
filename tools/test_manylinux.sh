@@ -34,8 +34,10 @@ run_venv_tests() {
         # manylinux image does not have PATH properly configured, so we need to
         # run pytest from the directory the python interpreter are located in.
         $PY_BIN/pytest -rsxXP --pyargs c_npy_demo.tests
-        # run the benchmark script (verify installation)
-        c_npy_demo.bench -s 20,10
+        # run the benchmark script to verify installation. again note use of
+        # absolute path; also pass small shape so runtime is shorter
+        ls $PY_BIN # debug: check that the benchmark really is installed there
+        #$PY_BIN/c_npy_demo.bench -s 20,10
     else
         echo "couldn't find `$PY_BIN/python3 --version` manylinux wheel"
     fi
