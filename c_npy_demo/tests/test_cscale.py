@@ -3,7 +3,7 @@ __doc__ = "Unit tests for :func:`c_npy_demo.cscale.stdscale`."
 import numpy as np
 import pytest
 
-# pylint:disable=relative-beyond-top-level
+# pylint: disable=relative-beyond-top-level
 from .. import cscale, pyscale
 
 
