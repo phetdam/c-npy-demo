@@ -1,6 +1,6 @@
 /**
  * @file cscale.h
- * @brief Contains declaration for function in `_cscale.c` and useful macros.
+ * @brief Contains declaration for function in `cscale.c` and useful macros.
  * @note This should be included after definition of `PY_ARRAY_UNIQUE_SYMBOL`
  *     and `numpy/arrayobject.h` in a source file. Has header guards.
  */
