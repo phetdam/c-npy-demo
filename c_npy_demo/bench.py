@@ -33,7 +33,7 @@ _HELP_VERBOSE = "Print raw timing results, passed to timeit.main"
 
 
 def comma_list_to_shape(s):
-    """Tries to parse a comma-separated list of ints into a valid numpy shape.
+    """Parse a string of comma-separated ints into a valid numpy shape.
 
     Trailing commas will raise an error.
 
@@ -95,6 +95,7 @@ def main(args = None):
     ex_setup = f"import numpy as np\nar = np.random.normal(size = {args.shape})"
     ex_snippet = "stdscale(ar)"
     # call timeit.main with timeit_args for both pyscale and cscale stdscale
+    ## not efficient!! double allocation of numpy array ##
     timeit.main(
         timeit_args + [
             "-s", "from c_npy_demo.pyscale import stdscale\n" + ex_setup,

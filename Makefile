@@ -28,7 +28,7 @@ DIST_FLAGS    ?= --dist-dir ./dist
 # by python3-config --ldflags and you will end up with a linker error
 PY_CFLAGS     ?= -fPIE $(shell python3-config --cflags)
 PY_LDFLAGS    ?= $(shell python3-config --embed --ldflags)
-# linker flags specifically for compiling the test runner
+# linker flags specifically for compiling the test runner (libcheck)
 CHECK_LDFLAGS  = $(PY_LDFLAGS) -lcheck
 
 # phony targets (need to look into why build sometimes doesn't trigger)
@@ -55,11 +55,10 @@ build: $(PYDEPS) $(XDEPS)
 inplace: $(XDEPS)
 	@$(PYTHON) setup.py build_ext --inplace
 
-# build test runner and run unit tests using check. no optimization needed. note
-# -lcheck to link libcheck, which for me is installed at /usr/local/lib.
-# need to pass -I/usr/include/python3.8 to correctly include Python.h and
-# -lpython3.8 as linker args to link to libpython3.8, which for me is located
-# in /usr/lib/x86_64-linux-gnu (system dir).
+# build test runner and run unit tests using check. CHECK_LDFLAGS passes -lcheck
+# to link libcheck, which for me is installed at /usr/local/lib. PY_CFLAGS
+# passes (for me) -I/usr/include/python3.8 to include Python.h and -lpython3.8
+# to ld to link to libpython3.8 in /usr/lib/x86_64-linux-gnu (for me).
 check: $(CHECK_DEPS) inplace
 	@$(CC) $(PY_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
 	@./runner
