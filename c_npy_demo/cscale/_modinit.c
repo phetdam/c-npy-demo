@@ -3,9 +3,7 @@
  * @brief Initializes the C extension module `c_npy_demo.cscale`.
  */
 
-#ifndef PY_SSIZE_T_CLEAN
 #define PY_SSIZE_T_CLEAN
-#endif
 #include "Python.h"
 
 // don't include deprecated numpy C API
@@ -45,6 +43,11 @@ static PyMethodDef mod_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     STDSCALE_DOC
   },
+  /**
+   * see https://stackoverflow.com/questions/43371780/why-does-pymethoddef-
+   * arrays-require-a-sentinel-element-containing-multiple-nulls. at least one
+   * NULL should be present; defining a NULL method is more consistent.
+   */
   {NULL, NULL, 0, NULL} // not sure why we need the sentinel here
 };
 
