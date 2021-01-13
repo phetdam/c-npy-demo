@@ -25,7 +25,7 @@
  * @param kwargs Keyword arguments
  * @returns `PyArrayObject *` cast to `PyObject *` 
  */
-PyObject *stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
+PyObject *cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
   // numpy ndarray and delta degrees of freedom
   PyArrayObject *ar;
   int ddof = 0;

@@ -22,7 +22,7 @@ PyDoc_STRVAR(
 // method docstrings. note that for the signature to be correctly parsed, we
 // need to place it in the docstring followed by "\n--\n\n"
 PyDoc_STRVAR(
-  STDSCALE_DOC,
+  CSCALE_STDSCALE_DOC,
   "stdscale(ar, ddof = 1)\n--\n\n"
   "Centers and scales array to have zero mean and unit variance.\n\n"
   ":param args: Arbitrary :class:`numpy.ndarray`\n"
@@ -39,9 +39,9 @@ static PyMethodDef cscale_methods[] = {
   {
     "stdscale",
     // cast PyCFunctionWithKeywords to PyCFunction (silences compiler warning)
-    (PyCFunction) stdscale,
+    (PyCFunction) cscale_stdscale,
     METH_VARARGS | METH_KEYWORDS,
-    STDSCALE_DOC
+    CSCALE_STDSCALE_DOC
   },
   /**
    * see https://stackoverflow.com/questions/43371780/why-does-pymethoddef-

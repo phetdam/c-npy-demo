@@ -29,6 +29,6 @@
   NPY_FAIL) { PyErr_WarnEx(PyExc_RuntimeWarning, "unable to deallocate " \
   "iterator of " #ar, 1); }
 
-PyObject *stdscale(PyObject *self, PyObject *args, PyObject *kwargs);
+PyObject *cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs);
 
 #endif /* CSCALE_H */
