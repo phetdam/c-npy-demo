@@ -44,16 +44,18 @@ Installation
 From source
 ~~~~~~~~~~~
 
-Building from this (unstable) repo will probably only work on Linux systems.
+Building from source using this repo will probably only work on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
-GIthub Actions runners were done within the `manylinux1 Docker images`__
+Github Actions runners were done within the `manylinux1 Docker images`__
 provided by PyPA. To build, you will need to have the latest `setuptools`__ [#]_
 installed on your system, with `wheel`__ also installed if you like to create a
 prebuilt wheel for your own specific platform.
 
 .. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__, but
    since a (tiny) C extension module has to be built in this package the legacy
-   ``setup.py`` method of building distributions still has to be used.
+   ``setup.py`` method of building distributions still has to be used. Note that
+   the `distutils.core.Extension`__ type actually points to the
+   ``setuptools.Extension`` class.
 
 .. __: https://github.com/pypa/manylinux
 
@@ -63,13 +65,16 @@ prebuilt wheel for your own specific platform.
 
 .. __: https://www.python.org/dev/peps/pep-0517/
 
+.. __: https://docs.python.org/3/distutils/apiref.html#distutils.core.Extension
+
 From PyPI
 ~~~~~~~~~
 
 Although this package is not on PyPI (yet), I have successfully built
 ``manylinux1`` wheels using Github Actions on the ``manylinux1`` Docker images
 provided by PyPA, of which more information can be found at the
-`manylinux GitHub`__.
+`manylinux GitHub`__. Once I finish the source, I will try to build wheels for
+Windows and Mac using GitHub Actions workflows.
 
 .. __: https://github.com/pypa/manylinux
 
