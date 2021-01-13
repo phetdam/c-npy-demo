@@ -48,7 +48,7 @@ static PyMethodDef mod_methods[] = {
    * arrays-require-a-sentinel-element-containing-multiple-nulls. at least one
    * NULL should be present; defining a NULL method is more consistent.
    */
-  {NULL, NULL, 0, NULL} // not sure why we need the sentinel here
+  {NULL, NULL, 0, NULL}
 };
 
 // module definition struct
