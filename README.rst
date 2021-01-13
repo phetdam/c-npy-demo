@@ -54,8 +54,8 @@ prebuilt wheel for your own specific platform.
 .. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__, but
    since a (tiny) C extension module has to be built in this package the legacy
    ``setup.py`` method of building distributions still has to be used. Note that
-   the `distutils.core.Extension`__ type actually points to the
-   ``setuptools.Extension`` class.
+   the `distutils.core.Extension`__ class is present in ``setuptools`` as the
+   ``setuptools.extension.Extension`` class.
 
 .. __: https://github.com/pypa/manylinux
 
