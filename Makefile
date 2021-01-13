@@ -20,15 +20,12 @@ BUILD_FLAGS    =
 # directory to save distributions to; use absolute path on docker
 DIST_FLAGS    ?= --dist-dir ./dist
 # python compiler and linker flags for use when linking python into external C
-# code (our test runner); can be externally specified. note -fPIE needs to be
-# passed because pythonx.y-config might pass a spec file to the -specs option
-# that essentially passes -fno-PIE if -r, -fpie, -fPIE, -fpic, -fPIC not passed
-# to gcc (i.e. no specification for some kind of position-independent code).
-# note that --embed needs to be specified on ubuntu, else -lpythonx.y is omitted
-# by python3-config --ldflags and you will end up with a linker error
+# code (our test runner); can be externally specified. gcc requires -fPIE.
 PY_CFLAGS     ?= -fPIE $(shell python3-config --cflags)
+# ubuntu needs --embed, else -lpythonx.y is omitted by --ldflags, which is a
+# linker error. libpython3.8 is in /usr/lib/x86_64-linux-gnu for me.
 PY_LDFLAGS    ?= $(shell python3-config --embed --ldflags)
-# linker flags specifically for compiling the test runner (libcheck)
+# linker flags for compiling test runner. my libcheck is in /usr/local/lib
 CHECK_LDFLAGS  = $(PY_LDFLAGS) -lcheck
 
 # phony targets (need to look into why build sometimes doesn't trigger)
@@ -55,10 +52,7 @@ build: $(PYDEPS) $(XDEPS)
 inplace: $(XDEPS)
 	@$(PYTHON) setup.py build_ext --inplace
 
-# build test runner and run unit tests using check. CHECK_LDFLAGS passes -lcheck
-# to link libcheck, which for me is installed at /usr/local/lib. PY_CFLAGS
-# passes (for me) -I/usr/include/python3.8 to include Python.h and -lpython3.8
-# to ld to link to libpython3.8 in /usr/lib/x86_64-linux-gnu (for me).
+# build test runner and run unit tests using check
 check: $(CHECK_DEPS) inplace
 	@$(CC) $(PY_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
 	@./runner

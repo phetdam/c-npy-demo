@@ -3,7 +3,6 @@
  * @brief Embeds Python interpreter to run `pytest` tests and yield test suite.
  */
 
-// no header guards since this is first and only definition
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 
@@ -14,11 +13,7 @@
 #include "pytest_suite.h"
 
 /**
- * Unit test that prints some stuff and checks `3 == 3`.
- * 
- * @note Doesn't do anything for now except print stuff. Always passes. Since
- *     the macro defines `print_stuff` as static, the test suite creation
- *     function `pytest_suite` is nonstatic. Test catches `stdout` and `stderr`.
+ * Runs `pytest` unit tests.
  */ 
 START_TEST(print_stuff)
 {

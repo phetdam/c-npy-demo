@@ -11,4 +11,3 @@
 Suite *pytest_suite();
 
 #endif /* PYTEST_SUITE_H */
-
