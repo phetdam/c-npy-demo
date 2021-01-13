@@ -35,7 +35,7 @@ PyDoc_STRVAR(
 );
 
 // static array of module methods
-static PyMethodDef mod_methods[] = {
+static PyMethodDef cscale_methods[] = {
   {
     "stdscale",
     // cast PyCFunctionWithKeywords to PyCFunction (silences compiler warning)
@@ -52,7 +52,7 @@ static PyMethodDef mod_methods[] = {
 };
 
 // module definition struct
-static struct PyModuleDef mod_def = {
+static struct PyModuleDef cscale_def = {
   PyModuleDef_HEAD_INIT,
   /**
    * module name, module docstring, per-interpreter module state (-1 if required
@@ -61,20 +61,20 @@ static struct PyModuleDef mod_def = {
   MODULE_NAME,
   MODULE_DOC,
   -1,
-  mod_methods
+  cscale_methods
 };
 
 // module initialization function
 PyMODINIT_FUNC PyInit_cscale(void) {
   // create the module
   PyObject *module;
-  module = PyModule_Create(&mod_def);
+  module = PyModule_Create(&cscale_def);
   // import numpy api
   import_array();
   // error check?
   if (PyErr_Occurred()) {
     return NULL;
   }
-  // return module pointer (could be NULL)
+  // return module pointer (NULL on failure)
   return module;
 }
