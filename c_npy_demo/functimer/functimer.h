@@ -11,4 +11,10 @@
 #include "Python.h"
 #endif /* PY_SSIZE_T_CLEAN */
 
+// argnames are self, args, and kwargs, as is typical for Python
+PyObject *functimer_timeit_once(PyObject *, PyObject *, PyObject *);
+PyObject *functimer_autorange(PyObject *, PyObject *, PyObject *);
+PyObject *functimer_repeat(PyObject *, PyObject *, PyObject *);
+PyObject *functimer_timeit(PyObject *, PyObject *, PyObject *);
+
 #endif /* FUNCTIMER_H */

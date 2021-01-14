@@ -9,9 +9,13 @@
 #include "functimer.h"
 
 /**
- *
+ * Operates in a similar manner to `timeit.timeit`. Docstring in `_modinit.c`.
+ * 
+ * @param args PyObject * tuple of positional arguments
+ * @param kwargs PyObject * dict of named arguments
+ * @returns PyObject * numeric value
  */
-PyObject * functimer_timeit_once(
+PyObject *functimer_timeit_once(
   PyObject *self, PyObject *args, PyObject *kwargs
 ) {
   // callable, args, kwargs, timer function
