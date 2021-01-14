@@ -9,7 +9,9 @@
 #include "functimer.h"
 
 /**
- * Operates in a similar manner to `timeit.timeit`. Docstring in `_modinit.c`.
+ * Operates in a similar manner to `timeit.timeit`.
+ * 
+ * Docstring in `_modinit.c`.
  * 
  * @param args PyObject * tuple of positional arguments
  * @param kwargs PyObject * dict of named arguments
@@ -189,4 +191,28 @@ PyObject *functimer_timeit_once(
   Py_DECREF(end_time);
   // return the time delta
   return timedelta;
+}
+
+/**
+ * Operates in a similar manner to `timeit.Timer.autorange`.
+ * 
+ * Docstring in `_modinit.c`.
+ */
+PyObject *functimer_autorange(
+  PyObject *self, PyObject *args, PyObject *kwargs
+) {
+  // callable, args, kwargs
+  PyObject *func, *func_args, *func_kwargs;
+  func_args = func_kwargs = NULL;
+  // names of arguments
+  char *argnames[] = {"func", "args", "kwargs", NULL};
+  // parse args and kwargs; sets appropriate exception so no need to check
+  if (
+    !PyArg_ParseTupleAndKeywords(
+      args, kwargs, "O|OO", argnames, &func, &func_args, &func_kwargs
+    )
+  ) { return NULL; }
+  // dummy return
+  Py_INCREF(Py_None);
+  return Py_None;
 }

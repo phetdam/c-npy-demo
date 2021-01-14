@@ -6,6 +6,8 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 
+#include "functimer.h"
+
 // module name and docstring
 #define MODULE_NAME "functimer"
 PyDoc_STRVAR(
@@ -85,14 +87,13 @@ PyDoc_STRVAR(
 
 // static array of module methods
 static PyMethodDef functimer_methods[] = {
-  /*
   {
     "timeit_once",
+    // cast PyCFunctionWithKeywords to PyCFunction to silence compiler warning
     (PyCFunction) functimer_timeit_once,
     METH_VARARGS | METH_KEYWORDS,
     FUNCTIMER_TIMEIT_ONCE_DOC
   },
-  */
   /*
   {
     "repeat",
@@ -101,22 +102,19 @@ static PyMethodDef functimer_methods[] = {
     FUNCTIMER_REPEAT_DOC
   },
   */
-  /*
   {
     "autorange",
-    // cast PyCFunctionWithKeywords to PyCFunction to silence compiler warning
     (PyCFunction) functimer_autorange,
     METH_VARARGS | METH_KEYWORDS,
     FUNCTIMER_AUTORANGE_DOC,
-  }
-  */
+  },
   /*
   {
     "timeit",
     (PyCFunction) functimer_timeit,
     METH_VARARGS | METH_KEYWORDS,
     FUNCTIMER_TIMEIT_DOC
-  }
+  },
   */
   // sentinel required; needs to have at least one NULL in it
   {NULL, NULL, 0, NULL}
