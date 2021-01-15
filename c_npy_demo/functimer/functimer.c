@@ -6,6 +6,8 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 
+#include <stdbool.h>
+
 #include "functimer.h"
 
 /**
@@ -50,7 +52,6 @@ PyObject *functimer_timeit_once(
   if (func_args == NULL) {
     func_args = PyTuple_New(0);
     if (func_args == NULL) {
-      PyErr_SetString(PyExc_RuntimeError, "couldn't allocate new empty tuple");
       return NULL;
     }
   }
@@ -156,7 +157,6 @@ PyObject *functimer_timeit_once(
   PyObject *timedelta = PyNumber_Subtract(end_time, start_time);
   // if NULL, failure. set message for exception, Py_DECREF and Py_XDECREF
   if (timedelta == NULL) {
-    PyErr_SetString(PyExc_ArithmeticError, "unable to compute time delta");
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
@@ -178,23 +178,128 @@ PyObject *functimer_timeit_once(
 /**
  * Operates in a similar manner to `timeit.Timer.autorange`.
  * 
- * Docstring in `_modinit.c`.
+ * Docstring in `_modinit.c`. No callback allowed.
+ * 
+ * @note `kwargs` is `NULL` if no named args are passed.
  */
 PyObject *functimer_autorange(
   PyObject *self, PyObject *args, PyObject *kwargs
 ) {
-  // callable, args, kwargs
-  PyObject *func, *func_args, *func_kwargs;
-  func_args = func_kwargs = NULL;
+  /**
+   * callable, args, kwargs, timer function. we don't actually need to use
+   * these directly in autorange; these will just be used with
+   * PyArg_ParseTupleAndKeywords so we can do some argument checking. since all
+   * references are borrowed we don't need to Py_[X]DECREF any of them.
+   */
+  PyObject *func, *func_args, *func_kwargs, *timer;
+  func_args = func_kwargs = timer = NULL;
   // names of arguments
-  char *argnames[] = {"func", "args", "kwargs", NULL};
+  char *argnames[] = {"func", "args", "kwargs", "timer", NULL};
   // parse args and kwargs; sets appropriate exception so no need to check
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OO", argnames, &func, &func_args, &func_kwargs
+      args, kwargs, "O|OOO", argnames, &func, &func_args, &func_kwargs, &timer
     )
   ) { return NULL; }
-  // dummy return
-  Py_INCREF(Py_None);
-  return Py_None;
+  // number of times to run the function func (default 1)
+  Py_ssize_t number = 1;
+  // current number multipler
+  Py_ssize_t multipler = 1;
+  // bases to scale number of times to run so number = bases[i] * multipler
+  int bases[] = {1, 2, 5};
+  // total of the time reported by functimer_timeit_once
+  double time_total;
+  /**
+   * Py_XINCREF kwargs. it may be NULL, in which case we will create a new dict
+   * with the number = number mapping which will be Py_XDECREF'd at the end of
+   * the function. otherwise, the borrowed ref gets its refcount incremented
+   * now and then decremented at the end of the function.
+   */
+  Py_XINCREF(kwargs);
+  // if NULL, create new dict
+  if (kwargs == NULL) {
+    kwargs = PyDict_New();
+    // return NULL on failure
+    if (kwargs == NULL) {
+      return NULL;
+    }
+  }
+  // keep going as long as number < PY_SSIZE_T_MAX / 10
+  while (true) {
+    // for each of the bases
+    for (int i = 0; i < 3; i++) {
+      // set number = bases[i] * multipler
+      number = bases[i] * multipler;
+      // create new PyLongObject from number
+      PyObject *number_ = PyLong_FromSsize_t(number);
+      // if NULL, return NULL, but also remember to Py_DECREF kwargs
+      if (number_ == NULL) {
+        Py_DECREF(kwargs);
+        return NULL;
+      }
+      // set time_total to 0 to initialize
+      time_total = 0;
+      // try running the function number times
+      for (Py_ssize_t j = 0; j < number; j++) {
+        // add number_ to kwargs. Py_DECREF kwargs, number_
+        if (PyDict_SetItemString(kwargs, "number", number_) < 0) {
+          Py_DECREF(kwargs);
+          Py_DECREF(number_);
+          return NULL;
+        }
+        // save the returned time from functimer_timeit_once. the self, args,
+        // kwargs refs are all borrowed so no need to Py_INCREF them.
+        PyObject *timeit_time = functimer_timeit_once(self, args, kwargs);
+        // if NULL, return NULL. let functimer_timeit set the error indicator.
+        // Py_DECREF kwargs and number_ (they are new references)
+        if (timeit_time == NULL) {
+          Py_DECREF(kwargs);
+          Py_DECREF(number_);
+          return NULL;
+        }
+        // convert timeit_time to Python float and Py_DECREF timeit_time_temp
+        PyObject *timeit_time_temp = timeit_time;
+        timeit_time = PyNumber_Float(timeit_time);
+        Py_DECREF(timeit_time_temp);
+        // on error, exit. Py_DECREF kwargs and number_
+        if (timeit_time == NULL) {
+          Py_DECREF(kwargs);
+          Py_DECREF(number_);
+          return NULL;
+        }
+        // attempt to get double from timeit_time and Py_DECREF it when done
+        double timeit_time_ = PyFloat_AsDouble(timeit_time);
+        Py_DECREF(timeit_time);
+        // check if error occurred (borrowed ref)
+        PyObject *err_type = PyErr_Occurred();
+        // if not NULL, then exit. error indicator already set. do Py_DECREFs
+        if (err_type != NULL) {
+          Py_DECREF(kwargs);
+          Py_DECREF(number_);
+          return NULL;
+        }
+        // add timeit_time_ to time_total
+        time_total = time_total + timeit_time_;
+      }
+      // computation of time_total complete. if time_total >= 0.2 s, break
+      if (time_total >= 0.2) {
+        break;
+      }
+      // done with number_ so Py_DECREF it
+      Py_DECREF(number_);
+    }
+    // if number > PY_SSIZE_T_MAX / 10, then break the while loop. emit warning
+    if (number > (PY_SSIZE_T_MAX / 10.)) {
+      PyErr_WarnEx(
+        PyExc_RuntimeWarning, "return value will exceed PY_SSIZE_T_MAX / 10", 1
+      );
+      break;
+    }
+    // multiply multiplier by 10. we want 1, 2, 5, 10, 20, 50, ...
+    multipler = multipler * 10;
+  }
+  // done with kwargs; Py_DECREF it
+  Py_DECREF(kwargs);
+  // return Python int from number. NULL returned on failure
+  return PyLong_FromSsize_t(number);
 }

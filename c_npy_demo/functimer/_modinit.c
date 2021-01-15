@@ -32,8 +32,8 @@ PyDoc_STRVAR(
   "Operates in the same way as :func:`timeit.timeit`, i.e. the same way as\n"
   ":meth:`timeit.Timer.timeit`. ``func`` will be executed with positional\n"
   "args ``args`` and keyword args ``kwargs`` ``number`` times and the total\n"
-  "execution time will be returned. By default, the units of time will be in\n"
-  "seconds unless ``timer`` returns time using different units."
+  "execution time will be returned. ``timer`` is the timing function and must\n"
+  "return time in units of fractional seconds."
   "\n\n"
   ":param func: Callable to time\n"
   ":type func: callable\n"
@@ -42,8 +42,8 @@ PyDoc_STRVAR(
   ":param kwargs: Dict of named arguments to pass to ``func``\n"
   ":type kwargs: dict, optional\n"
   ":param timer: Timer function, defaults to :func:`time.perf_counter` which\n"
-  "    returns time in seconds. If specified, must return a number and not\n"
-  "    take any arguments."
+  "    returns time in seconds. If specified, must return time in fractional\n"
+  "    seconds and not take any arguments.\n"
   ":type timer: function, optional\n"
   ":returns: Time for ``func`` to be executed ``number`` times with args\n"
   "    ``args`` and kwargs ``kwargs``, in units of ``timer``.\n"
@@ -62,7 +62,7 @@ PyDoc_STRVAR(
 */
 PyDoc_STRVAR(
   FUNCTIMER_AUTORANGE_DOC,
-  "autorange(func, args=None, kwargs=None)\n"
+  "autorange(func, args=None, kwargs=None, timer=None)\n"
   "--\n\n"
   "Determine number of time to call :func:`c_npy_demo.functimer.timeit_once."
   "\n\n"
@@ -77,6 +77,10 @@ PyDoc_STRVAR(
   ":type args: tuple, optional\n"
   ":param kwargs: Dict of named arguments to pass to ``func``\n"
   ":type kwargs: dict, optional\n"
+  ":param timer: Timer function, defaults to :func:`time.perf_counter` which\n"
+  "    returns time in seconds. If specified, must return time in fractional\n"
+  "    seconds and not take any arguments.\n"
+  ":type timer: function, optional\n"
   ":rtype: int"
 );
 /*
@@ -138,10 +142,6 @@ PyMODINIT_FUNC PyInit_functimer(void) {
   // create the module
   PyObject *module;
   module = PyModule_Create(&functimer_def);
-  // error check
-  if (PyErr_Occurred()) {
-    return NULL;
-  }
-  // return module pointer (could be NULL)
+  // return module pointer (could be NULL on failure)
   return module;
 }
