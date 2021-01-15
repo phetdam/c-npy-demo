@@ -36,28 +36,21 @@ PyObject *functimer_timeit_once(
     )
   ) { return NULL; }
   /**
-   * Py_XINCREF func_args and func_kwargs. we do this because if func_args,
-   * func_kwargs are NULL (not provided by user), then we get new PyObject *
-   * references for them. thus, at the end of the function, we will have to
-   * Py_DECREF. doing Py_XINCREF increments borrowed reference count if
-   * func_args, func_kwargs were provided by user, so Py_DECREF doesn't
-   * decrement BORROWED refs, which is of course bad.
+   * Py_XINCREF func_args. we do this because if func_args is NULL (not given
+   * by user), then we get new PyObject * reference for it. thus, at the end of
+   * the function, we will have to Py_DECREF func_args. doing Py_XINCREF
+   * increments borrowed reference count if func_args is provided by user so
+   * Py_DECREF doesn't decrement BORROWED refs, which is of course bad.
+   * 
+   * note we don't need to do this for func_kwargs since PyObject_Call lets us
+   * pass NULL if there are no keyword arguments to pass.
    */
   Py_XINCREF(func_args);
-  Py_XINCREF(func_kwargs);
   // if func_args is NULL, no args specified, so set it to be empty tuple
   if (func_args == NULL) {
     func_args = PyTuple_New(0);
     if (func_args == NULL) {
       PyErr_SetString(PyExc_RuntimeError, "couldn't allocate new empty tuple");
-      return NULL;
-    }
-  }
-  // if func_kwargs is NULL, no kwargs specified, so set to empty dict
-  if (func_kwargs == NULL) {
-    func_kwargs = PyDict_New();
-    if (func_kwargs == NULL) {
-      PyErr_SetString(PyExc_RuntimeError, "couldn't allocate new empty dict");
       return NULL;
     }
   }
@@ -71,43 +64,39 @@ PyObject *functimer_timeit_once(
   // if timer NULL, then timer was not provided so we use time.perf_counter
   if (timer == NULL) {
     time_module = PyImport_ImportModule("time");
-    // if module failed to import, exception is set. Py_DECREF func_args and
-    // func_kwargs and then we can exit
+    // if module failed to import, exception is set. Py_DECREF func_args
     if (time_module == NULL) {
       Py_DECREF(func_args);
-      Py_DECREF(func_kwargs);
       return NULL;
     }
     // try to get perf_counter from time
     time_perf_counter = PyObject_GetAttrString(time_module, "perf_counter");
-    // if NULL, exception set. Py_DECREF time_module, func_args, func_kwargs
+    // if NULL, exception set. Py_DECREF time_module, func_args
     if (time_perf_counter == NULL) {
       Py_DECREF(time_module);
       Py_DECREF(func_args);
-      Py_DECREF(func_kwargs);
       return NULL;
     }
     // set timer to time.perf_counter
     timer = time_perf_counter;
   }
-  /** check that func_args is tuple and that func_kwargs is a dict. need to also
-    * Py_XDECREF time_module, time_perf_counter and Py_DECREF func_args,
-    * func_kwargs to clean up our garbage correctly.
-    */
+  /**
+   * check that func_args is tuple and that func_kwargs is a dict (or is NULL).
+   * need to also Py_XDECREF time_module, time_perf_counter, and Py_DECREF
+   * func_args so that we clean up our garbage correctly.
+   */
   if (!PyTuple_CheckExact(func_args)) {
     PyErr_SetString(PyExc_TypeError, "args must be a tuple");
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
-    Py_DECREF(func_kwargs);
     return NULL;
   }
-  if (!PyDict_CheckExact(func_kwargs)) {
+  if ((func_kwargs != NULL) && !PyDict_CheckExact(func_kwargs)) {
     PyErr_SetString(PyExc_TypeError, "kwargs must be a dict");
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
-    Py_DECREF(func_kwargs);
     return NULL;
   }
   // starting, ending times recorded by timer function
@@ -119,7 +108,6 @@ PyObject *functimer_timeit_once(
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
-    Py_DECREF(func_kwargs);
     return NULL;
   }
   // if not numeric, raised exception. Py_DECREF and Py_XDECREF as needed. note
@@ -129,18 +117,16 @@ PyObject *functimer_timeit_once(
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
-    Py_DECREF(func_kwargs);
     Py_DECREF(start_time);
     return NULL;
   }
   // call function number times with func_args and func_kwargs
   for (Py_ssize_t i = 0; i < number; i++) {
     // if NULL is returned, an exception has been raised. Py_DECREF, Py_XDECREF
-    if (PyObject_Call(func, func_args, func_kwargs) == NULL) {
+    if (PyObject_Call(func, func_args, NULL) == NULL) {
       Py_XDECREF(time_module);
       Py_XDECREF(time_perf_counter);
       Py_DECREF(func_args);
-      Py_DECREF(func_kwargs);
       Py_DECREF(start_time);
       return NULL;
     }
@@ -152,7 +138,6 @@ PyObject *functimer_timeit_once(
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
-    Py_DECREF(func_kwargs);
     Py_DECREF(start_time);
     return NULL;
   }
@@ -163,7 +148,6 @@ PyObject *functimer_timeit_once(
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
-    Py_DECREF(func_kwargs);
     Py_DECREF(start_time);
     Py_DECREF(end_time);
     return NULL;
@@ -176,7 +160,6 @@ PyObject *functimer_timeit_once(
     Py_XDECREF(time_module);
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
-    Py_DECREF(func_kwargs);
     Py_DECREF(start_time);
     Py_DECREF(end_time);
     return NULL;
@@ -184,9 +167,8 @@ PyObject *functimer_timeit_once(
   // decrement refcounts for time_module, time_perf_counter (may be NULL)
   Py_XDECREF(time_module);
   Py_XDECREF(time_perf_counter);
-  // decrement refcounts for func_args, func_kwargs, start_time, end_time
+  // decrement refcounts for func_args, start_time, end_time
   Py_DECREF(func_args);
-  Py_DECREF(func_kwargs);
   Py_DECREF(start_time);
   Py_DECREF(end_time);
   // return the time delta
