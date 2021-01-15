@@ -18,7 +18,8 @@ PyDoc_STRVAR(
   "executable string statements. This way, timings of several different\n"
   "callables avoid multiple setup statement calls, which is wasteful."
   "\n\n"
-  "Time is obtained by default using :func:`time.perf_counter`..\n"
+  "Times obtained by default using :func:`time.perf_counter`."
+  "\n\n"
   "Functional API only."
 );
 
@@ -26,8 +27,7 @@ PyDoc_STRVAR(
 // need to place it in the docstring followed by "\n--\n\n"
 PyDoc_STRVAR(
   FUNCTIMER_TIMEIT_ONCE_DOC,
-  "timeit_once(func, args=None, kwargs=None, timer=<built-in function "
-  "perf_counter>, number=1000000)\n"
+  "timeit_once(func, args=None, kwargs=None, timer=None, number=1000000)\n"
   "--\n\n"
   "Operates in the same way as :func:`timeit.timeit`, i.e. the same way as\n"
   ":meth:`timeit.Timer.timeit`. ``func`` will be executed with positional\n"
@@ -49,6 +49,7 @@ PyDoc_STRVAR(
   "    ``args`` and kwargs ``kwargs``, in units of ``timer``.\n"
   ":rtype: float"
 );
+/*
 PyDoc_STRVAR(
   FUNCTIMER_REPEAT_DOC,
   "repeat(func, args=None, kwargs=None, number=1000000, repeat=5)\n"
@@ -58,6 +59,7 @@ PyDoc_STRVAR(
   "\n\n"
   ":rtype: list"
 );
+*/
 PyDoc_STRVAR(
   FUNCTIMER_AUTORANGE_DOC,
   "autorange(func, args=None, kwargs=None)\n"
@@ -77,6 +79,7 @@ PyDoc_STRVAR(
   ":type kwargs: dict, optional\n"
   ":rtype: int"
 );
+/*
 PyDoc_STRVAR(
   FUNCTIMER_TIMEIT_DOC,
   "timeit(func, args=None, kwargs=None, number=None, repeat=None, "
@@ -84,6 +87,7 @@ PyDoc_STRVAR(
   "--\n\n"
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
 );
+*/
 
 // static array of module methods
 static PyMethodDef functimer_methods[] = {
@@ -130,7 +134,7 @@ static struct PyModuleDef functimer_def = {
 };
 
 // module initialization function
-PyMODINIT_FUNC PyInit_cscale(void) {
+PyMODINIT_FUNC PyInit_functimer(void) {
   // create the module
   PyObject *module;
   module = PyModule_Create(&functimer_def);

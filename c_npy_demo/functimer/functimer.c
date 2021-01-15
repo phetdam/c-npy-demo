@@ -112,8 +112,8 @@ PyObject *functimer_timeit_once(
   }
   // starting, ending times recorded by timer function
   PyObject *start_time, *end_time;
-  // get starting time from timer function
-  start_time = PyObject_CallNoArgs(timer);
+  // get starting time from timer function. 
+  start_time = PyObject_CallObject(timer, NULL);
   // if NULL, exception was raised. Py_DECREF and Py_XDECREF as needed
   if (start_time == NULL) {
     Py_XDECREF(time_module);
@@ -146,7 +146,7 @@ PyObject *functimer_timeit_once(
     }
   }
   // get ending time from timer function
-  end_time = PyObject_CallNoArgs(timer);
+  end_time = PyObject_CallObject(timer, NULL);
   // if NULL, exception raised; Py_DECREF and Py_XDECREF as needed
   if (end_time == NULL) {
     Py_XDECREF(time_module);
@@ -169,7 +169,7 @@ PyObject *functimer_timeit_once(
     return NULL;
   }
   // compute time difference
-  PyObject *timedelta = PyNumber_Subtract(start_time, end_time);
+  PyObject *timedelta = PyNumber_Subtract(end_time, start_time);
   // if NULL, failure. set message for exception, Py_DECREF and Py_XDECREF
   if (timedelta == NULL) {
     PyErr_SetString(PyExc_ArithmeticError, "unable to compute time delta");

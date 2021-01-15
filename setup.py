@@ -4,9 +4,8 @@
 from setuptools import Extension, setup
 from numpy import get_include
 
-# package name and path for cscale extension source code
+# package name
 _PACKAGE_NAME = "c_npy_demo"
-_EXT_SRC_PATH = _PACKAGE_NAME + "/cscale"
 
 
 def _get_ext_modules():
@@ -23,9 +22,18 @@ def _get_ext_modules():
         Extension(
             name = "cscale",
             sources = [
-                _EXT_SRC_PATH + "/cscale.c", _EXT_SRC_PATH + "/_modinit.c"
+                _PACKAGE_NAME + "/cscale/cscale.c",
+                _PACKAGE_NAME + "/cscale/_modinit.c"
             ],
             include_dirs = [get_include()],
+            extra_compile_args = ["-std=gnu11"]
+        ),
+        Extension(
+            name = "functimer",
+            sources = [
+                _PACKAGE_NAME + "/functimer/functimer.c",
+                _PACKAGE_NAME + "/functimer/_modinit.c"
+            ],
             extra_compile_args = ["-std=gnu11"]
         )
     ]
