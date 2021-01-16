@@ -200,7 +200,6 @@ PyObject *functimer_autorange(
    * references are borrowed we don't need to Py_[X]DECREF any of them.
    */
   PyObject *func, *func_args, *func_kwargs, *timer;
-  func_args = func_kwargs = timer = NULL;
   // names of arguments
   char *argnames[] = {"func", "args", "kwargs", "timer", NULL};
   // parse args and kwargs; sets appropriate exception so no need to check
@@ -329,15 +328,13 @@ PyObject *functimer_autorange(
 PyObject *functimer_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
   /**
    * callable, args, kwargs, timer function. we don't actually need to use
-   * these directly in autorange; these will just be used with
-   * PyArg_ParseTupleAndKeywords so we can do some argument checking. since all
-   * references are borrowed we don't need to Py_[X]DECREF any of them.
+   * these directly; these will just be used with PyArg_ParseTupleAndKeywords
+   * so we can do some argument checking. since all references are borrowed we
+   * don't need to Py_[X]DECREF any of them.
    */
   PyObject *func, *func_args, *func_kwargs, *timer;
-  // if timer NULL after arg parsing, set to time.perf_counter
-  func_args = func_kwargs = timer = NULL;
-  // number of times to execute the callable with args and kwargs
-  Py_ssize_t number = 1000000;
+  // number of times to execute callable with arguments; not used
+  Py_ssize_t number;
   // number of times to repeat the call to functimer_timeit_once
   Py_ssize_t repeat = 5;
   // names of arguments
