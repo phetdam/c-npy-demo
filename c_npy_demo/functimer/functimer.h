@@ -15,6 +15,6 @@
 PyObject *functimer_timeit_once(PyObject *, PyObject *, PyObject *);
 PyObject *functimer_autorange(PyObject *, PyObject *, PyObject *);
 PyObject *functimer_repeat(PyObject *, PyObject *, PyObject *);
-PyObject *functimer_timeit(PyObject *, PyObject *, PyObject *);
+PyObject *functimer_timeit_auto(PyObject *, PyObject *, PyObject *);
 
 #endif /* FUNCTIMER_H */
