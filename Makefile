@@ -52,9 +52,9 @@ build: $(PYDEPS) $(XDEPS)
 inplace: $(XDEPS)
 	@$(PYTHON) setup.py build_ext --inplace
 
-# build test runner and run unit tests using check
+# build test runner and run unit tests using check. show flags passed to gcc
 check: $(CHECK_DEPS) inplace
-	@$(CC) $(PY_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
+	$(CC) $(PY_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
 	@./runner
 
 # make source and wheel

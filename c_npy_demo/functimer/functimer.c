@@ -37,6 +37,11 @@ PyObject *functimer_timeit_once(
       &timer, &number
     )
   ) { return NULL; }
+  // check that number is greater than 0. if not, set exception and exit
+  if (number < 1) {
+    PyErr_SetString(PyExc_ValueError, "number must be positive");
+    return NULL;
+  }
   /**
    * Py_XINCREF func_args. we do this because if func_args is NULL (not given
    * by user), then we get new PyObject * reference for it. thus, at the end of
@@ -54,6 +59,20 @@ PyObject *functimer_timeit_once(
     if (func_args == NULL) {
       return NULL;
     }
+  }
+  /**
+   * check that func_args is tuple and that func_kwargs is a dict (or is NULL).
+   * need to also Py_DECREF func_args to clean up the garbage
+   */
+  if (!PyTuple_CheckExact(func_args)) {
+    PyErr_SetString(PyExc_TypeError, "args must be a tuple");
+    Py_DECREF(func_args);
+    return NULL;
+  }
+  if ((func_kwargs != NULL) && !PyDict_CheckExact(func_kwargs)) {
+    PyErr_SetString(PyExc_TypeError, "kwargs must be a dict");
+    Py_DECREF(func_args);
+    return NULL;
   }
   /**
    * if timer is NULL, then import time module and then attempt to import
@@ -81,25 +100,6 @@ PyObject *functimer_timeit_once(
     // set timer to time.perf_counter
     timer = time_perf_counter;
   }
-  /**
-   * check that func_args is tuple and that func_kwargs is a dict (or is NULL).
-   * need to also Py_XDECREF time_module, time_perf_counter, and Py_DECREF
-   * func_args so that we clean up our garbage correctly.
-   */
-  if (!PyTuple_CheckExact(func_args)) {
-    PyErr_SetString(PyExc_TypeError, "args must be a tuple");
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    return NULL;
-  }
-  if ((func_kwargs != NULL) && !PyDict_CheckExact(func_kwargs)) {
-    PyErr_SetString(PyExc_TypeError, "kwargs must be a dict");
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    return NULL;
-  }
   // starting, ending times recorded by timer function
   PyObject *start_time, *end_time;
   // get starting time from timer function. 
@@ -124,7 +124,7 @@ PyObject *functimer_timeit_once(
   // call function number times with func_args and func_kwargs
   for (Py_ssize_t i = 0; i < number; i++) {
     // if NULL is returned, an exception has been raised. Py_DECREF, Py_XDECREF
-    if (PyObject_Call(func, func_args, NULL) == NULL) {
+    if (PyObject_Call(func, func_args, func_kwargs) == NULL) {
       Py_XDECREF(time_module);
       Py_XDECREF(time_perf_counter);
       Py_DECREF(func_args);
