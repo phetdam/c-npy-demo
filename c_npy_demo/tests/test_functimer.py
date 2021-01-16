@@ -29,3 +29,10 @@ def test_timeit_once_sanity():
     # number must be positive
     with pytest.raises(ValueError):
         functimer.timeit_once(max, args = (1, 2), number = -1)
+
+
+def test_timeit_once_timer():
+    "Check that the timer for ``timeit_once`` has correct return values"
+    # must return a numeric value
+    with pytest.raises(TypeError, match = "timer must return a numeric value"):
+        functimer.timeit_once(max, args = (1, 2), timer = lambda: "cheese")
