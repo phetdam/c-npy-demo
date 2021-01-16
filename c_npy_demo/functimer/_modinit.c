@@ -27,7 +27,7 @@ PyDoc_STRVAR(
 // need to place it in the docstring followed by "\n--\n\n"
 PyDoc_STRVAR(
   FUNCTIMER_TIMEIT_ONCE_DOC,
-  "timeit_once(func, args=None, kwargs=None, timer=None, number=1000000)\n"
+  "timeit_once(func, args=None, kwargs=None, *, timer=None, number=1000000)\n"
   "--\n\n"
   "Operates in the same way as :func:`timeit.timeit`, i.e. the same way as\n"
   ":meth:`timeit.Timer.timeit`. ``func`` will be executed with positional\n"
@@ -45,24 +45,43 @@ PyDoc_STRVAR(
   "    returns time in seconds. If specified, must return time in fractional\n"
   "    seconds and not take any arguments.\n"
   ":type timer: function, optional\n"
+  ":param number: Number of times to call ``func``\n"
+  ":type number: int, optional\n"
   ":returns: Time for ``func`` to be executed ``number`` times with args\n"
   "    ``args`` and kwargs ``kwargs``, in units of ``timer``.\n"
   ":rtype: float"
 );
-/*
 PyDoc_STRVAR(
   FUNCTIMER_REPEAT_DOC,
-  "repeat(func, args=None, kwargs=None, number=1000000, repeat=5)\n"
+  "repeat(func, args=None, kwargs=None, *, timer=None, number=1000000, "
+  "repeat=5)\n"
   "--\n\n"
   "Operates in the same way as :func:`timeit.repeat`, i.e. the same was as\n"
-  ":meth:`timeit.Timer.repeat`. TBA"
+  ":meth:`timeit.Timer.repeat`. :func:`timeit_once` will be executed\n"
+  "``repeat`` times, with ``number`` the number of loops to run in each\n"
+  ":func:`timeit_once` call."
   "\n\n"
+  ":param func: Callable to time\n"
+  ":type func: callable\n"
+  ":param args: Tuple of positional args to pass to ``func``\n"
+  ":type args: tuple, optional\n"
+  ":param kwargs: Dict of named arguments to pass to ``func``\n"
+  ":type kwargs: dict, optional\n"
+  ":param timer: Timer function, defaults to :func:`time.perf_counter` which\n"
+  "    returns time in seconds. If specified, must return time in fractional\n"
+  "    seconds and not take any arguments.\n"
+  ":type timer: function, optional\n"
+  ":param number: Number of times to call ``func``\n"
+  ":type number: int, optional\n"
+  ":param repeat: Number of times to repeat the call to :func:`timeit_once`\n"
+  ":param repeat: int, optional\n"
+  ":returns: List of ``repeat`` times in fractional seconds taken for each\n"
+  "    call to :func:`timeit_once`."
   ":rtype: list"
 );
-*/
 PyDoc_STRVAR(
   FUNCTIMER_AUTORANGE_DOC,
-  "autorange(func, args=None, kwargs=None, timer=None)\n"
+  "autorange(func, args=None, kwargs=None, *, timer=None)\n"
   "--\n\n"
   "Determine number of time to call :func:`c_npy_demo.functimer.timeit_once."
   "\n\n"
@@ -84,9 +103,10 @@ PyDoc_STRVAR(
   ":rtype: int"
 );
 /*
+// update docstring later
 PyDoc_STRVAR(
   FUNCTIMER_TIMEIT_DOC,
-  "timeit(func, args=None, kwargs=None, number=None, repeat=None, "
+  "timeit(func, args=None, kwargs=None, *, number=None, repeat=None, "
   "unit=None)\n"
   "--\n\n"
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
@@ -102,14 +122,12 @@ static PyMethodDef functimer_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     FUNCTIMER_TIMEIT_ONCE_DOC
   },
-  /*
   {
     "repeat",
     (PyCFunction) functimer_repeat,
     METH_VARARGS | METH_KEYWORDS,
     FUNCTIMER_REPEAT_DOC
   },
-  */
   {
     "autorange",
     (PyCFunction) functimer_autorange,

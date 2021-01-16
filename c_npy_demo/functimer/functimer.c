@@ -33,7 +33,7 @@ PyObject *functimer_timeit_once(
   // parse args and kwargs; sets appropriate exception so no need to check
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OOOn", argnames, &func, &func_args, &func_kwargs,
+      args, kwargs, "O|OO$On", argnames, &func, &func_args, &func_kwargs,
       &timer, &number
     )
   ) { return NULL; }
@@ -185,6 +185,10 @@ PyObject *functimer_timeit_once(
  * Docstring in `_modinit.c`. No callback allowed.
  * 
  * @note `kwargs` is `NULL` if no named args are passed.
+ * 
+ * @param args PyObject * tuple of positional arguments
+ * @param kwargs PyObject * dict of named arguments
+ * @returns PyObject * numeric value
  */
 PyObject *functimer_autorange(
   PyObject *self, PyObject *args, PyObject *kwargs
@@ -202,7 +206,7 @@ PyObject *functimer_autorange(
   // parse args and kwargs; sets appropriate exception so no need to check
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OOO", argnames, &func, &func_args, &func_kwargs, &timer
+      args, kwargs, "O|OO$O", argnames, &func, &func_args, &func_kwargs, &timer
     )
   ) { return NULL; }
   // number of times to run the function func (starts at 1)
@@ -311,4 +315,87 @@ PyObject *functimer_autorange(
   Py_DECREF(kwargs);
   // return Python int from number. NULL returned on failure
   return PyLong_FromSsize_t(number);
+}
+
+/**
+ * Operates in a similar manner to `timeit.Timer.repeat`.
+ * 
+ * Docstring in `_modinit.c`.
+ * 
+ * @param args PyObject * tuple of positional arguments
+ * @param kwargs PyObject * dict of named arguments
+ * @returns PyObject * list of trial times
+ */
+PyObject *functimer_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
+  /**
+   * callable, args, kwargs, timer function. we don't actually need to use
+   * these directly in autorange; these will just be used with
+   * PyArg_ParseTupleAndKeywords so we can do some argument checking. since all
+   * references are borrowed we don't need to Py_[X]DECREF any of them.
+   */
+  PyObject *func, *func_args, *func_kwargs, *timer;
+  // if timer NULL after arg parsing, set to time.perf_counter
+  func_args = func_kwargs = timer = NULL;
+  // number of times to execute the callable with args and kwargs
+  Py_ssize_t number = 1000000;
+  // number of times to repeat the call to functimer_timeit_once
+  Py_ssize_t repeat = 5;
+  // names of arguments
+  char *argnames[] = {
+    "func", "args", "kwargs", "timer", "number", "repeat", NULL
+  };
+  // parse args and kwargs; sets appropriate exception so no need to check
+  if (
+    !PyArg_ParseTupleAndKeywords(
+      args, kwargs, "O|OO$Onn", argnames, &func, &func_args, &func_kwargs,
+      &timer, &number, &repeat
+    )
+  ) { return NULL; }
+  // check that repeat is greater than 0. if not, set exception and exit. we
+  // don't need to check number since functimer_timeit_once will do the check.
+  if (repeat < 1) {
+    PyErr_SetString(PyExc_ValueError, "repeat must be positive");
+    return NULL;
+  }
+  // Python string for repeat
+  PyObject *repeat_obj = PyUnicode_FromString("repeat");
+  // check if repeat was passed as a named arg. if so, we remove it from kwargs
+  // so we can directly pass kwargs into functimer_timeit_once
+  if (kwargs != NULL) {
+    // get return value from PyDict_Contains
+    int has_repeat = PyDict_Contains(kwargs, repeat_obj);
+    // if error, Py_DECREF repeat_obj and return NULL
+    if (has_repeat == -1) {
+      Py_DECREF(repeat_obj);
+      return NULL;
+    }
+    // if repeat is in kwargs, then remove it from kwargs
+    if (has_repeat) {
+      // if failed, Py_DECREF repeat_obj and then return NULL
+      if (PyDict_DelItemString(kwargs, "repeat") == -1) {
+        Py_DECREF(repeat_obj);
+        return NULL;
+      }
+    }
+    // else do nothing
+  }
+  // don't need repeat_obj anymore so Py_DECREF it
+  Py_DECREF(repeat_obj);
+  // allocate new list to return
+  PyObject *func_times = PyList_New(repeat);
+  // for each trial
+  for (Py_ssize_t i = 0; i < repeat; i++) {
+    // get time result from functimer_timeit_once
+    PyObject *func_time = functimer_timeit_once(self, args, kwargs);
+    // if NULL then there was exception. Py_DECREF func_times and return NULL
+    if (func_time == NULL) {
+      Py_DECREF(func_times);
+      return NULL;
+    }
+    // else set index i of func_times to func_time (reference stolen). no need
+    // to use PyList_SetItem since we won't be out of bounds/leak old refs.
+    PyList_SET_ITEM(func_times, i, func_time);
+  }
+  // return the list of times returned from functimer_timeit_once
+  return func_times;
 }
