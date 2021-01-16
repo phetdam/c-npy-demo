@@ -40,6 +40,8 @@ Suite *pytest_suite() {
   Suite *suite = suite_create("pytest_suite");
   // our one and only test case, named core
   TCase *tc_core = tcase_create("core");
+  // increase test timeout to 60s
+  tcase_set_timeout(tc_core, 60);
   // register case together with test func, add to suite, and return suite
   tcase_add_test(tc_core, print_stuff);
   suite_add_tcase(suite, tc_core);

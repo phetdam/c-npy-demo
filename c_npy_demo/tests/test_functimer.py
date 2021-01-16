@@ -1,9 +1,14 @@
 __doc__ = "Unit tests for :func:`c_npy_demo.cscale.functimer`."
 
 import pytest
+import sys
+import tracemalloc
 
 # pylint: disable=relative-beyond-top-level
 from .. import functimer
+
+# start tracemalloc so we can take memory snapshots
+tracemalloc.start()
 
 
 def test_timeit_once_sanity():
@@ -29,6 +34,9 @@ def test_timeit_once_sanity():
     # number must be positive
     with pytest.raises(ValueError):
         functimer.timeit_once(max, args = (1, 2), number = -1)
+    # number must be less than sys.maxsize (PY_SSIZE_T_MAX)
+    with pytest.raises(OverflowError):
+        functimer.timeit_once(max, args = (1, 2), number = sys.maxsize + 999)
 
 
 def test_timeit_once_timer():
@@ -36,3 +44,47 @@ def test_timeit_once_timer():
     # must return a numeric value
     with pytest.raises(TypeError, match = "timer must return a numeric value"):
         functimer.timeit_once(max, args = (1, 2), timer = lambda: "cheese")
+
+
+def test_timeit_once_memleak():
+    "Check if ``timeit_once`` is leaking memory due to improper refcounting."
+    # filter so that memory allocation tracing is limited to timeit_once call
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 55)]
+    # take snapshots before and after running timeit_once
+    snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
+    functimer.timeit_once(max, args = (1, 2), number = 1000)
+    snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
+    # compare second to first snapshot and print differences (top 10)
+    diffs = snap_2.compare_to(snap_1, "lineno")
+    for diff in diffs:
+        print(diff)
+
+
+def test_autorange_sanity():
+    "Sanity checks for ``PyArg_ParseTupleAndKeywords`` in ``autorange``."
+    # one positional argument required
+    with pytest.raises(TypeError):
+        functimer.autorange(args = ())
+    # args must be a tuple (raised by timeit_once)
+    with pytest.raises(TypeError, match = "args must be a tuple"):
+        functimer.autorange(max, args = [1, 2])
+    # kwargs must be a dict (raised by timeit_once)
+    with pytest.raises(TypeError, match = "kwargs must be a dict"):
+        functimer.autorange(max, args = ((),), kwargs = ["also bogus"])
+    # timer must be callable (raised by timeit_once)
+    with pytest.raises(TypeError):
+        functimer.autorange(max, args = (1, 2), timer = None)
+
+
+def test_autorange_memleak():
+    "Check if ``autorange`` is leaking memory due to improper refcounting."
+    # filter so that memory allocation tracing is limited to autorange call
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 85)]
+    # take snapshots before and after running timeit_once
+    snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
+    functimer.autorange(max, args = (1, 2))
+    snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
+    # compare second to first snapshot and print differences (top 10)
+    diffs = snap_2.compare_to(snap_1, "lineno")
+    for diff in diffs:
+        print(diff)

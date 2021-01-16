@@ -121,10 +121,14 @@ PyObject *functimer_timeit_once(
     Py_DECREF(start_time);
     return NULL;
   }
+  PyObject *func_res;
   // call function number times with func_args and func_kwargs
   for (Py_ssize_t i = 0; i < number; i++) {
+    // call function and Py_XDECREF its result
+    func_res = PyObject_Call(func, func_args, func_kwargs);
+    Py_XDECREF(func_res);
     // if NULL is returned, an exception has been raised. Py_DECREF, Py_XDECREF
-    if (PyObject_Call(func, func_args, func_kwargs) == NULL) {
+    if (func_res == NULL) {
       Py_XDECREF(time_module);
       Py_XDECREF(time_perf_counter);
       Py_DECREF(func_args);
@@ -201,8 +205,8 @@ PyObject *functimer_autorange(
       args, kwargs, "O|OOO", argnames, &func, &func_args, &func_kwargs, &timer
     )
   ) { return NULL; }
-  // number of times to run the function func (default 1)
-  Py_ssize_t number = 1;
+  // number of times to run the function func (starts at 1)
+  Py_ssize_t number;
   // current number multipler
   Py_ssize_t multipler = 1;
   // bases to scale number of times to run so number = bases[i] * multipler
@@ -241,7 +245,7 @@ PyObject *functimer_autorange(
       time_total = 0;
       // try running the function number times
       for (Py_ssize_t j = 0; j < number; j++) {
-        // add number_ to kwargs. Py_DECREF kwargs, number_
+        // add number_ to kwargs. Py_DECREF kwargs, number_ on failure
         if (PyDict_SetItemString(kwargs, "number", number_) < 0) {
           Py_DECREF(kwargs);
           Py_DECREF(number_);
@@ -281,12 +285,17 @@ PyObject *functimer_autorange(
         // add timeit_time_ to time_total
         time_total = time_total + timeit_time_;
       }
-      // computation of time_total complete. if time_total >= 0.2 s, break
+      // done with number_ so Py_DECREF it
+      Py_DECREF(number_);
+      // computation of time_total complete. if time_total >= 0.2 s, break the
+      // outermost for loop. no more changes to number
       if (time_total >= 0.2) {
         break;
       }
-      // done with number_ so Py_DECREF it
-      Py_DECREF(number_);
+    }
+    // if time_total >= 0.2, break from the while loop
+    if (time_total >= 0.2) {
+      break;
     }
     // if number > PY_SSIZE_T_MAX / 10, then break the while loop. emit warning
     if (number > (PY_SSIZE_T_MAX / 10.)) {
