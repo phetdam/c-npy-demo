@@ -10,7 +10,7 @@
 // i use libcheck 0.15.2
 #include <check.h>
 
-#include "pytest_suite.h"
+#include "test_suite.h"
 
 // program usage, nothing much for now
 #define USAGE "usage: %s [-h]\n" \
@@ -42,7 +42,12 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   // instantiate our test suite. note this does not have to be freed!
-  Suite *suite = pytest_suite();
+  Suite *suite = make_suite(300);
+  // if suite is NULL, there was an error, so print error + return EXIT_FAILURE
+  if (suite == NULL) {
+    fprintf(stderr, "error: %s: make_suite returned NULL\n", __func__);
+    return EXIT_FAILURE;
+  }
   // create our suite runner and run all tests (CK_ENV -> set CK_VERBOSITY and
   // if not set, default to CK_NORMAL, i.e. only show failed)
   SRunner *runner = srunner_create(suite);
