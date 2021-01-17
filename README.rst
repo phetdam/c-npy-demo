@@ -16,7 +16,13 @@ optimization is the root of all evil* [#]_
    The contents of this repository will see significant change in the near
    future, as I have decided to greatly simplify the code being used. The
    implied volatility stuff will be moved to a new repository, whose name will
-   be yet another play on snake-related stuff.
+   be yet another play on snake-related stuff. There is more code than I
+   initially wanted, however, since I wrote my own alternative to `timeit`__
+   as a C extension module along with its necessary unit tests since using
+   ``timeit.main`` results in double allocation of a ``numpy`` array in the
+   benchmarking script.
+
+.. __: https://docs.python.org/3/library/timeit.html
 
 A tiny demo Python package comparing speed differences between NumPy's Python
 and C APIs that also serves as an example project for writing a C extension
