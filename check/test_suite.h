@@ -6,6 +6,11 @@
 #ifndef TEST_SUITE_H
 #define TEST_SUITE_H
 
+#ifndef PY_SSIZE_T_CLEAN
+#define PY_SSIZE_T_CLEAN
+#include "Python.h"
+#endif /* PY_SSIZE_T_CLEAN */
+
 #include <check.h>
 
 // whether to exit the test runner immediately the Py_FinalizeEx returns an
