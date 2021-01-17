@@ -9,25 +9,24 @@
 #ifndef PY_SSIZE_T_CLEAN
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
-#include "structmember.h"
 #endif /* PY_SSIZE_T_CLEAN */
 
 // definition for the TimeitResult struct
 typedef struct {
-    PyObject_HEAD
-    // best per-loop runtime of the tested callable
-    double best;
-    // unit to use in the brief (report similar to timeit.main output)
-    char const *unit;
-    // number of loops the callable was run during each trial
-    Py_ssize_t number;
-    // number of trials that were run
-    Py_ssize_t repeat;
-    // tuples of per-loop runtimes, total runtimes for each trial
-    PyObject *loop_times;
-    PyObject *times;
-    // cached property. Python string with output similar to timeit.main output
-    PyObject *brief;
+  PyObject_HEAD
+  // best per-loop runtime of the tested callable
+  double best;
+  // unit to use in the brief (report similar to timeit.main output)
+  char const *unit;
+  // number of loops the callable was run during each trial
+  Py_ssize_t number;
+  // number of trials that were run
+  Py_ssize_t repeat;
+  // tuples of per-loop runtimes, total runtimes for each trial
+  PyObject *loop_times;
+  PyObject *times;
+  // cached property. Python string with output similar to timeit.main output
+  PyObject *brief;
 } TimeitResult;
 
 // custom destructor (operates on self)
