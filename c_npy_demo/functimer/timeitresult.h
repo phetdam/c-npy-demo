@@ -11,7 +11,7 @@
 #include "Python.h"
 #endif /* PY_SSIZE_T_CLEAN */
 
-// definition for the TimeitResult struct
+// definition for the TimeitResult struct. not subclassable.
 typedef struct {
   PyObject_HEAD
   // best per-loop runtime of the tested callable
@@ -30,15 +30,14 @@ typedef struct {
 } TimeitResult;
 
 // custom destructor (operates on self)
-void TimeitResult_dealloc(PyObject *);
-// custom __repr__ implementation (operate on self)
-PyObject *TimeitResult_repr(PyObject *);
-// custom __new__ implementation (subtype, args, kwargs)
+void TimeitResult_dealloc(TimeitResult *);
+// custom __new__ implementation (subtype, args, kwargs). since we want the
+// TimedResult to be immutable, we don't define a custom __init__ function.
 PyObject *TimeitResult_new(PyTypeObject *, PyObject *, PyObject *);
-// custom __init__ implementation (self, args, kwargs)
-int TimeitResult_init(PyObject *, PyObject *, PyObject *);
 // custom getter for brief so that it works like the @property decorator. first
 // arg is self and the closure is unused.
-PyObject *TimeitResult_getbrief(PyObject *, void *);
+PyObject *TimeitResult_getbrief(TimeitResult *, void *);
+// custom __repr__ implementation (operates on self)
+PyObject *TimeitResult_repr(TimeitResult *);
 
 #endif /* TIMEITRESULT_H */
