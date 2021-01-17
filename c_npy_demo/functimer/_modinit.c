@@ -105,8 +105,8 @@ PyDoc_STRVAR(
 /*
 // update docstring later
 PyDoc_STRVAR(
-  FUNCTIMER_TIMEIT_AUTO_DOC,
-  "timeit_auto(func, args=None, kwargs=None, *, timer=None, number=None, "
+  FUNCTIMER_TIMEIT_ENH_DOC,
+  "timeit_enh(func, args=None, kwargs=None, *, timer=None, number=None, "
   "repeat=None, unit=None, precision=None)\n"
   "--\n\n"
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
@@ -136,10 +136,10 @@ static PyMethodDef functimer_methods[] = {
   },
   /*
   {
-    "timeit_auto",
-    (PyCFunction) functimer_timeit_auto,
+    "timeit_enh",
+    (PyCFunction) functimer_timeit_enh,
     METH_VARARGS | METH_KEYWORDS,
-    FUNCTIMER_TIMEIT_AUTO_DOC
+    FUNCTIMER_TIMEIT_ENH_DOC
   },
   */
   // sentinel required; needs to have at least one NULL in it
