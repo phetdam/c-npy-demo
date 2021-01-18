@@ -35,6 +35,8 @@ FUNCTIMER_SO   = $(shell find $(PKG_NAME)/functimer.*.so | \
 CHECK_CFLAGS   = $(PY_CFLAGS) -I$(_TIMER_DIR)
 # linker flags for compiling test runner
 CHECK_LDFLAGS  = $(PY_LDFLAGS) -L$(PKG_NAME) -lcheck
+# flags to pass to the libcheck test runner
+RUNNER_FLAGS   = -v
 
 # phony targets (need to look into why build sometimes doesn't trigger)
 .PHONY: build clean dummy dist
@@ -63,7 +65,7 @@ inplace: $(XDEPS)
 # build test runner and run unit tests using check. show flags passed to gcc
 check: $(CHECK_DEPS) inplace
 	$(CC) $(CHECK_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
-	@./runner
+	@./runner $(RUNNER_FLAGS)
 
 # make source and wheel
 dist: build
