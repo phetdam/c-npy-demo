@@ -12,7 +12,13 @@
 // i use libcheck 0.15.2
 #include <check.h>
 
-#include "test_suite.h"
+#include "pytest_suite.h"
+#include "test_helpers.h"
+#include "timeitresult_suite.h"
+
+// whether to exit the test runner immediately the Py_FinalizeEx returns an
+// error. set to false by default so other tests can run.
+int Py_Finalize_err_stop;
 
 // long option names
 #define help_longopt "help"
@@ -114,17 +120,26 @@ int main(int argc, char **argv) {
     );
     return EXIT_FAILURE;
   }
-  // done with option parsing. instantiate test suite; no free call necessary
-  Suite *suite = make_suite(timeout);
-  // if suite is NULL, there was an error, so print error + return EXIT_FAILURE
-  if (suite == NULL) {
-    fprintf(stderr, "error: %s: make_suite returned NULL\n", __func__);
+  // done with option parsing. instantiate test suites; no free call necessary.
+  // if suites are NULL, there was error, so print error + return EXIT_FAILURE
+  Suite *pytest_suite = make_pytest_suite(timeout);
+  if (pytest_suite == NULL) {
+    fprintf(stderr, "error: %s: make_pytest_suite returned NULL\n", __func__);
     return EXIT_FAILURE;
   }
-  // create our suite runner and run all tests (CK_ENV -> set CK_VERBOSITY and
-  // if not set, default to CK_NORMAL, i.e. only show failed)
-  SRunner *runner = srunner_create(suite);
-  srunner_run_all(runner, verbosity_flag ? CK_VERBOSE : CK_NORMAL);
+  Suite *timeitresult_suite = make_timeitresult_suite(timeout);
+  if (timeitresult_suite == NULL) {
+    fprintf(
+      stderr, "error: %s: make_timeitresult_suite returned NULL\n", __func__
+    );
+    return EXIT_FAILURE;
+  }
+  // create our suite runner and run all tests. CK_ENV uses value of environment
+  // variable CK_VERBOSITY and defaults to CK_NORMAL if CK_VERBOSITY not set.
+  // CK_NORMAL only shows failed tests.
+  SRunner *runner = srunner_create(pytest_suite);
+  srunner_add_suite(runner, timeitresult_suite);
+  srunner_run_all(runner, verbosity_flag ? CK_VERBOSE : CK_ENV);
   // get number of failed tests and free runner
   int n_failed = srunner_ntests_failed(runner);
   srunner_free(runner);

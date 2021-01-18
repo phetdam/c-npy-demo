@@ -1,19 +1,17 @@
 /**
- * @file test_suite.h
- * @brief Header file for `test_suite.c`.
+ * @file test_helpers.h
+ * @brief Header file containing useful declarations usable by all test suites.
  */
 
-#ifndef TEST_SUITE_H
-#define TEST_SUITE_H
+#ifndef TEST_HELPERS_H
+#define TEST_HELPERS_H
 
 #ifndef PY_SSIZE_T_CLEAN
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #endif /* PY_SSIZE_T_CLEAN */
 
-#include <check.h>
-
-// whether to exit the test runner immediately the Py_FinalizeEx returns an
+// whether to exit the test runner immediately if Py_FinalizeEx returns an
 // error. set to false by default so other tests can run.
 extern int Py_Finalize_err_stop;
 /**
@@ -27,7 +25,5 @@ extern int Py_Finalize_err_stop;
 #define Py_FinalizeEx_handle_err(ret) if (Py_FinalizeEx() < 0) { \
   fprintf(stderr, "error: %s: Py_FinalizeEx error\n", __func__); \
   if (Py_Finalize_err_stop) { exit(120); } else { return ret; } }
-// returns main test suite run by the runner. takes timeout value
-Suite *make_suite(double);
 
-#endif /* TEST_SUITE_H */
+#endif /* TEST_HELPERS_H */

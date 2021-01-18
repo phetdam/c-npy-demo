@@ -84,6 +84,11 @@ PyObject *TimeitResult_new(
     PyErr_SetString(PyExc_RuntimeError, "missing PyTypeObject *type");
     return NULL;
   }
+  // if args is NULL, raise exception and return NULL
+  if (args == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "missing PyObject *args");
+    return NULL;
+  }
   // new instance of the TimeitResult allocated by tp_alloc slot
   TimeitResult *self = (TimeitResult *) type->tp_alloc(type, 0);
   // if NULL, return NULL (error indicator set)

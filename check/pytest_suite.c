@@ -10,12 +10,8 @@
 
 #include <check.h>
 
-#include "test_suite.h"
-#include "timeitresult.h"
-
-// whether to exit the test runner immediately the Py_FinalizeEx returns an
-// error. set to false by default so other tests can run.
-int Py_Finalize_err_stop;
+#include "pytest_suite.h"
+#include "test_helpers.h"
 
 /**
  * Runs `pytest` unit tests.
@@ -47,47 +43,27 @@ START_TEST(test_pytest) {
 END_TEST
 
 /**
- * Test that `TimeitResult_validate_unit` works as expected.
- */
-START_TEST(test_validate_unit) {
-  // return false if arg is NULL
-  ck_assert_msg(
-    !TimeitResult_validate_unit(NULL), "%s: TimeitResult_validate_unit should "
-    "return false if passed NULL pointer", __func__
-  );
-  // foobar is not a valid unit
-  ck_assert_msg(
-    !TimeitResult_validate_unit("foobar"), "%s: TimeitResult_validate_unit "
-    "should not validate invalid unit \"foobar\"", __func__
-  );
-  // nsec is a valid unit
-  ck_assert_msg(
-    TimeitResult_validate_unit("nsec"), "%s: TimeitResult_validate_unit "
-    "should validate valid unit \"nsec\"", __func__
-  );
-}
-
-/**
- * Create test suite `"test_suite"` using static tests defined above.
+ * Create test suite `"pytest_suite"` using static test defined above.
+ * 
+ * Responsible for invoking `pytest`.
  * 
  * @param timeout `double` number of seconds for the test case's timeout
  * @returns libcheck `Suite *`, `NULL` on error
  */
-Suite *make_suite(double timeout) {
+Suite *make_pytest_suite(double timeout) {
   // if timeout is nonpositive, print error and return NULL
   if (timeout <= 0) {
     fprintf(stderr, "error: %s: timeout must be positive\n", __func__);
     return NULL;
   }
-  // create suite called test_suite
+  // create suite called pytest_suite
   Suite *suite = suite_create("test_suite");
-  // our one and only test case, named core
+  // only one test case
   TCase *tc_core = tcase_create("core");
   // set test case timeout to timeout
   tcase_set_timeout(tc_core, timeout);
-  // register case together with tests, add to suite, and return suite
+  // register case together with test, add to suite, and return suite
   tcase_add_test(tc_core, test_pytest);
-  tcase_add_test(tc_core, test_validate_unit);
   suite_add_tcase(suite, tc_core);
   return suite;
 }
