@@ -70,12 +70,12 @@ START_TEST(test_validate_unit) {
 /**
  * Create test suite `"test_suite"` using static tests defined above.
  * 
- * @param timeout `int` number of seconds for the test case's timeout
+ * @param timeout `double` number of seconds for the test case's timeout
  * @returns libcheck `Suite *`, `NULL` on error
  */
-Suite *make_suite(int timeout) {
+Suite *make_suite(double timeout) {
   // if timeout is nonpositive, print error and return NULL
-  if (timeout < 1) {
+  if (timeout <= 0) {
     fprintf(stderr, "error: %s: timeout must be positive\n", __func__);
     return NULL;
   }
