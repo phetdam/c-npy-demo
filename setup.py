@@ -32,6 +32,7 @@ def _get_ext_modules():
             name = "functimer",
             sources = [
                 _PACKAGE_NAME + "/functimer/functimer.c",
+                _PACKAGE_NAME + "/functimer/timeitresult.c",
                 _PACKAGE_NAME + "/functimer/_modinit.c"
             ],
             extra_compile_args = ["-std=gnu11"]
