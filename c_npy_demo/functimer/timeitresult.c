@@ -7,6 +7,7 @@
 #include "Python.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "timeitresult.h"
@@ -15,12 +16,17 @@
 char const * const TimeitResult_units[] = {TimeitResult_UNITS, NULL};
 
 /**
- * Return 1 if `unit` matches a value in `TimeitResult_units` else `0.
+ * Return 1 if `unit` matches a value in `TimeitResult_units` else 0.
  * 
  * @param unit `char const *`, must be `NULL`-terminated
  * @returns 1 if valid unit in `TimeitResult_units, 0 otherwise.
  */
 int TimeitResult_validate_unit(char const *unit) {
+  // return false if NULL and raise warning
+  if (unit == NULL) {
+    fprintf(stderr, "warning: %s: unit is NULL\n", __func__);
+    return false;
+  }
   int i = 0;
   // until the end of the array
   while (TimeitResult_units[i] != NULL) {
@@ -88,7 +94,7 @@ PyObject *TimeitResult_new(
   // value until the value is explicitly requested through attribute access
   self->loop_times = self->brief = NULL;
   // argument names
-  char argnames[] = {"best", "unit", "number", "repeat", "times"};
+  char *argnames[] = {"best", "unit", "number", "repeat", "times"};
   // parse args and kwargs. pass field addresses to PyArg_ParseTupleAndKeywords.
   // on error, need to Py_DECREF self, which is a new reference.
   if (

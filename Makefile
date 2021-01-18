@@ -1,16 +1,19 @@
-# Makefile for c_numpy_demo build + install.
+# Makefile for c_npy_demo build + install.
 
 # package name and source folder for extension source
 PKG_NAME       = c_npy_demo
 _EXT_DIR       = $(PKG_NAME)/cscale
+# source folder for the timing module (also a C extension)
+_TIMER_DIR     = $(PKG_NAME)/functimer
 # directory for libcheck test runner code
 CHECK_DIR      = check
 # c compiler, of course
 CC             = gcc
-# dependencies for the extension module
-XDEPS          = $(wildcard $(_EXT_DIR)/*.c)
-# dependencies for test running code
-CHECK_DEPS     = $(wildcard $(CHECK_DIR)/*.c)
+# dependencies for the extension modules
+XDEPS          = $(wildcard $(_EXT_DIR)/*.c) $(wildcard $(_TIMER_DIR)/*.c)
+# dependencies for test running code. since we are testing a helper function in
+# $(_TIMER_DIR)/timeitresult.c, we include it as a dependency.
+CHECK_DEPS     = $(wildcard $(CHECK_DIR)/*.c) $(_TIMER_DIR)/timeitresult.c
 # required Python source files in the package (modules and tests)
 PYDEPS         = $(wildcard $(PKG_NAME)/*.py) $(wildcard $(PKG_NAME)/*/*.py)
 # set python; on docker specify PYTHON value externally using absolute path
@@ -25,8 +28,13 @@ PY_CFLAGS     ?= -fPIE $(shell python3-config --cflags)
 # ubuntu needs --embed, else -lpythonx.y is omitted by --ldflags, which is a
 # linker error. libpython3.8 is in /usr/lib/x86_64-linux-gnu for me.
 PY_LDFLAGS    ?= $(shell python3-config --embed --ldflags)
-# linker flags for compiling test runner. my libcheck is in /usr/local/lib
-CHECK_LDFLAGS  = $(PY_LDFLAGS) -lcheck
+# name of the shared object for functimer built by setup.py (no path)
+FUNCTIMER_SO   = $(shell find $(PKG_NAME)/functimer.*.so | \
+                   sed s/"$(PKG_NAME)\/"//g)
+# compile flags for compiling test runner. my libcheck is in /usr/local/lib
+CHECK_CFLAGS   = $(PY_CFLAGS) -I$(_TIMER_DIR)
+# linker flags for compiling test runner
+CHECK_LDFLAGS  = $(PY_LDFLAGS) -L$(PKG_NAME) -lcheck
 
 # phony targets (need to look into why build sometimes doesn't trigger)
 .PHONY: build clean dummy dist
@@ -54,7 +62,7 @@ inplace: $(XDEPS)
 
 # build test runner and run unit tests using check. show flags passed to gcc
 check: $(CHECK_DEPS) inplace
-	$(CC) $(PY_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
+	$(CC) $(CHECK_CFLAGS) -o runner $(CHECK_DEPS) $(CHECK_LDFLAGS)
 	@./runner
 
 # make source and wheel

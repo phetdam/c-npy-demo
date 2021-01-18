@@ -11,6 +11,7 @@
 #include <check.h>
 
 #include "test_suite.h"
+#include "timeitresult.h"
 
 // whether to exit the test runner immediately the Py_FinalizeEx returns an
 // error. set to false by default so other tests can run.
@@ -19,8 +20,7 @@ int Py_Finalize_err_stop;
 /**
  * Runs `pytest` unit tests.
  */ 
-START_TEST(pytest)
-{
+START_TEST(test_pytest) {
   // required initialization function
   Py_Initialize();
   // import the pytest module 
@@ -47,6 +47,27 @@ START_TEST(pytest)
 END_TEST
 
 /**
+ * Test that `TimeitResult_validate_unit` works as expected.
+ */
+START_TEST(test_validate_unit) {
+  // return false if arg is NULL
+  ck_assert_msg(
+    !TimeitResult_validate_unit(NULL), "%s: TimeitResult_validate_unit should "
+    "return false if passed NULL pointer", __func__
+  );
+  // foobar is not a valid unit
+  ck_assert_msg(
+    !TimeitResult_validate_unit("foobar"), "%s: TimeitResult_validate_unit "
+    "should not validate invalid unit \"foobar\"", __func__
+  );
+  // nsec is a valid unit
+  ck_assert_msg(
+    TimeitResult_validate_unit("nsec"), "%s: TimeitResult_validate_unit "
+    "should validate valid unit \"nsec\"", __func__
+  );
+}
+
+/**
  * Create test suite `"test_suite"` using static tests defined above.
  * 
  * @param timeout `int` number of seconds for the test case's timeout
@@ -65,7 +86,8 @@ Suite *make_suite(int timeout) {
   // set test case timeout to timeout
   tcase_set_timeout(tc_core, timeout);
   // register case together with tests, add to suite, and return suite
-  tcase_add_test(tc_core, pytest);
+  tcase_add_test(tc_core, test_pytest);
+  tcase_add_test(tc_core, test_validate_unit);
   suite_add_tcase(suite, tc_core);
   return suite;
 }
