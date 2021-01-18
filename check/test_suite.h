@@ -27,7 +27,7 @@ extern int Py_Finalize_err_stop;
 #define Py_FinalizeEx_handle_err(ret) if (Py_FinalizeEx() < 0) { \
   fprintf(stderr, "error: %s: Py_FinalizeEx error\n", __func__); \
   if (Py_Finalize_err_stop) { exit(120); } else { return ret; } }
-// returns main test suite run by the runner
-Suite *make_suite();
+// returns main test suite run by the runner. takes timeout value
+Suite *make_suite(double);
 
 #endif /* TEST_SUITE_H */
