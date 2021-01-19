@@ -14,24 +14,6 @@
 #include "timeitresult.h"
 #include "timeitresult_suite.h"
 
-// empty macros indicating whether test needs Python C API or not.
-#define PY_C_API_REQUIRED
-#define NO_PY_C_API
-
-/**
- * Python interpreter fixture setup to allow use of the Python C API
- */
-void py_setup(void) {
-  Py_Initialize();
-}
-
-/**
- * Python interpreter fixture teardown to finalize interpreter
- */
-void py_teardown(void) {
-  Py_FinalizeEx_handle_err()
-}
-
 /**
  * Test that `TimeitResult_validate_unit` works as expected.
  */

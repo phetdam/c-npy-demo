@@ -14,29 +14,39 @@
 #include "test_helpers.h"
 
 /**
- * Runs `pytest` unit tests.
+ * Runs `pytest` unit tests. `faulthandler` enabled.
+ * 
+ * See https://docs.python.org/3/library/faulthandler.html for details.
  */ 
 START_TEST(test_pytest) {
   // required initialization function
   Py_Initialize();
+  // import the faulthandler module. handle errors
+  PyObject *faulth_mod = PyImport_ImportModule("faulthandler");
+  if (faulth_mod == NULL) {
+    
+  }
   // import the pytest module 
-  PyObject *module = PyImport_ImportModule("pytest");
+  PyObject *pytest_mod = PyImport_ImportModule("pytest");
   // if NULL, exception was set, so the test failed. finalize + handle err
-  if (module == NULL) {
+  if (pytest_mod == NULL) {
     Py_FinalizeEx_handle_err()
     return;
   }
   // try to access the main method from pytest
-  PyObject *pytest_main = PyObject_GetAttrString(module, "main");
-  // if NULL, exception set. Py_DECREF module and finalize + handle err
+  PyObject *pytest_main = PyObject_GetAttrString(pytest_mod, "main");
+  // if NULL, exception set. Py_DECREF pytest_mod and finalize + handle err
   if (pytest_main == NULL) {
-    Py_DECREF(module);
+    Py_DECREF(pytest_mod);
     Py_FinalizeEx_handle_err()
     return;
   }
   // run pytest.main; relies on local pytest.ini (returns exit code). on error,
   // exit code is NULL, so we use Py_XDECREF since we ignore the value
   Py_XDECREF(PyObject_CallObject(pytest_main, NULL));
+  // Py_DECREF faulth_mod, faulth_enable, pytest_mod, pytest_main
+  Py_DECREF(pytest_mod);
+  Py_DECREF(pytest_main);
   // required finalization + handle any finalization error
   Py_FinalizeEx_handle_err()
 }

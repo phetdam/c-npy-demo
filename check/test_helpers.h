@@ -11,6 +11,9 @@
 #include "Python.h"
 #endif /* PY_SSIZE_T_CLEAN */
 
+// empty macros indicating whether tests need the Python C API or not
+#define PY_C_API_REQUIRED
+#define NO_PY_C_API
 // whether to exit the test runner immediately if Py_FinalizeEx returns an
 // error. set to false by default so other tests can run.
 extern int Py_Finalize_err_stop;
@@ -25,5 +28,11 @@ extern int Py_Finalize_err_stop;
 #define Py_FinalizeEx_handle_err(ret) if (Py_FinalizeEx() < 0) { \
   fprintf(stderr, "error: %s: Py_FinalizeEx error\n", __func__); \
   if (Py_Finalize_err_stop) { exit(120); } else { return ret; } }
+
+// Python interpreter fixture setup to allow use of the Python C API
+void py_setup(void);
+
+// Python interpreter fixture teardown to finalize interpreter
+void py_teardown(void);
 
 #endif /* TEST_HELPERS_H */
