@@ -200,9 +200,10 @@ PyObject *TimeitResult_getbrief(TimeitResult *self, void *closure) {
  * Custom `__repr__` implementation for `TimeitResult`.
  * 
  * @param self `TimeitResult *` current instance
+ * @param args `PyObject *` ignored, always `NULL`
  * @returns `PyObject *` Python unicode object representation for `self`
  */
-PyObject *TimeitResult_repr(TimeitResult *self) {
+PyObject *TimeitResult_repr(TimeitResult *self, PyObject *args) {
   // dummy, returns "TimeitResult(bogus)"
   return PyUnicode_FromString("TimeitResult(bogus)");
 }

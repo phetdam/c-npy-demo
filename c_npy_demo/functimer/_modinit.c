@@ -5,8 +5,11 @@
 
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
+// need to include structmember.h to access the PyMemberDef struct definition
+#include "structmember.h"
 
 #include "functimer.h"
+#include "timeitresult.h"
 
 // module name and docstring
 #define MODULE_NAME "functimer"
@@ -112,6 +115,22 @@ PyDoc_STRVAR(
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
 );
 */
+// TimeitResult class name
+#define TIMEITRESULT_NAME "TimeitResult"
+// TimeitResult class docstring
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_DOC,
+  "TimeitResult"
+);
+// TimeitResult docstrings for cached properties
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_GETBRIEF_DOC,
+  "TimeitResult.brief"
+);
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_GETLOOP_TIMES_DOC,
+  "TimeitResult.loop_times"
+);
 
 // static array of module methods
 static PyMethodDef functimer_methods[] = {
@@ -146,7 +165,64 @@ static PyMethodDef functimer_methods[] = {
   {NULL, NULL, 0, NULL}
 };
 
-// module definition struct
+// standard members for TimeitResult, all read-only
+// todo: add docstrings for the members?
+static PyMemberDef TimeitResult_members[] = {
+  {"best", T_DOUBLE, offsetof(TimeitResult, best), READONLY, NULL},
+  {"unit", T_STRING, offsetof(TimeitResult, unit), READONLY, NULL},
+  {"number", T_PYSSIZET, offsetof(TimeitResult, number), READONLY, NULL},
+  {"repeat", T_PYSSIZET, offsetof(TimeitResult, repeat), READONLY, NULL},
+  {"times", T_OBJECT_EX, offsetof(TimeitResult, times), READONLY, NULL},
+  // required sentinel, at least name must be NULL
+  {NULL, 0, 0, 0, NULL}
+};
+
+// getters for TimeitResult.brief and TimeitResult.loop_times
+static PyGetSetDef TimeitResult_getters[] = {
+  {
+    "brief", (getter) TimeitResult_getbrief, NULL,
+    FUNCTIMER_TIMEITRESULT_GETBRIEF_DOC, NULL
+  },
+  {
+    "loop_times", (getter) TimeitResult_getloop_times, NULL,
+    FUNCTIMER_TIMEITRESULT_GETLOOP_TIMES_DOC, NULL
+  },
+  // sentinel required; name must be NULL
+  {NULL, NULL, NULL, NULL, NULL}
+};
+
+// methods for TimeitResult
+static PyMethodDef TimeitResult_methods[] = {
+  {"__repr__", (PyCFunction) TimeitResult_repr, METH_NOARGS, NULL},
+  // required sentinel, at least name needs to be NULL
+  {NULL, NULL, 0, NULL}
+};
+
+// static type definition struct
+static PyTypeObject TimeitResult_type = {
+  PyVarObject_HEAD_INIT(NULL, 0)
+  // full type name is c_npy_demo.MODULE_NAME.TimeitResult
+  .tp_name = "c_npy_demo." MODULE_NAME "." TIMEITRESULT_NAME,
+  // docstring and size for the TimeitResult struct
+  .tp_doc = FUNCTIMER_TIMEITRESULT_DOC,
+  .tp_basicsize = sizeof(TimeitResult),
+  // not a variable-size object, so set to 0
+  .tp_itemsize = 0,
+  // omit Py_TPFLAGS_BASETYPE as this class is final
+  .tp_flags = Py_TPFLAGS_DEFAULT,
+  // custom __new__ function; no __init__ implementation for reinitialization
+  .tp_new = TimeitResult_new,
+  // custom destructor
+  .tp_dealloc = (destructor) TimeitResult_dealloc,
+  // standard class members; all are read-only
+  .tp_members = TimeitResult_members,
+  // getters for the brief and loop_times cached properties
+  .tp_getset = TimeitResult_getters,
+  // TimeitResult methods
+  .tp_methods = TimeitResult_methods
+};
+
+// static module definition struct
 static struct PyModuleDef functimer_def = {
   PyModuleDef_HEAD_INIT,
   MODULE_NAME,
@@ -157,9 +233,31 @@ static struct PyModuleDef functimer_def = {
 
 // module initialization function
 PyMODINIT_FUNC PyInit_functimer(void) {
-  // create the module
-  PyObject *module;
-  module = PyModule_Create(&functimer_def);
-  // return module pointer (could be NULL on failure)
+  // check if type is ready. if error (return < 0), exception is set
+  if (PyType_Ready(&TimeitResult_type) < 0) {
+    return NULL;
+  }
+  // create the module. if NULL, return
+  PyObject *module = PyModule_Create(&functimer_def);
+  if (module == NULL) {
+    return NULL;
+  }
+  /**
+   * add PyTypeObject * to module. need to Py_INCREF &TimeitResult_type since
+   * it starts with zero references. PyModule_AddObject only steals a reference
+   * on success, so on error (returns -1), must Py_DECREF &Timeitresult_type.
+   * also need to Py_DECREF module, which is a new reference.
+   */
+  Py_INCREF(&TimeitResult_type);
+  if (
+    PyModule_AddObject(
+      module, TIMEITRESULT_NAME, (PyObject *) &TimeitResult_type
+    ) < 0
+  ) {
+    Py_DECREF(&TimeitResult_type);
+    Py_DECREF(module);
+    return NULL;
+  }
+  // return module pointer
   return module;
 }
