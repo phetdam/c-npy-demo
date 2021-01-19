@@ -55,7 +55,9 @@ Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
 Github Actions runners were done within the `manylinux1 Docker images`__
 provided by PyPA. To build, you will need to have the latest `setuptools`__ [#]_
 installed on your system, with `wheel`__ also installed if you like to create a
-prebuilt wheel for your own specific platform.
+prebuilt wheel for your own specific platform. You of course will need whatever
+C compiler is used to build Python on your system which will be determined by
+``setuptools``.
 
 .. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__, but
    since a (tiny) C extension module has to be built in this package the legacy
