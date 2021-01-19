@@ -1,4 +1,4 @@
-__doc__ = "Unit tests for :func:`c_npy_demo.cscale.functimer`."
+__doc__ = "Unit tests for :func:`c_npy_demo.cscale.functimer` functions."
 
 import pytest
 import sys

@@ -53,9 +53,12 @@ void TimeitResult_dealloc(TimeitResult *self) {
     PyErr_SetString(PyExc_RuntimeError, "pointer to self is NULL");
     return;
   }
-  // Py_DECREF times (guaranteed to not be NULL)
-  Py_DECREF(self->times);
-  // loop_times, brief might be NULL if never accessed as attribute
+  /**
+   * times, loop_times, brief might be NULL, so we need Py_XDECREF. times can
+   * be NULL if TimeitResult_new fails while loop_times and brief may be NULL
+   * if they are never accessed by the user as attributes.
+   */
+  Py_XDECREF(self->times);
   Py_XDECREF(self->loop_times);
   Py_XDECREF(self->brief);
   // free the struct using the default function set to tp_free
@@ -95,11 +98,11 @@ PyObject *TimeitResult_new(
   if (self == NULL) {
     return NULL;
   }
-  // loop_times and brief are initially set to NULL since they won't have any
-  // value until the value is explicitly requested through attribute access
-  self->loop_times = self->brief = NULL;
-  // argument names
-  char *argnames[] = {"best", "unit", "number", "repeat", "times"};
+  // set initial values to be overwritten later with args, kwargs
+  self->best = self->number = self->repeat = 0;
+  self->unit = self->times = self->loop_times = self->brief = NULL;
+  // argument names (must be NULL-terminated)
+  char *argnames[] = {"best", "unit", "number", "repeat", "times", NULL};
   // parse args and kwargs. pass field addresses to PyArg_ParseTupleAndKeywords.
   // on error, need to Py_DECREF self, which is a new reference.
   if (

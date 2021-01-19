@@ -75,7 +75,7 @@ PY_C_API_REQUIRED START_TEST(test_dealloc) {
  * 
  * @note Technically C API module functions should be static.
  */
-PY_C_API_REQUIRED START_TEST(test_new) {
+PY_C_API_REQUIRED START_TEST(test_new_extern) {
   // dummy tuple needed to pass to args
   PyObject *args = PyTuple_New(0);
   // if NULL, test fails
@@ -112,8 +112,10 @@ PY_C_API_REQUIRED START_TEST(test_new) {
  * 
  * Invokes unit tests for `TimeitResult` in two cases. The first case,
  * `"py_core"` uses the `py_setup` and `py_teardown` functions to set up an
- * unchecked fixture (runs in same address space and only at start and end of
- * test case). The second case, `"c_core"`, doesn't use the Python C API.
+ * checked fixture (runs in forked address space at the start and end of each
+ * unit test, so if the Python interpreter gets killed we can get a fresh one
+ * for subsequent tests). The second case, `"c_core"`, doesn't use the Python C
+ * API and has no need for other setup/teardown cases.
  * 
  * @param timeout `double` number of seconds for the test case's timeout
  * @returns libcheck `Suite *`, `NULL` on error
@@ -137,7 +139,7 @@ Suite *make_timeitresult_suite(double timeout) {
   tcase_add_checked_fixture(tc_py_core, py_setup, py_teardown);
   // register cases together with tests, add cases to suite, and return suite
   tcase_add_test(tc_py_core, test_dealloc);
-  tcase_add_test(tc_py_core, test_new);
+  tcase_add_test(tc_py_core, test_new_extern);
   tcase_add_test(tc_c_core, test_validate_unit);
   suite_add_tcase(suite, tc_py_core);
   suite_add_tcase(suite, tc_c_core);

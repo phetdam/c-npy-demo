@@ -25,6 +25,7 @@ int Py_Finalize_err_stop;
 #define timeout_longopt "timeout"
 #define verbose_longopt "verbose"
 #define exit_py_longopt "exit-on-pyerr"
+#define no_fork_longopt "no-fork"
 
 // long options for the test runner. values are equivalent to short flags.
 static struct option runner_opts[] = {
@@ -35,11 +36,13 @@ static struct option runner_opts[] = {
   // force verbose output level. if not specified, defaults to CK_NORMAL
   {verbose_longopt, no_argument, NULL, 'v'},
   // stop runner on Py_FinalizeEx error. if not specified, false
-  {exit_py_longopt, no_argument, NULL, 'E'}
+  {exit_py_longopt, no_argument, NULL, 'E'},
+  // no fork mode to allow debugging
+  {no_fork_longopt, no_argument, NULL, 'n'}
 };
 
 // program usage
-#define USAGE "usage: %s [-h] [-vE] [-t timeout]\n\n" \
+#define USAGE "usage: %s [-h] [-vEn] [-t timeout]\n\n" \
   "libcheck runner. runs pytest by embedding the Python interpreter. invoke\n" \
   "with ./, i.e. from the same directory it is located in." \
   "\n\n" \
@@ -51,21 +54,25 @@ static struct option runner_opts[] = {
   "                        CK_VERBOSE to srunner_run_all\n" \
   " -E, --exit-on-pyerr    exit test runner if Py_FinalizeEx errors, i.e.\n" \
   "                        an error occurred during finalization of the\n" \
-  "                        Python interpreter state. usually unnecessary.\n", \
-  argv[0]
+  "                        Python interpreter state. usually unnecessary.\n" \
+  " -n, --no-fork          don't run unit tests in separate address space.\n" \
+  "                        pass this flag if runnning with gdb.\n", argv[0]
 
 int main(int argc, char **argv) {
-  // verbosity flag, value of timeout. verbosity flag set to false initially
-  int verbosity_flag;
+  // verbosity flag, fork mode flag. verbosity flag false initially while the
+  // fork mode flag is true initially.
+  int verbosity_flag, fork_mode_flag;
+  // number of seconds before a test times out
   double timeout = 300;
   verbosity_flag = false;
+  fork_mode_flag = true;
   // get arguments using getopt_long
   while (true) {
     // long option index and value (short option flag) returned by getopt_long
     int opt_i, opt_flag;
     // get identifier (short flag) from getopt_long
     opt_flag = getopt_long(
-      argc, (char * const *) argv, "ht:vE", runner_opts, &opt_i
+      argc, (char * const *) argv, "ht:vEn", runner_opts, &opt_i
     );
     // if opt_flag == -1, then we are done. break while
     if (opt_flag == -1) {
@@ -103,6 +110,10 @@ int main(int argc, char **argv) {
         );
         Py_Finalize_err_stop = true;
         break;
+      // if we want to run all tests in same process (for debugging)
+      case 'n':
+        fork_mode_flag = false;
+        break;
       // unknown option. getopt_long will print a message for us, so exit
       case '?':
         return EXIT_FAILURE;
@@ -134,10 +145,14 @@ int main(int argc, char **argv) {
     );
     return EXIT_FAILURE;
   }
-  // create our suite runner and run all tests. CK_ENV uses value of environment
-  // variable CK_VERBOSITY and defaults to CK_NORMAL if CK_VERBOSITY not set.
-  // CK_NORMAL only shows failed tests.
+  /**
+   * create our suite runner and run all tests. CK_ENV uses value of environment
+   * variable CK_VERBOSITY and defaults to CK_NORMAL if CK_VERBOSITY not set.
+   * CK_NORMAL only shows failed tests. use srunner_set_fork_status to set
+   * whether or not we run tests in same process space (for debugging) or not.
+   */
   SRunner *runner = srunner_create(pytest_suite);
+  srunner_set_fork_status(runner, fork_mode_flag ? CK_FORK : CK_NOFORK);
   srunner_add_suite(runner, timeitresult_suite);
   srunner_run_all(runner, verbosity_flag ? CK_VERBOSE : CK_ENV);
   // get number of failed tests and free runner

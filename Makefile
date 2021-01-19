@@ -36,7 +36,7 @@ CHECK_CFLAGS   = $(PY_CFLAGS) -I$(_TIMER_DIR)
 # linker flags for compiling test runner
 CHECK_LDFLAGS  = $(PY_LDFLAGS) -L$(PKG_NAME) -lcheck
 # flags to pass to the libcheck test runner
-RUNNER_FLAGS   = -v
+RUNNER_FLAGS   =
 
 # phony targets (need to look into why build sometimes doesn't trigger)
 .PHONY: build clean dummy dist
