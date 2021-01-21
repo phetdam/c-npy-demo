@@ -79,14 +79,14 @@ PY_C_API_REQUIRED START_TEST(test_new_extern) {
   // unsafe cast that is done for the type argument.
   TimeitResult_new((PyTypeObject *) args, NULL, NULL);
   exc = PyErr_Occurred();
+  // Py_DECREF tuple since we don't need it anymore
+  Py_DECREF(args);
   // exc should not be NULL and should be RuntimeError
   ck_assert_ptr_nonnull(exc);
   ck_assert_msg(
     PyErr_GivenExceptionMatches(exc, PyExc_RuntimeError),
     "%s: TimeitResult_new should set RuntimeError if args is NULL", __func__
   );
-  // Py_DECREF tuple since we don't need it anymore
-  Py_DECREF(args);
 }
 
 /**
