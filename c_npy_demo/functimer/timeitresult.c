@@ -58,7 +58,13 @@ void TimeitResult_dealloc(TimeitResult *self) {
    * be NULL if TimeitResult_new fails while loop_times and brief may be NULL
    * if they are never accessed by the user as attributes.
    */
-  Py_XDECREF(self->times);
+  /**
+   * special note about Py_XDECREF(self->times): this line causes a segfault
+   * when pytest is invoked and collects units tests. in the interpreter, there
+   * is no segfault, so perhaps pytest might be doing something. do note that
+   * omitting this line leaks a reference.
+   */
+  //Py_XDECREF(self->times);
   Py_XDECREF(self->loop_times);
   Py_XDECREF(self->brief);
   // free the struct using the default function set to tp_free
@@ -100,7 +106,8 @@ PyObject *TimeitResult_new(
   }
   // set initial values to be overwritten later with args, kwargs
   self->best = self->number = self->repeat = 0;
-  self->unit = self->times = self->loop_times = self->brief = NULL;
+  self->unit = NULL;
+  self->times = self->loop_times = self->brief = NULL;
   // argument names (must be NULL-terminated)
   char *argnames[] = {"best", "unit", "number", "repeat", "times", NULL};
   // parse args and kwargs. pass field addresses to PyArg_ParseTupleAndKeywords.
@@ -114,44 +121,50 @@ PyObject *TimeitResult_new(
     Py_DECREF(self);
     return NULL;
   }
+  // increase reference count to times since it is a Python object
+  Py_INCREF(self->times);
   // check that unit is one of several accepted values recorded in
-  // TimeitResult_units. if not, set error indicator, Py_DECREF self
+  // TimeitResult_units. if not, set error indicator, Py_DECREF self, times
   if (!TimeitResult_validate_unit(self->unit)) {
     PyErr_SetString(
       PyExc_ValueError, "unit must be one of [" TimeitResult_UNITS_STR "]"
     );
+    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
   /**
    * check that number and repeat are positive. note that we don't check if
    * best is positive; maybe a weird "negative timer" was passed. on error, we
-   * have to Py_DECREF self, which is a new reference.
+   * have to Py_DECREF times, self, which is a new reference.
    */
   if (self->number < 1) {
     PyErr_SetString(PyExc_ValueError, "number must be positive");
+    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
   if (self->repeat < 1) {
     PyErr_SetString(PyExc_ValueError, "repeat must be positive");
+    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
   // times must be tuple. on error, Py_DECREF self and set error indicator
   if (!PyTuple_CheckExact(self->times)) {
     PyErr_SetString(PyExc_TypeError, "times must be a tuple");
+    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
-  // len(times) must equal repeat. if not, set error and Py_DECREF self. we use
-  // PyTuple_GET_SIZE since self->times is already known to be a tuple
-  if (PyTuple_GET_SIZE(self->times) != self->repeat) {
+  // len(times) must equal repeat. if not, set error and Py_DECREF self
+  if (PyTuple_Size(self->times) != self->repeat) {
     PyErr_SetString(PyExc_ValueError, "len(times) must equal repeat");
+    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
-  // all checks are complete, so return self
+  // all checks are complete so return self
   return (PyObject *) self;
 }
 
@@ -203,10 +216,9 @@ PyObject *TimeitResult_getbrief(TimeitResult *self, void *closure) {
  * Custom `__repr__` implementation for `TimeitResult`.
  * 
  * @param self `TimeitResult *` current instance
- * @param args `PyObject *` ignored, always `NULL`
  * @returns `PyObject *` Python unicode object representation for `self`
  */
-PyObject *TimeitResult_repr(TimeitResult *self, PyObject *args) {
+PyObject *TimeitResult_repr(TimeitResult *self) {
   // dummy, returns "TimeitResult(bogus)"
   return PyUnicode_FromString("TimeitResult(bogus)");
 }

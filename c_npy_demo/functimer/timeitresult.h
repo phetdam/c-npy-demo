@@ -64,7 +64,7 @@ PyObject *TimeitResult_getloop_times(TimeitResult *, void *);
 // custom getter for brief so that it works like the @property decorator. first
 // arg is self and the closure is unused.
 PyObject *TimeitResult_getbrief(TimeitResult *, void *);
-// custom __repr__ implementation (operates on self, args ignored)
-PyObject *TimeitResult_repr(TimeitResult *, PyObject *args);
+// custom __repr__ implementation (operates on self)
+PyObject *TimeitResult_repr(TimeitResult *);
 
 #endif /* TIMEITRESULT_H */

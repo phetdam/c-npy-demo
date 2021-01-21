@@ -191,13 +191,6 @@ static PyGetSetDef TimeitResult_getters[] = {
   {NULL, NULL, NULL, NULL, NULL}
 };
 
-// methods for TimeitResult
-static PyMethodDef TimeitResult_methods[] = {
-  {"__repr__", (PyCFunction) TimeitResult_repr, METH_NOARGS, NULL},
-  // required sentinel, at least name needs to be NULL
-  {NULL, NULL, 0, NULL}
-};
-
 // static type definition struct
 static PyTypeObject TimeitResult_type = {
   PyVarObject_HEAD_INIT(NULL, 0)
@@ -218,8 +211,8 @@ static PyTypeObject TimeitResult_type = {
   .tp_members = TimeitResult_members,
   // getters for the brief and loop_times cached properties
   .tp_getset = TimeitResult_getters,
-  // TimeitResult methods
-  .tp_methods = TimeitResult_methods
+  // TimeitResult __repr__ method
+  .tp_repr = (reprfunc) TimeitResult_repr
 };
 
 // static module definition struct
