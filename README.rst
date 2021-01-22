@@ -111,4 +111,6 @@ Remarks on a few lessons I learned the hard way from mixing Python code,
 foreign C code, the Python and NumPy C APIs, and Python C extension modules. It
 was definitely a difficult but rewarding journey.
 
-TBA.
+TBA. I learned a great lesson on using ``tp_new`` and ``tp_dealloc`` by having
+the unpleasant experience of having a double ``Py_DECREF`` lead to a
+segmentation fault during ``pytest`` test discovery.
