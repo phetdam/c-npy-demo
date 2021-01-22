@@ -45,6 +45,8 @@ int TimeitResult_validate_unit(char const *unit) {
  * 
  * Checks if `self` is `NULL` so that it can be safely used from C.
  * 
+ * @note This is called when `Py_[X]DECREF` is called on a `TimeitResult *`.
+ * 
  * @param self `TimeitResult *` current instance
  */
 void TimeitResult_dealloc(TimeitResult *self) {
@@ -73,11 +75,15 @@ void TimeitResult_dealloc(TimeitResult *self) {
  * custom initialization function (C analogue to `__init__`), so all necessary
  * initialization is performed here (C analogue to `__new__`).
  * 
+ * @note On error, note that we only `Py_DECREF` the `TimeitResult *` as the
+ *     macro will call `TimeitResult_dealloc`, which will call `Py_[X]DECREF`
+ *     as needed on the appropriate struct members.
+ * 
  * @param type `PyTypeObject *` type object for the `TimeitResult` class
  * @param args `PyObject *` positional args
  * @param kwargs `PyObject *` keyword args
- * @returns `PyObject *` new instance of the `TimeitResult` struct or `NULL`
- *     if an error occurred. Sets error indicator.
+ * @returns `PyObject *` new instance (new reference) of the `TimeitResult`
+ *     struct or `NULL` if an error occurred + sets error indicator.
  */
 PyObject *TimeitResult_new(
   PyTypeObject *type, PyObject *args, PyObject *kwargs
@@ -208,9 +214,32 @@ PyObject *TimeitResult_getbrief(TimeitResult *self, void *closure) {
  * Custom `__repr__` implementation for `TimeitResult`.
  * 
  * @param self `TimeitResult *` current instance
- * @returns `PyObject *` Python unicode object representation for `self`
+ * @returns `PyObject *` Python Unicode object representation for `self`. This
+ *     is a new reference and is the C parallel to how `__repr__` would be
+ *     implemented in pure Python.
  */
 PyObject *TimeitResult_repr(TimeitResult *self) {
   // dummy, returns "TimeitResult(bogus)"
-  return PyUnicode_FromString("TimeitResult(bogus)");
+  //return PyUnicode_FromString("TimeitResult(bogus)");
+  /**
+   * since PyUnicode_FromFormat doesn't accept any float-format strings we need
+   * to create a Python float from self->best. we then pass the %R specifier
+   * to PyUnicode_FromFormat to automatically call PyObject_Repr on the object.
+   */
+  PyObject *py_best = PyFloat_FromDouble(self->best);
+  if (py_best == NULL) {
+    return NULL;
+  }
+  // create Python string representation. Py_DECREF py_best on error
+  PyObject *repr_str = PyUnicode_FromFormat(
+    TIMEITRESULT_NAME "(best=%R, unit='%s', number=%zd, repeat=%zd, times=%R)",
+    py_best, self->unit, self->number, self->repeat, self->times
+  );
+  if (repr_str == NULL) {
+    Py_DECREF(py_best);
+    return NULL;
+  }
+  // Py_DECREF py_best and return result
+  Py_DECREF(py_best);
+  return repr_str;
 }

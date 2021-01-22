@@ -115,8 +115,6 @@ PyDoc_STRVAR(
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
 );
 */
-// TimeitResult class name
-#define TIMEITRESULT_NAME "TimeitResult"
 // TimeitResult class docstring
 PyDoc_STRVAR(
   FUNCTIMER_TIMEITRESULT_DOC,

@@ -34,10 +34,9 @@ def tuple_replace():
 def test_TimeitResult_new(__new__args, tuple_replace):
     """Sanity checks for ``Timeitresult.__new__``.
 
-    :param __new__args: ``pytest`` fixture. Valid args for instantiation.
+    :param __new__args: ``pytest`` fixture. See :func:`__new__args`.
     :type __new__args: tuple
-    :param tuple_replace: ``pytest`` fixture. Creates new tuples from existing
-        tuples with element modifications.
+    :param tuple_replace: ``pytest`` fixture. See :func:`tuple_replace`.
     :type tuple_replace: function
     """
     # all arguments are required
@@ -60,3 +59,23 @@ def test_TimeitResult_new(__new__args, tuple_replace):
         TimeitResult(*tuple_replace(__new__args, ((0.03, 0.02), 4)))
     # should initialize correctly
     TimeitResult(*__new__args)
+
+
+def test_TimeitResult_repr(__new__args):
+    """Check that ``TimeitResult.__repr__`` works as expected.
+
+    :param __new__args: ``pytest`` fixture. See :func:`__new__args`.
+    :type __new__args: tuple
+    """
+    # create expected __repr__ string from __new__args
+    repr_ex = "TimeitResult("
+    # each item is separated with ", " and has format "name=item"
+    for name, item in zip(
+        ("best", "unit", "number", "repeat", "times"), __new__args
+    ):
+        repr_ex = repr_ex + name + "=" + repr(item) + ", "
+    # remove last ", " from repr_ex and append ")"
+    repr_ex = repr_ex[:-2] + ")"
+    # instantiate TimeitResult and check that __repr__ works correctly
+    tir = TimeitResult(*__new__args)
+    assert repr(tir) == repr_ex

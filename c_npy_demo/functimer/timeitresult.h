@@ -13,6 +13,9 @@
 
 #include <stdbool.h>
 
+// TimeitResult class name
+#define TIMEITRESULT_NAME "TimeitResult"
+
 // definition for the TimeitResult struct. not subclassable.
 typedef struct {
   PyObject_HEAD
