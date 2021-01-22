@@ -58,13 +58,7 @@ void TimeitResult_dealloc(TimeitResult *self) {
    * be NULL if TimeitResult_new fails while loop_times and brief may be NULL
    * if they are never accessed by the user as attributes.
    */
-  /**
-   * special note about Py_XDECREF(self->times): this line causes a segfault
-   * when pytest is invoked and collects units tests. in the interpreter, there
-   * is no segfault, so perhaps pytest might be doing something. do note that
-   * omitting this line leaks a reference.
-   */
-  //Py_XDECREF(self->times);
+  Py_XDECREF(self->times);
   Py_XDECREF(self->loop_times);
   Py_XDECREF(self->brief);
   // free the struct using the default function set to tp_free
@@ -123,13 +117,15 @@ PyObject *TimeitResult_new(
   }
   // increase reference count to times since it is a Python object
   Py_INCREF(self->times);
-  // check that unit is one of several accepted values recorded in
-  // TimeitResult_units. if not, set error indicator, Py_DECREF self, times
+  /**
+   * check that unit is one of several accepted values recorded in
+   * TimeitResult_units. if not, set error indicator, Py_DECREF self. note that
+   * we doon't Py_DECREF self->tmies: tp_dealloc does that for us.
+   */
   if (!TimeitResult_validate_unit(self->unit)) {
     PyErr_SetString(
       PyExc_ValueError, "unit must be one of [" TimeitResult_UNITS_STR "]"
     );
-    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
@@ -140,27 +136,23 @@ PyObject *TimeitResult_new(
    */
   if (self->number < 1) {
     PyErr_SetString(PyExc_ValueError, "number must be positive");
-    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
   if (self->repeat < 1) {
     PyErr_SetString(PyExc_ValueError, "repeat must be positive");
-    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
   // times must be tuple. on error, Py_DECREF self and set error indicator
   if (!PyTuple_CheckExact(self->times)) {
     PyErr_SetString(PyExc_TypeError, "times must be a tuple");
-    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
   // len(times) must equal repeat. if not, set error and Py_DECREF self
   if (PyTuple_Size(self->times) != self->repeat) {
     PyErr_SetString(PyExc_ValueError, "len(times) must equal repeat");
-    Py_DECREF(self->times);
     Py_DECREF(self);
     return NULL;
   }
