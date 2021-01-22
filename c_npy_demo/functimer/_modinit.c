@@ -171,6 +171,7 @@ static PyMemberDef TimeitResult_members[] = {
   {"number", T_PYSSIZET, offsetof(TimeitResult, number), READONLY, NULL},
   {"repeat", T_PYSSIZET, offsetof(TimeitResult, repeat), READONLY, NULL},
   {"times", T_OBJECT_EX, offsetof(TimeitResult, times), READONLY, NULL},
+  {"precision", T_INT, offsetof(TimeitResult, precision), READONLY, NULL},
   // required sentinel, at least name must be NULL
   {NULL, 0, 0, 0, NULL}
 };

@@ -13,7 +13,7 @@ from ..functimer import TimeitResult
 @pytest.fixture(scope = "module")
 def __new__args():
     "Valid args to pass to ``partial(TimeitResult.__new__, TimeitResult)``."
-    return 0.88, "usec", 10000, 5, (0.88, 1.02, 1.04, 1.024, 1)
+    return 8.8e-5, "usec", 10000, 5, (0.88, 1.02, 1.04, 1.024, 1)
 
 
 @pytest.fixture(scope = "module")
@@ -63,6 +63,17 @@ def test_TimeitResult_new(__new__args, tuple_replace):
         TimeitResult(
             *tuple_replace(__new__args, (4, (0.9, 0.99, "invalid", None, "2")))
         )
+    # check that precision can be passed as both kwarg and positional arg
+    TimeitResult(*__new__args, 1)
+    TimeitResult(*__new__args, precision = 1)
+    # check that precision must be valid (int in [1, 70])
+    with pytest.raises(ValueError, match = "precision must be positive"):
+        TimeitResult(*__new__args, precision = 0)
+    with pytest.raises(ValueError, match = "precision is capped at 70"):
+        TimeitResult(*__new__args, precision = 71)
+    # check that warning is raised when brief precision >= 20
+    with pytest.warns(UserWarning, match = "precision is rather high"):
+        TimeitResult(*__new__args, precision = 20)
     # should initialize correctly
     TimeitResult(*__new__args)
 

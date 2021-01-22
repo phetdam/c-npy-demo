@@ -301,10 +301,17 @@ PyObject *functimer_autorange(
       break;
     }
     // if number > PY_SSIZE_T_MAX / 10, then break the while loop. emit warning
+    // and if an exception is raised (return == -1), Py_DECREF kwargs
     if (number > (PY_SSIZE_T_MAX / 10.)) {
-      PyErr_WarnEx(
-        PyExc_RuntimeWarning, "return value will exceed PY_SSIZE_T_MAX / 10", 1
-      );
+      if(
+        PyErr_WarnEx(
+          PyExc_RuntimeWarning,
+          "return value will exceed PY_SSIZE_T_MAX / 10", 1
+        ) < 0
+      ) {
+        Py_DECREF(kwargs);
+        return NULL;
+      }
       break;
     }
     // multiply multiplier by 10. we want 1, 2, 5, 10, 20, 50, ...

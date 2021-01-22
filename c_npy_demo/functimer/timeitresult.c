@@ -104,18 +104,21 @@ PyObject *TimeitResult_new(
   if (self == NULL) {
     return NULL;
   }
-  // set initial values to be overwritten later with args, kwargs
-  self->best = self->number = self->repeat = 0;
+  // set pointers to NULL to be overwritten later with args, kwargs
   self->unit = NULL;
   self->times = self->loop_times = self->brief = NULL;
+  // set default value for self->precision
+  self->precision = 1;
   // argument names (must be NULL-terminated)
-  char *argnames[] = {"best", "unit", "number", "repeat", "times", NULL};
+  char *argnames[] = {
+    "best", "unit", "number", "repeat", "times", "precision", NULL
+  };
   // parse args and kwargs. pass field addresses to PyArg_ParseTupleAndKeywords.
   // on error, need to Py_DECREF self, which is a new reference.
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "dsnnO", argnames, &(self->best), &(self->unit),
-      &(self->number), &(self->repeat), &(self->times)
+      args, kwargs, "dsnnO|i", argnames, &(self->best), &(self->unit),
+      &(self->number), &(self->repeat), &(self->times), &(self->precision)
     )
   ) {
     Py_DECREF(self);
@@ -136,9 +139,9 @@ PyObject *TimeitResult_new(
     return NULL;
   }
   /**
-   * check that number and repeat are positive. note that we don't check if
-   * best is positive; maybe a weird "negative timer" was passed. on error, we
-   * have to Py_DECREF times, self, which is a new reference.
+   * check that number, precision, repeat are positive. we don't check if best
+   * is positive; maybe a weird "negative timer" was passed. on error, we have
+   * to Py_DECREF times, self, which is a new reference.
    */
   if (self->number < 1) {
     PyErr_SetString(PyExc_ValueError, "number must be positive");
@@ -149,6 +152,30 @@ PyObject *TimeitResult_new(
     PyErr_SetString(PyExc_ValueError, "repeat must be positive");
     Py_DECREF(self);
     return NULL;
+  }
+  if (self->precision < 1) {
+    PyErr_SetString(PyExc_ValueError, "precision must be positive");
+    Py_DECREF(self);
+    return NULL;
+  }
+  // cap precison at 70 (who needs that many decimal places anyways?)
+  if (self->precision > 70) {
+    PyErr_SetString(PyExc_ValueError, "precision is capped at 70");
+    Py_DECREF(self);
+    return NULL;
+  }
+  // if precision >= 20, print warning. if exception is raised (return value of
+  // PyErr_WarnEx < 0), then Py_DECREF self
+  if (self->precision >= 20) {
+    if (
+      PyErr_WarnEx(
+        PyExc_UserWarning, "value of precision is rather high (>= 20). "
+        "consider passing a lower value for better brief readability.", 1
+      ) < 0
+    ) {
+      Py_DECREF(self);
+      return NULL;
+    }
   }
   // times must be tuple. on error, Py_DECREF self and set error indicator
   if (!PyTuple_CheckExact(self->times)) {
@@ -240,6 +267,18 @@ PyObject *TimeitResult_getloop_times(TimeitResult *self, void *closure) {
 PyObject *TimeitResult_getbrief(TimeitResult *self, void *closure) {
   // dummy; returns "oowee"
   return PyUnicode_FromString("oowee");
+  // if self->brief is NULL, it has not been accessed before, so we have to
+  // create a new Python string holding the brief.
+  /*
+  if (self->brief == NULL) {
+
+  }
+  // else we just Py_INCREF self->brief
+  else {
+    Py_INCREF(self->brief);
+  }
+  return self->brief;
+  */
 }
 
 /**

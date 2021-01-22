@@ -32,6 +32,9 @@ typedef struct {
   // a cached property and will be created only upon access.
   PyObject *loop_times;
   PyObject *times;
+  // precision to use when displaying best in brief. defaults to 1. in the
+  // __new__ method precision will capped at 70.
+  int precision;
   // cached property. Python string with output similar to timeit.main output
   PyObject *brief;
 } TimeitResult;
