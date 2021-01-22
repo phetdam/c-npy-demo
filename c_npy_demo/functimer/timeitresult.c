@@ -219,8 +219,6 @@ PyObject *TimeitResult_getbrief(TimeitResult *self, void *closure) {
  *     implemented in pure Python.
  */
 PyObject *TimeitResult_repr(TimeitResult *self) {
-  // dummy, returns "TimeitResult(bogus)"
-  //return PyUnicode_FromString("TimeitResult(bogus)");
   /**
    * since PyUnicode_FromFormat doesn't accept any float-format strings we need
    * to create a Python float from self->best. we then pass the %R specifier
