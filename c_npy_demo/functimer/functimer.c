@@ -369,14 +369,14 @@ PyObject *functimer_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
     // get return value from PyDict_Contains
     int has_repeat = PyDict_Contains(kwargs, repeat_obj);
     // if error, Py_DECREF repeat_obj and return NULL
-    if (has_repeat == -1) {
+    if (has_repeat < 0) {
       Py_DECREF(repeat_obj);
       return NULL;
     }
     // if repeat is in kwargs, then remove it from kwargs
     if (has_repeat) {
       // if failed, Py_DECREF repeat_obj and then return NULL
-      if (PyDict_DelItemString(kwargs, "repeat") == -1) {
+      if (PyDict_DelItemString(kwargs, "repeat") < 0) {
         Py_DECREF(repeat_obj);
         return NULL;
       }
