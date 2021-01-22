@@ -88,12 +88,12 @@ void TimeitResult_dealloc(TimeitResult *self) {
 PyObject *TimeitResult_new(
   PyTypeObject *type, PyObject *args, PyObject *kwargs
 ) {
-  // if type is NULL, raise exception and return NULL
+  // if type is NULL, set error indicator and return NULL
   if (type == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "missing PyTypeObject *type");
     return NULL;
   }
-  // if args is NULL, raise exception and return NULL
+  // if args is NULL, set error indicator and return NULL
   if (args == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "missing PyObject *args");
     return NULL;
@@ -156,11 +156,27 @@ PyObject *TimeitResult_new(
     Py_DECREF(self);
     return NULL;
   }
-  // len(times) must equal repeat. if not, set error and Py_DECREF self
-  if (PyTuple_Size(self->times) != self->repeat) {
+  /**
+   * len(times) must equal repeat. if not, set error and Py_DECREF self. we can
+   * use PyTuple_GET_SIZE instead of PyTuple_Size since we already have
+   * guaranteed that self->times is a tuple at this point.
+   */
+  if (PyTuple_GET_SIZE(self->times) != self->repeat) {
     PyErr_SetString(PyExc_ValueError, "len(times) must equal repeat");
     Py_DECREF(self);
     return NULL;
+  }
+  // check that all the elements of self->times are int or float
+  for (Py_ssize_t i = 0; i < self->repeat; i++) {
+    // get borrowed reference to ith element of self->times. note that we use
+    // PyTuple_GET_ITEM since we are guaranteed not to go out of bounds.
+    PyObject *time_i = PyTuple_GET_ITEM(self->times, i);
+    // if neither int nor float, set error indicator, Py_DECREF self
+    if (!PyLong_CheckExact(time_i) && !PyFloat_CheckExact(time_i)) {
+      PyErr_SetString(PyExc_TypeError, "times must contain only int or float");
+      Py_DECREF(self);
+      return NULL;
+    }
   }
   // all checks are complete so return self
   return (PyObject *) self;
@@ -175,26 +191,42 @@ PyObject *TimeitResult_new(
  *     trial, the value given by `self->number`.
  */
 PyObject *TimeitResult_getloop_times(TimeitResult *self, void *closure) {
-  // dummy, returns (0.1, 0.2)
-  PyObject *res = PyTuple_New(2);
-  if (res == NULL) {
-    return NULL;
+  // if self->loop_times is NULL, it has not been accessed before, so we have
+  // to create a new Python tuple holding the per-loop times.
+  if (self->loop_times == NULL) {
+    // create new empty tuple. on error, return NULL. use PyTuple_GET_SIZE
+    // since we already know that self->times is a tuple.
+    self->loop_times = PyTuple_New(PyTuple_GET_SIZE(self->times));
+    if (self->loop_times == NULL) {
+      return NULL;
+    }
+    // for each trial, compute self->times[i] / self->number
+    for (Py_ssize_t i = 0; i < self->repeat; i++) {
+      /**
+       * get value of self->times[i] as double. even though we already checked
+       * that the contents of self->times are int or float, we still need to
+       * use PyFloat_AsDouble since we allow elements of self->times to be int.
+       * we also already checked that self->times is tuple and we won't go out
+       * of bounds so we can use PyTuple_GET_ITEM instead of PyTuple_GetItem.
+       */
+      double time_i = PyFloat_AsDouble(PyTuple_GET_ITEM(self->times, i));
+      PyObject *loop_time_i = PyFloat_FromDouble(
+        time_i / ((double) self->number)
+      );
+      if (loop_time_i == NULL) {
+        Py_DECREF(self->times);
+        return NULL;
+      }
+      // add loop_time_i to self->loop_times. no error checking needed here.
+      // note that the loop_time_i reference is stolen by self->loop_times.
+      PyTuple_SET_ITEM(self->loop_times, i, loop_time_i);
+    }
   }
-  // make some floats
-  PyObject *f1, *f2;
-  f1 = PyFloat_FromDouble(0.1);
-  if (f1 == NULL) {
-    Py_DECREF(res);
-    return NULL;
+  // else simply Py_INCREF self->loop_times
+  else {
+    Py_INCREF(self->loop_times);
   }
-  f2 = PyFloat_FromDouble(0.2);
-  if (f2 == NULL) {
-    Py_DECREF(res);
-    return NULL;
-  }
-  PyTuple_SET_ITEM(res, 0, f1);
-  PyTuple_SET_ITEM(res, 1, f2);
-  return res;
+  return self->loop_times;
 }
 
 /**
