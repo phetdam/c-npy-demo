@@ -12,8 +12,17 @@ from ..functimer import TimeitResult
 
 @pytest.fixture(scope = "module")
 def __new__args():
-    "Valid args to pass to ``partial(TimeitResult.__new__, TimeitResult)``."
-    return 8.8e-5, "usec", 10000, 5, (0.88, 1.02, 1.04, 1.024, 1)
+    """Valid args to pass to ``partial(TimeitResult.__new__, TimeitResult)``.
+
+    .. note::
+
+       ``best`` is explicitly made to be a float else
+       :func:`test_TimeitResult_repr` raises an :class:`AssertionError` due to
+       ints and floats having different representations.
+
+    Here the best time is 0.88 s, which is 8e-5 s/loop and 88 usec/loop.
+    """
+    return 88., "usec", 10000, 5, (0.88, 1.02, 1.04, 1.024, 1)
 
 
 @pytest.fixture(scope = "module")
@@ -108,6 +117,22 @@ def test_TimeitResult_loop_times(__new__args):
     loop_times_ex = np.array(__new__args[4]) / __new__args[2]
     # instantiate new TimeitResult
     tir = TimeitResult(*__new__args)
-    print(tir)
     # check using np.allclose that loop_times_ex matches tir.loop_times
     np.testing.assert_allclose(tir.loop_times, loop_times_ex)
+
+
+#@pytest.mark.skip(reason = "causes segmentation fault")
+def test_TimeitResult_brief(__new__args):
+    """Check that ``TimeitResult.brief`` returns the expected.
+
+    :param __new__args: ``pytest`` fixture. See :func:`__new__args`.
+    :type __new__args: tuple
+    """
+    # print expected brief string
+    brief_ex = (
+        f"{__new__args[2]} loops, best of {__new__args[3]}: "
+        f"{__new__args[0]:.1f} {__new__args[1]} per loop"
+    )
+    # instantiate new TimeitResult and check that tir.brief matches brief_ex
+    tir = TimeitResult(*__new__args)
+    assert tir.brief == brief_ex

@@ -6,6 +6,7 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -56,9 +57,9 @@ void TimeitResult_dealloc(TimeitResult *self) {
     return;
   }
   /**
-   * times, loop_times, brief might be NULL, so we need Py_XDECREF. times can
-   * be NULL if TimeitResult_new fails while loop_times and brief may be NULL
-   * if they are never accessed by the user as attributes.
+   * times, loop_times, brief might be NULL, so we need Py_XDECREF. times can be
+   * NULL if TimeitResult_new fails while loop_times, brief may be NULL if they
+   * are never accessed by the user as attributes.
    */
   Py_XDECREF(self->times);
   Py_XDECREF(self->loop_times);
@@ -249,10 +250,15 @@ PyObject *TimeitResult_getloop_times(TimeitResult *self, void *closure) {
       PyTuple_SET_ITEM(self->loop_times, i, loop_time_i);
     }
   }
-  // else simply Py_INCREF self->loop_times
-  else {
-    Py_INCREF(self->loop_times);
-  }
+  /**
+   * Py_INCREF self->loop_times and then return. we have to Py_INCREF since
+   * there is one reference in the instance and we need to give a reference to
+   * the caller back in Python. same logic applies to self->brief or else the
+   * Py_XDECREF can result in no references (created new reference in the
+   * getter, given to Python caller, when tp_dealloc called may result in this
+   * single new reference being set to zero even though caller holds a ref).
+   */
+  Py_INCREF(self->loop_times);
   return self->loop_times;
 }
 
@@ -265,20 +271,37 @@ PyObject *TimeitResult_getloop_times(TimeitResult *self, void *closure) {
  *     from `timeit.main` printed when `timeit` is run using `python3 -m`.
  */
 PyObject *TimeitResult_getbrief(TimeitResult *self, void *closure) {
-  // dummy; returns "oowee"
-  return PyUnicode_FromString("oowee");
   // if self->brief is NULL, it has not been accessed before, so we have to
-  // create a new Python string holding the brief.
-  /*
+  // create a new Python string holding the brief. return NULL on error.
   if (self->brief == NULL) {
-
+    /**
+     * since PyUnicode_FromFormat doesn't format floats, we need to create a
+     * rounded Python float from self->best (to nearest). we use
+     * pow(10, self->precision) to give us the correct rounding precision.
+     */
+    double round_factor = pow(10, self->precision);
+    PyObject *best_round = PyFloat_FromDouble(
+      round(self->best * round_factor) / round_factor
+    );
+    if (best_round == NULL) {
+      return NULL;
+    }
+    // get new reference to formatted string. use %R to use result of
+    // PyObject_Repr on best_round in the formatted string.
+    self->brief = PyUnicode_FromFormat(
+      "%zd loops, best of %zd: %R %s per loop", self->number, self->repeat,
+      best_round, self->unit
+    );
+    // don't need best_round anymore so Py_DECREF it
+    Py_DECREF(best_round);
+    // error. we already used Py_DECREF on best_round
+    if (self->brief == NULL) {
+      return NULL;
+    }
   }
-  // else we just Py_INCREF self->brief
-  else {
-    Py_INCREF(self->brief);
-  }
+  // Py_INCREF self->brief + return. see TimeitResult_getloop_times comment.
+  Py_INCREF(self->brief);
   return self->brief;
-  */
 }
 
 /**
