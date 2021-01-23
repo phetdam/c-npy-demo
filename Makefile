@@ -28,9 +28,6 @@ PY_CFLAGS     ?= -fPIE $(shell python3-config --cflags)
 # ubuntu needs --embed, else -lpythonx.y is omitted by --ldflags, which is a
 # linker error. libpython3.8 is in /usr/lib/x86_64-linux-gnu for me.
 PY_LDFLAGS    ?= $(shell python3-config --embed --ldflags)
-# name of the shared object for functimer built by setup.py (no path)
-FUNCTIMER_SO   = $(shell find $(PKG_NAME)/functimer.*.so | \
-                   sed s/"$(PKG_NAME)\/"//g)
 # compile flags for compiling test runner. my libcheck is in /usr/local/lib
 CHECK_CFLAGS   = $(PY_CFLAGS) -I$(_TIMER_DIR)
 # linker flags for compiling test runner
