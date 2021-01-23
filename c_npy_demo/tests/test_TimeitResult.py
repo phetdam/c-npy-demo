@@ -121,7 +121,6 @@ def test_TimeitResult_loop_times(__new__args):
     np.testing.assert_allclose(tir.loop_times, loop_times_ex)
 
 
-#@pytest.mark.skip(reason = "causes segmentation fault")
 def test_TimeitResult_brief(__new__args):
     """Check that ``TimeitResult.brief`` returns the expected.
 
