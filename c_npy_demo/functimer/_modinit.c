@@ -86,7 +86,7 @@ PyDoc_STRVAR(
   FUNCTIMER_AUTORANGE_DOC,
   "autorange(func, args=None, kwargs=None, *, timer=None)\n"
   "--\n\n"
-  "Determine number of time to call :func:`c_npy_demo.functimer.timeit_once."
+  "Determine number of times to call :func:`c_npy_demo.functimer.timeit_once."
   "\n\n"
   "Operates in the same way as :meth:`timeit.Timer.autorange`.\n"
   ":func:`autorange` calls :func:`timeit_once` 1, 2, 5, 10, 20, 50, etc.\n"
@@ -118,16 +118,40 @@ PyDoc_STRVAR(
 // TimeitResult class docstring
 PyDoc_STRVAR(
   FUNCTIMER_TIMEITRESULT_DOC,
-  "TimeitResult"
+  "An immutable type for holding timing results from :func:`timeit_enh`."
+  "\n\n"
+  "All attributes are read-only. :attr:`loop_times` and :attr:`brief` are\n"
+  "computed on demand when they are first accessed."
 );
 // TimeitResult docstrings for cached properties
 PyDoc_STRVAR(
   FUNCTIMER_TIMEITRESULT_GETBRIEF_DOC,
-  "TimeitResult.brief"
+  "A short string formatted similarly to that of :func:`timeit.main`."
+  "\n\n"
+  "For example, suppose that calling :func:`repr` on a :class:`TimeitResult`\n"
+  "instance yields (manually wrapped for compactness)"
+  "\n\n"
+  ".. code:: python3"
+  "\n\n"
+  "   TimeitResult(best=88.0, unit='usec', number=10000, repeat=5,\n"
+  "       times=(0.88, 1.02, 1.04, 1.024, 1), precision=1)"
+  "\n\n"
+  "Accessing the ``brief`` attribute [#]_ yields"
+  "\n\n"
+  ".. code:: text"
+  "\n\n"
+  "   10000 loops, best of 5: 88.0 usec per loop"
+  "\n\n"
+  ".. [#] It is more accurate to call ``brief`` a cached property, as it is\n"
+  "   computed the first time it is accessed and simply yields new references\n"
+  "   whenever it is repeatedly accessed."
 );
 PyDoc_STRVAR(
   FUNCTIMER_TIMEITRESULT_GETLOOP_TIMES_DOC,
-  "TimeitResult.loop_times"
+  "The unweighted average time taken per loop, per trial, in units of seconds."
+  "\n\n"
+  "Like :attr:`~TimeitResult.brief`, this is a cached property computed on\n"
+  "the first access that yields new references on subsequent accesses."
 );
 
 // static array of module methods

@@ -324,8 +324,10 @@ PyObject *TimeitResult_repr(TimeitResult *self) {
   }
   // create Python string representation. Py_DECREF py_best on error
   PyObject *repr_str = PyUnicode_FromFormat(
-    TIMEITRESULT_NAME "(best=%R, unit='%s', number=%zd, repeat=%zd, times=%R)",
-    py_best, self->unit, self->number, self->repeat, self->times
+    TIMEITRESULT_NAME "(best=%R, unit='%s', number=%zd, repeat=%zd, times=%R, "
+    "precision=%d)",
+    py_best, self->unit, self->number, self->repeat, self->times,
+    self->precision
   );
   if (repr_str == NULL) {
     Py_DECREF(py_best);

@@ -20,7 +20,8 @@ def __new__args():
        :func:`test_TimeitResult_repr` raises an :class:`AssertionError` due to
        ints and floats having different representations.
 
-    Here the best time is 0.88 s, which is 8e-5 s/loop and 88 usec/loop.
+    Here the best time is 0.88 s, which is 8e-5 s/loop and 88 usec/loop. If
+    ``precision`` is not provided, it defaults to 1.
     """
     return 88., "usec", 10000, 5, (0.88, 1.02, 1.04, 1.024, 1)
 
@@ -95,9 +96,11 @@ def test_TimeitResult_repr(__new__args):
     """
     # create expected __repr__ string from __new__args
     repr_ex = "TimeitResult("
-    # each item is separated with ", " and has format "name=item"
+    # each item is separated with ", " and has format "name=item". we append
+    # precision __new__args so that we can build the string with for loop only
     for name, item in zip(
-        ("best", "unit", "number", "repeat", "times"), __new__args
+        ("best", "unit", "number", "repeat", "times", "precision"),
+        __new__args + (1,)
     ):
         repr_ex = repr_ex + name + "=" + repr(item) + ", "
     # remove last ", " from repr_ex and append ")"
