@@ -159,19 +159,23 @@ PyObject *TimeitResult_new(
     Py_DECREF(self);
     return NULL;
   }
-  // cap precison at 70 (who needs that many decimal places anyways?)
-  if (self->precision > 70) {
-    PyErr_SetString(PyExc_ValueError, "precision is capped at 70");
+  // cap precison at TimeitResult_MAX_PRECISION. no human needs more precision
+  // than the value given by TimeitResult_MAX_PRECISION.
+  if (self->precision > TimeitResult_MAX_PRECISION) {
+    PyErr_Format(
+      PyExc_ValueError, "precision is capped at %d", TimeitResult_MAX_PRECISION
+    );
     Py_DECREF(self);
     return NULL;
   }
-  // if precision >= 20, print warning. if exception is raised (return value of
-  // PyErr_WarnEx < 0), then Py_DECREF self
-  if (self->precision >= 20) {
+  // if precision >= floor(TimeitResult_MAX_PRECISION / 2), print warning.
+  // if exception raised (PyErr_WarnFormat returns < 0), then Py_DECREF self
+  if (self->precision >= (TimeitResult_MAX_PRECISION / 2)) {
     if (
-      PyErr_WarnEx(
-        PyExc_UserWarning, "value of precision is rather high (>= 20). "
-        "consider passing a lower value for better brief readability.", 1
+      PyErr_WarnFormat(
+        PyExc_UserWarning, 1, "value of precision is rather high (>= %d). "
+        "consider passing a lower value for better brief readability.",
+        TimeitResult_MAX_PRECISION / 2
       ) < 0
     ) {
       Py_DECREF(self);

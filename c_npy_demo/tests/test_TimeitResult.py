@@ -76,14 +76,17 @@ def test_TimeitResult_new(__new__args, tuple_replace):
     # check that precision can be passed as both kwarg and positional arg
     TimeitResult(*__new__args, 1)
     TimeitResult(*__new__args, precision = 1)
-    # check that precision must be valid (int in [1, 70])
+    # check that precision must be valid (int in [1, 20])
     with pytest.raises(ValueError, match = "precision must be positive"):
         TimeitResult(*__new__args, precision = 0)
-    with pytest.raises(ValueError, match = "precision is capped at 70"):
-        TimeitResult(*__new__args, precision = 71)
+    with pytest.raises(
+        ValueError,
+        match = f"precision is capped at {TimeitResult.MAX_PRECISION}"
+    ):
+        TimeitResult(*__new__args, precision = TimeitResult.MAX_PRECISION + 1)
     # check that warning is raised when brief precision >= 20
     with pytest.warns(UserWarning, match = "precision is rather high"):
-        TimeitResult(*__new__args, precision = 20)
+        TimeitResult(*__new__args, precision = TimeitResult.MAX_PRECISION // 2)
     # should initialize correctly
     TimeitResult(*__new__args)
 

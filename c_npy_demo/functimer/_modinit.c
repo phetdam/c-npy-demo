@@ -110,7 +110,7 @@ PyDoc_STRVAR(
 PyDoc_STRVAR(
   FUNCTIMER_TIMEIT_ENH_DOC,
   "timeit_enh(func, args=None, kwargs=None, *, timer=None, number=None, "
-  "repeat=None, unit=None, precision=None)\n"
+  "repeat=None, unit=None, precision=1)\n"
   "--\n\n"
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
 );
@@ -251,6 +251,26 @@ static struct PyModuleDef functimer_def = {
 PyMODINIT_FUNC PyInit_functimer(void) {
   // check if type is ready. if error (return < 0), exception is set
   if (PyType_Ready(&TimeitResult_type) < 0) {
+    return NULL;
+  }
+  /**
+   * now that type has been initialized, we can add more attributes to the
+   * dict at TimeitResult_type.tp_dict. we add TimeitResult_MAX_PRECISION as
+   * the MAX_PRECISION class attribute.
+   */
+  PyObject *max_precision = PyLong_FromLong((long) TimeitResult_MAX_PRECISION);
+  // no need to Py_DECREF &TimeitResult_type
+  if (max_precision == NULL) {
+    return NULL;
+  }
+  // add max_precision to Timeitresult_Type.tp_dict as MAX_PRECISION. if
+  // assignment fails, Py_DECREF max_precision
+  if (
+    PyDict_SetItemString(
+      TimeitResult_type.tp_dict, "MAX_PRECISION", max_precision
+    ) < 0
+  ) {
+    Py_DECREF(max_precision);
     return NULL;
   }
   // create the module. if NULL, return

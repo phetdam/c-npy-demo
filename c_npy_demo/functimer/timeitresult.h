@@ -39,7 +39,8 @@ typedef struct {
   PyObject *brief;
 } TimeitResult;
 
-
+// maximum precision value that may be passed to the TimeitResult constructor
+#define TimeitResult_MAX_PRECISION 20
 // list of valid values that unit can take. used to initialize
 // TimeitResult_units and TimeitResult_UNITS_STR
 #define TimeitResult_UNITS "nsec", "usec", "msec", "sec"
