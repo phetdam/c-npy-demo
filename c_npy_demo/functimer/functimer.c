@@ -16,9 +16,9 @@
  * 
  * Docstring in `_modinit.c`.
  * 
- * @param args PyObject * tuple of positional arguments
- * @param kwargs PyObject * dict of named arguments
- * @returns PyObject * numeric value
+ * @param args tuple of positional arguments
+ * @param kwargs dict of named arguments
+ * @returns `PyObject *` numeric value
  */
 PyObject *functimer_timeit_once(
   PyObject *self, PyObject *args, PyObject *kwargs
@@ -187,9 +187,9 @@ PyObject *functimer_timeit_once(
  * 
  * @note `kwargs` is `NULL` if no named args are passed.
  * 
- * @param args PyObject * tuple of positional arguments
- * @param kwargs PyObject * dict of named arguments
- * @returns PyObject * numeric value
+ * @param args tuple of positional arguments
+ * @param kwargs dict of named arguments
+ * @returns `PyLongObject *` cast to `PyObject *` of number of loops in a trial
  */
 PyObject *functimer_autorange(
   PyObject *self, PyObject *args, PyObject *kwargs
@@ -329,9 +329,9 @@ PyObject *functimer_autorange(
  * 
  * Docstring in `_modinit.c`.
  * 
- * @param args PyObject * tuple of positional arguments
- * @param kwargs PyObject * dict of named arguments
- * @returns PyObject * list of trial times
+ * @param args tuple of positional arguments
+ * @param kwargs dict of named arguments
+ * @returns `PyListObject *` list of trial items cast to `PyObject *`
  */
 PyObject *functimer_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
   /**
@@ -410,9 +410,9 @@ PyObject *functimer_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
  * 
  * Docstring in `_modinit.c`.
  * 
- * @param args PyObject * tuple of positional arguments
- * @param kwargs PyObject * dict of named arguments
- * @returns `TimeitResult *` cast to `PyObject *` of timing results
+ * @param args tuple of positional arguments
+ * @param kwargs dict of named arguments
+ * @returns `TimeitResult *` of timing results cast to `PyObject *`
  */
 PyObject *functimer_timeit_enh(
   PyObject *self, PyObject *args, PyObject *kwargs
@@ -483,6 +483,142 @@ PyObject *functimer_timeit_enh(
       ) < 0
     ) { return NULL; }
   }
+  /**
+   * now that all the parameters have been checked, we need to delegate
+   * arguments to the right methods. func, func_args, and func_kwargs need to
+   * be put together into a tuple, while timer needs to be put in a new dict
+   * (if not NULL). if number == PY_SSIZE_T_MIN, then we need to call
+   * functimer_autorange to give a value for number.
+   */
+  // number of positional arguments that will go in the new args tuple. if
+  // func_args, func_kwargs are not NULL, n_new_args incremented by 1 each.
+  int n_new_args = 1;
+  if (func_args != NULL) {
+    n_new_args++;
+  }
+  if(func_kwargs != NULL) {
+    n_new_args++;
+  }
+  // new args tuple (for functimer_autorange, functimer_repeat)
+  PyObject *new_args = PyTuple_New(n_new_args);
+  if (new_args == NULL) {
+    return NULL;
+  }
+  // pass func reference to new_args. Py_INCREF obviously needed.
+  Py_INCREF(func);
+  PyTuple_SET_ITEM(new_args, 0, func);
+  // if func_args is not NULL, then Py_INCREF and add to position 1
+  if (func_args != NULL) {
+    Py_INCREF(func_args);
+    PyTuple_SET_ITEM(new_args, 1, func_args);
+  }
+  // if func_kwargs is not NULL, Py_INCREF and add to last position
+  if (func_kwargs != NULL) {
+    Py_INCREF(func_kwargs);
+    PyTuple_SET_ITEM(new_args, n_new_args - 1, func_args);
+  }
+  // new kwargs dict (for functimer_autorange, functimer_repeat)
+  PyObject *new_kwargs = PyDict_New();
+  // if NULL, only need to Py_DECREF new_args, as func, func_args, func_kwargs
+  // had references stolen by new_args
+  if (new_kwargs == NULL) {
+    Py_DECREF(new_args);
+    return NULL;
+  }
+  // if timer is not NULL, add timer to new_kwargs (borrow ref)
+  if (timer != NULL) {
+    PyDict_SetItemString(new_kwargs, "timer", timer);
+  }
+  // number as a PyLongObject * to be passed to new_kwargs when ready
+  PyObject *number_ = NULL;
+  // if number == PY_SSIZE_T_MIN, then we need to use functimer_autorange to
+  // determine the number of loops to run in a trial
+  if (number == PY_SSIZE_T_MIN) {
+    // get result from functimer_autorange
+    number_ = functimer_autorange(self, new_args, new_kwargs);
+    // on error, need to Py_DECREF new_args, new_kwargs (new refs)
+    if (number_ == NULL) {
+      Py_DECREF(new_args);
+      Py_DECREF(new_kwargs);
+      return NULL;
+    }
+    // attempt to convert number_ into Py_ssize_t
+    number = PyLong_AsSsize_t(number_);
+    // if number == -1, error (don't even need to check PyErr_Occurred). then
+    // Py_DECREF new_args, new_kwargs, number_ (also new ref)
+    if (number == -1) {
+      Py_DECREF(new_args);
+      Py_DECREF(new_kwargs);
+      Py_DECREF(number_);
+      return NULL;
+    }
+  }
+  // if number_ is NULL, it wasn't initialized in if statement, so initialize
+  if (number_ == NULL) {
+    number_ = PyLong_FromSsize_t(number);
+    // Py_DECREF new_args, new_kwargs on error
+    if (number_ == NULL) {
+      Py_DECREF(new_args);
+      Py_DECREF(new_kwargs);
+      return NULL;
+    }
+  }
+  // add number_ to new_kwargs. Py_DECREF new_args, new_kwargs, number_ if err
+  if (PyDict_SetItemString(new_kwargs, "number", number_) < 0) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    return NULL;
+  }
+  // repeat as a PyLongObject * to be passed to new_kwargs
+  PyObject *repeat_ = PyLong_FromSsize_t(repeat);
+  // on error, Py_DECREF new_args, new_kwargs, number_
+  if (repeat_ == NULL) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    return NULL;
+  }
+  // add repeat_ to new_kwargs, Py_DECREF on error (include repeat_)
+  if (PyDict_SetItemString(new_kwargs, "repeat", repeat_) < 0) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    Py_DECREF(repeat_);
+    return NULL;
+  }
+  // call functimer_repeat with new_args, new_kwargs (borrowed refs) and get
+  // res_list, the list of times in seconds for each of the repeat trials
+  PyObject *res_list = functimer_repeat(self, new_args, new_kwargs);
+  // if NULL, exception was set, so Py_DECREF as needed
+  if (res_list == NULL) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    Py_DECREF(repeat_);
+    return NULL;
+  }
+  // create tuple out of res_list
+  PyObject *res_tuple = PySequence_Tuple(res_list);
+  // Py_DECREF as needed if error
+  if (res_tuple == NULL) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    Py_DECREF(repeat_);
+    return NULL;
+  }
+  // best time (for now, in seconds, )
+  // get the best time out of the per-trial times in res_tuple
+  // no Py_[X]DECREF of func, func_args, func_kwargs since refs were stolen.
+  // however, we Py_DECREF new_args, new_kwargs, number_, repeat_, res_list
+  Py_DECREF(new_args);
+  Py_DECREF(new_kwargs);
+  Py_DECREF(number_);
+  Py_DECREF(repeat_);
+  Py_DECREF(res_list);
+  // remove this Py_DECREF later when function is complete
+  Py_DECREF(res_tuple);
   // dummy return 
   Py_INCREF(Py_None);
   return Py_None;

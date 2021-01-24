@@ -20,20 +20,20 @@
 NO_PY_C_API START_TEST(test_validate_unit) {
   // return false if arg is NULL
   ck_assert_msg(
-    !TimeitResult_validate_unit(NULL), "%s: TimeitResult_validate_unit should "
-    "return false if passed NULL pointer", __func__
+    !TimeitResult_validate_unit(NULL), "TimeitResult_validate_unit should "
+    "return false if passed NULL pointer"
   );
   // foobar is not a valid unit
   ck_assert_msg(
-    !TimeitResult_validate_unit("foobar"), "%s: TimeitResult_validate_unit "
-    "should not validate invalid unit \"foobar\"", __func__
+    !TimeitResult_validate_unit("foobar"), "TimeitResult_validate_unit should "
+    "should not validate invalid unit \"foobar\""
   );
   // nsec is a valid unit
   ck_assert_msg(
-    TimeitResult_validate_unit("nsec"), "%s: TimeitResult_validate_unit "
-    "should validate valid unit \"nsec\"", __func__
+    TimeitResult_validate_unit("nsec"), "TimeitResult_validate_unit should "
+    "validate valid unit \"nsec\""
   );
-}
+} END_TEST
 
 /**
  * Test that `TimeitResult_dealloc` raises appropriate exceptions.
@@ -47,10 +47,9 @@ PY_C_API_REQUIRED START_TEST(test_dealloc) {
   // check that exc is of type RuntimeError
   ck_assert_msg(
     PyErr_GivenExceptionMatches(exc, PyExc_RuntimeError),
-    "%s: TimeitResult_dealloc should set RuntimeError if given NULL pointer",
-    __func__
+    "TimeitResult_dealloc should set RuntimeError if given NULL pointer"
   );
-}
+} END_TEST
 
 /**
  * Test that `TimeitResult_new` is argument safe for extern access.
@@ -73,7 +72,7 @@ PY_C_API_REQUIRED START_TEST(test_new_extern) {
   // check that exc is RuntimeError
   ck_assert_msg(
     PyErr_GivenExceptionMatches(exc, PyExc_RuntimeError),
-    "%s: TimeitResult_new should set RuntimeError if type is NULL", __func__
+    "TimeitResult_new should set RuntimeError if type is NULL"
   );
   // should set exception if args is NULL. exc is borrowed. note the very
   // unsafe cast that is done for the type argument.
@@ -85,9 +84,38 @@ PY_C_API_REQUIRED START_TEST(test_new_extern) {
   ck_assert_ptr_nonnull(exc);
   ck_assert_msg(
     PyErr_GivenExceptionMatches(exc, PyExc_RuntimeError),
-    "%s: TimeitResult_new should set RuntimeError if args is NULL", __func__
+    "TimeitResult_new should set RuntimeError if args is NULL"
   );
-}
+} END_TEST
+
+/**
+ * Test that `_TimeitResult_validate_units_bases` works as intended.
+ * 
+ * If this test fails, then `TimeitResult_units` and `TimeitResult_unit_bases`
+ * have different lengths and thus the built module shouldn't be used.
+ */
+NO_PY_C_API START_TEST(test_units_bases_length) {
+  // arrays that should make _TimeitResult_validate_units_bases return false
+  char const *ar_1[] = {"one", "two", "three", NULL};
+  double const br_1[] = {1, 2, 3, 4, 0};
+  ck_assert_msg(
+    !_TimeitResult_validate_units_bases(ar_1, br_1),
+    "_TimeitResult_validate_units_bases should return false on ar_1, br_1"
+  );
+  // arrays that should make _TimeitResult_validate_units_bases return true
+  char const *ar_2[] = {"one", "two", NULL};
+  double const br_2[] = {1, 2, 0};
+  ck_assert_msg(
+    _TimeitResult_validate_units_bases(ar_2, br_2),
+    "_TimeitResult_validate_units_bases should return true on ar_2, br_2"
+  );
+  // TimeitResult_validate_units_bases must return true
+  ck_assert_msg(
+    TimeitResult_validate_units_bases(),
+    "TimeitResult_validate_units_bases returned false; check length of "
+    "TimeitResult_units and TimeitResult_unit_bases"
+  );
+} END_TEST
 
 /**
  * Create test suite `"timeitresult_suite"` using static tests defined above.
@@ -123,6 +151,7 @@ Suite *make_timeitresult_suite(double timeout) {
   tcase_add_test(tc_py_core, test_dealloc);
   tcase_add_test(tc_py_core, test_new_extern);
   tcase_add_test(tc_c_core, test_validate_unit);
+  tcase_add_test(tc_c_core, test_units_bases_length);
   suite_add_tcase(suite, tc_py_core);
   suite_add_tcase(suite, tc_c_core);
   return suite;

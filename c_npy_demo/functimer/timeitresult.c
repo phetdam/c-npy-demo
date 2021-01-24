@@ -15,6 +15,43 @@
 
 // available array of units that unit is allowed to be equal to.
 char const * const TimeitResult_units[] = {TimeitResult_UNITS, NULL};
+/**
+ * bases corresponding to TimeitResult_units. each ith value corresponds to
+ * the number a time in seconds should be multipled by to get the times in the
+ * units given by the ith entry in TimeitResult_units.
+ */
+double const TimeitResult_unit_bases[] = {TimeitResult_UNIT_BASES, 0};
+
+/**
+ * Check that `NULL`-terminated `ar` and `0`-terminated `br` have same length.
+ * 
+ * Usually `ar` will be `TimeitResult_units` and `br` will be
+ * `TimeitResult_unit_bases` in production but this internal function allows
+ * unit testing. The macro `TimeitResult_validate_units_bases` calls this
+ * function, which is run during module initialization. Returns `1` if
+ * lengths are matching else `0` is returned.
+ * 
+ * @note If one of the array has multiple trailing `NULL` values of `0` values,
+ *     then the result of this function is inaccurate.
+ * 
+ * @param ar `NULL`-terminated `char const * const` array
+ * @param br `0`-terminated `double const` array
+ * @returns `1` if lengths are matching, `0` otherwise
+ */
+int _TimeitResult_validate_units_bases(
+  char const * const * const ar, double const * const br
+) {
+  int i = 0;
+  // loop until we reach the end of one of the arrays
+  while ((ar[i] != NULL) && (br[i] != 0)) {
+    i++;
+  }
+  // if last element of ar NULL and last element of br 0, then return true
+  if ((ar[i] == NULL) && (br[i] == 0)) {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Return 1 if `unit` matches a value in `TimeitResult_units` else 0.

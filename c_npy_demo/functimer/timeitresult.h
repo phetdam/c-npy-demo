@@ -44,6 +44,9 @@ typedef struct {
 // list of valid values that unit can take. used to initialize
 // TimeitResult_units and TimeitResult_UNITS_STR
 #define TimeitResult_UNITS "nsec", "usec", "msec", "sec"
+// valid values used to initialize TimeitResult_unit_bases. all values are
+// interpreted as doubles (TimeitResult_unit_bases is double const array)
+#define TimeitResult_UNIT_BASES 1e9, 1e6, 1e3, 1
 /**
  * stringify combines varargs into a string, i.e. a, b, c -> "a, b, c", while
  * xstringify allows varargs to be macro expanded before stringification.
@@ -55,7 +58,28 @@ typedef struct {
 #define TimeitResult_UNITS_STR xstringify(TimeitResult_UNITS)
 // NULL-terminated array of strings indicating values unit can take
 extern char const * const TimeitResult_units[];
+/**
+ * 0-terminated array of doubles, each ith value corresponding to a number
+ * to multiply a time in seconds by to get time in the units given by the ith
+ * unit in the TimeitResult_units NULL-terminated array
+ */
+extern double const TimeitResult_unit_bases[];
 
+// helper macro to check that TimeitResult_units and TimeitResult_unit_bases
+// are the same length. 1 if true, 0 otherwise. used during unit testing.
+#define TimeitResult_validate_units_bases() \
+  _TimeitResult_validate_units_bases( \
+    TimeitResult_units, TimeitResult_unit_bases \
+  )
+/**
+ * internal helper function to check that char const * const array terminated
+ * with a single NULL and double const array terminated with single 0 have the
+ * same length. see function comments for more details. 1 if true, 0 otherwise.
+ * this function is used internally during unit testing.
+ */
+int _TimeitResult_validate_units_bases(
+  char const * const * const, double const * const
+);
 // helper function for checking if unit has taken a valid string value, i.e.
 // one of the values in TimeitResult_units. returns 1 if valid, 0 otherwise.
 int TimeitResult_validate_unit(char const *);
