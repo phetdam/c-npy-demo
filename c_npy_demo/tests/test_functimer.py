@@ -80,7 +80,7 @@ def test_timeit_once_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to timeit_once call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 85)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 86)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     functimer.timeit_once(*func_and_args, number = 1000)
@@ -117,7 +117,7 @@ def test_autorange_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to autorange call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 122)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 123)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     functimer.autorange(*func_and_args)
