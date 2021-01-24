@@ -4,7 +4,7 @@ import pytest
 import sys
 import tracemalloc
 
-# pylint: disable=relative-beyond-top-level
+# pylint: disable=relative-beyond-top-level,no-name-in-module
 from .. import functimer
 from ..functimer import TimeitResult
 
@@ -172,7 +172,7 @@ def test_repeat_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to repeat call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 177)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 178)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     functimer.repeat(*func_and_args, number = 400, repeat = 2)
