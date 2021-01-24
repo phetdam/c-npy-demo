@@ -168,20 +168,6 @@ PyObject *TimeitResult_new(
     Py_DECREF(self);
     return NULL;
   }
-  // if precision >= floor(TimeitResult_MAX_PRECISION / 2), print warning.
-  // if exception raised (PyErr_WarnFormat returns < 0), then Py_DECREF self
-  if (self->precision >= (TimeitResult_MAX_PRECISION / 2)) {
-    if (
-      PyErr_WarnFormat(
-        PyExc_UserWarning, 1, "value of precision is rather high (>= %d). "
-        "consider passing a lower value for better brief readability.",
-        TimeitResult_MAX_PRECISION / 2
-      ) < 0
-    ) {
-      Py_DECREF(self);
-      return NULL;
-    }
-  }
   // times must be tuple. on error, Py_DECREF self and set error indicator
   if (!PyTuple_CheckExact(self->times)) {
     PyErr_SetString(PyExc_TypeError, "times must be a tuple");

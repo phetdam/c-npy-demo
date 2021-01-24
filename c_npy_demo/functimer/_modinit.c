@@ -105,7 +105,6 @@ PyDoc_STRVAR(
   ":type timer: function, optional\n"
   ":rtype: int"
 );
-/*
 // update docstring later
 PyDoc_STRVAR(
   FUNCTIMER_TIMEIT_ENH_DOC,
@@ -114,7 +113,6 @@ PyDoc_STRVAR(
   "--\n\n"
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
 );
-*/
 // TimeitResult class docstring
 PyDoc_STRVAR(
   FUNCTIMER_TIMEITRESULT_DOC,
@@ -175,14 +173,12 @@ static PyMethodDef functimer_methods[] = {
     METH_VARARGS | METH_KEYWORDS,
     FUNCTIMER_AUTORANGE_DOC,
   },
-  /*
   {
     "timeit_enh",
     (PyCFunction) functimer_timeit_enh,
     METH_VARARGS | METH_KEYWORDS,
     FUNCTIMER_TIMEIT_ENH_DOC
   },
-  */
   // sentinel required; needs to have at least one NULL in it
   {NULL, NULL, 0, NULL}
 };

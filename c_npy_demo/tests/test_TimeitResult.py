@@ -84,9 +84,6 @@ def test_TimeitResult_new(__new__args, tuple_replace):
         match = f"precision is capped at {TimeitResult.MAX_PRECISION}"
     ):
         TimeitResult(*__new__args, precision = TimeitResult.MAX_PRECISION + 1)
-    # check that warning is raised when brief precision >= 20
-    with pytest.warns(UserWarning, match = "precision is rather high"):
-        TimeitResult(*__new__args, precision = TimeitResult.MAX_PRECISION // 2)
     # should initialize correctly
     TimeitResult(*__new__args)
 

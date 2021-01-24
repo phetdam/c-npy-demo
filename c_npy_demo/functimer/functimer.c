@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #include "functimer.h"
+#include "timeitresult.h"
 
 /**
  * Operates in a similar manner to `timeit.timeit`.
@@ -402,4 +403,87 @@ PyObject *functimer_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
   }
   // return the list of times returned from functimer_timeit_once
   return func_times;
+}
+
+/**
+ * Operates in a similar manner to `timeit.main` but returns a `TimeitResult`.
+ * 
+ * Docstring in `_modinit.c`.
+ * 
+ * @param args PyObject * tuple of positional arguments
+ * @param kwargs PyObject * dict of named arguments
+ * @returns `TimeitResult *` cast to `PyObject *` of timing results
+ */
+PyObject *functimer_timeit_enh(
+  PyObject *self, PyObject *args, PyObject *kwargs
+) {
+  // callable, args, kwargs, timer function
+  PyObject *func, *func_args, *func_kwargs, *timer;
+  func = func_args = func_kwargs = timer = NULL;
+  // number of times to execute func in a trial, number of trials. if number is
+  // PY_SSIZE_T_MIN, then functimer_autorange is used to set number
+  Py_ssize_t number = PY_SSIZE_T_MIN;
+  Py_ssize_t repeat = 5;
+  // display unit to use. if NULL then it will be automatically selected
+  char const *unit = NULL;
+  // precision to display brief output with
+  int precision = 1;
+  // argument names
+  char *argnames[] = {
+    "func", "args", "kwargs", "timer", "number", "repeat", "unit", "precision",
+    NULL
+  };
+  // parse args and kwargs; sets appropriate exception automatically
+  if (
+    !PyArg_ParseTupleAndKeywords(
+      args, kwargs, "O|OO$Onnsi", argnames, &func, &func_args, &func_kwargs,
+      &timer, &number, &repeat, &unit, &precision
+    )
+  ) { return NULL; }
+  /**
+   * we defer checking of func, func_args, func_kwargs to functimer_timeit_once
+   * and so must check number, repeat, unit, precision
+   */
+  // number must be positive (unless PY_SSIZE_T_MIN)
+  if ((number != PY_SSIZE_T_MIN) && (number < 1)) {
+    PyErr_SetString(PyExc_ValueError, "number must be positive");
+    return NULL;
+  }
+  // repeat must be positive
+  if (repeat < 1) {
+    PyErr_SetString(PyExc_ValueError, "repeat must be positive");
+    return NULL;
+  }
+  // unit must be valid. if NULL, it will be decided later
+  if ((unit != NULL) && !TimeitResult_validate_unit(unit)) {
+    PyErr_SetString(
+      PyExc_ValueError, "unit must be one of [" TimeitResult_UNITS_STR "]"
+    );
+    return NULL;
+  }
+  // precision must be positive
+  if (precision < 1) {
+    PyErr_SetString(PyExc_ValueError, "precision must be positive");
+    return NULL;
+  }
+  // precision must be <= TimeitResult_MAX_PRECISION
+  if (precision > TimeitResult_MAX_PRECISION) {
+    PyErr_Format(
+      PyExc_ValueError, "precision is capped at %d", TimeitResult_MAX_PRECISION
+    );
+    return NULL;
+  }
+  // if precision >= floor(TimeitResult_MAX_PRECISION / 2), print warning.
+  if (precision >= (TimeitResult_MAX_PRECISION / 2)) {
+    if (
+      PyErr_WarnFormat(
+        PyExc_UserWarning, 1, "value of precision is rather high (>= %d). "
+        "consider passing a lower value for better brief readability.",
+        TimeitResult_MAX_PRECISION / 2
+      ) < 0
+    ) { return NULL; }
+  }
+  // dummy return 
+  Py_INCREF(Py_None);
+  return Py_None;
 }
