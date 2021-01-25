@@ -217,7 +217,8 @@ def test_timeit_enh_sanity(func_and_args):
             *func_and_args, precision = TimeitResult.MAX_PRECISION // 2
         )
     # this should run normally
-    functimer.timeit_enh(*func_and_args)
+    tir = functimer.timeit_enh(*func_and_args)
+    print(tir.brief)
 
 
 def test_timeit_enh_memleak(func_and_args):
@@ -227,7 +228,7 @@ def test_timeit_enh_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to repeat call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 233)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 234)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     functimer.timeit_enh(*func_and_args, precision = 2)

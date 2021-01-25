@@ -258,59 +258,51 @@ PyObject *functimer_autorange(
       }
       // set time_total to 0 to initialize
       time_total = 0;
-      // try running the function number times
-      for (Py_ssize_t j = 0; j < number; j++) {
-        // add number_ to kwargs. Py_DECREF kwargs, number_ on failure
-        if (PyDict_SetItemString(kwargs, "number", number_) < 0) {
-          Py_DECREF(kwargs);
-          Py_DECREF(number_);
-          return NULL;
-        }
-        // save the returned time from functimer_timeit_once. the self, args,
-        // kwargs refs are all borrowed so no need to Py_INCREF them.
-        PyObject *timeit_time = functimer_timeit_once(self, args, kwargs);
-        // if NULL, return NULL. let functimer_timeit set the error indicator.
-        // Py_DECREF kwargs and number_ (they are new references)
-        if (timeit_time == NULL) {
-          Py_DECREF(kwargs);
-          Py_DECREF(number_);
-          return NULL;
-        }
-        // convert timeit_time to Python float and Py_DECREF timeit_time_temp
-        PyObject *timeit_time_temp = timeit_time;
-        timeit_time = PyNumber_Float(timeit_time);
-        Py_DECREF(timeit_time_temp);
-        // on error, exit. Py_DECREF kwargs and number_
-        if (timeit_time == NULL) {
-          Py_DECREF(kwargs);
-          Py_DECREF(number_);
-          return NULL;
-        }
-        // attempt to get double from timeit_time and Py_DECREF it when done
-        double timeit_time_ = PyFloat_AsDouble(timeit_time);
-        Py_DECREF(timeit_time);
-        // check if error occurred (borrowed ref)
-        PyObject *err_type = PyErr_Occurred();
-        // if not NULL, then exit. error indicator already set. do Py_DECREFs
-        if (err_type != NULL) {
-          Py_DECREF(kwargs);
-          Py_DECREF(number_);
-          return NULL;
-        }
-        // add timeit_time_ to time_total
-        time_total = time_total + timeit_time_;
+      // add number_ to kwargs. Py_DECREF kwargs, number_ on failure
+      if (PyDict_SetItemString(kwargs, "number", number_) < 0) {
+        Py_DECREF(kwargs);
+        Py_DECREF(number_);
+        return NULL;
+      }
+      // save the returned time from functimer_timeit_once. the self, args,
+      // kwargs refs are all borrowed so no need to Py_INCREF them.
+      PyObject *timeit_time = functimer_timeit_once(self, args, kwargs);
+      // if NULL, return NULL. let functimer_timeit set the error indicator.
+      // Py_DECREF kwargs and number_ (they are new references)
+      if (timeit_time == NULL) {
+        Py_DECREF(kwargs);
+        Py_DECREF(number_);
+        return NULL;
+      }
+      // convert timeit_time to Python float and Py_DECREF timeit_time_temp
+      PyObject *timeit_time_temp = timeit_time;
+      timeit_time = PyNumber_Float(timeit_time);
+      Py_DECREF(timeit_time_temp);
+      // on error, exit. Py_DECREF kwargs and number_
+      if (timeit_time == NULL) {
+        Py_DECREF(kwargs);
+        Py_DECREF(number_);
+        return NULL;
+      }
+      // attempt to get time_total from timeit_time (Py_DECREF'd when done)
+      time_total = PyFloat_AsDouble(timeit_time);
+      Py_DECREF(timeit_time);
+      // check if error occurred (borrowed ref)
+      PyObject *err_type = PyErr_Occurred();
+      // if not NULL, then exit. error indicator already set. do Py_DECREFs
+      if (err_type != NULL) {
+        Py_DECREF(kwargs);
+        Py_DECREF(number_);
+        return NULL;
       }
       // done with number_ so Py_DECREF it
       Py_DECREF(number_);
-      // computation of time_total complete. if time_total >= 0.2 s, break the
-      // outermost for loop. no more changes to number
+      // computation of time_total complete. if time_total >= 0.2 s, Py_DECREF
+      // kwargs and return Python int from number (NULL on failure)
       if (time_total >= 0.2) {
-        break;
+        Py_DECREF(kwargs);
+        return PyLong_FromSsize_t(number);
       }
-    }
-    // if time_total >= 0.2, break from the while loop
-    if (time_total >= 0.2) {
-      break;
     }
     // if number > PY_SSIZE_T_MAX / 10, then break the while loop. emit warning
     // and if an exception is raised (return == -1), Py_DECREF kwargs
@@ -728,9 +720,12 @@ PyObject *functimer_timeit_enh(
   Py_DECREF(best_);
   Py_DECREF(unit_);
   Py_DECREF(precision_);
-  // create new TimeitResult instance using res_args and Py_DECREF res_args
+  /**
+   * create new TimeitResult instance using res_args. note that since the
+   * references parsed inside TimeitResult_new are borrowed, we can't safely
+   * Py_DECREF res_args and must leave one reference alive.
+   */
   PyObject *tir = TimeitResult_new(&TimeitResult_type, res_args, NULL);
-  Py_DECREF(res_args);
   // TimeitResult_new will set error indicator on error
   if (tir == NULL) {
     return NULL;
