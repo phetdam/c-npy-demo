@@ -6,6 +6,7 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 
+#include <float.h>
 #include <stdbool.h>
 
 #include "functimer.h"
@@ -120,6 +121,16 @@ PyObject *functimer_timeit_once(
     Py_XDECREF(time_perf_counter);
     Py_DECREF(func_args);
     Py_DECREF(start_time);
+    return NULL;
+  }
+  // get new start time; time was lost checking if start_time is valid
+  Py_DECREF(start_time);
+  start_time = PyObject_CallObject(timer, NULL);
+  // if NULL, exception was raised. Py_DECREF and Py_XDECREF as needed
+  if (start_time == NULL) {
+    Py_XDECREF(time_module);
+    Py_XDECREF(time_perf_counter);
+    Py_DECREF(func_args);
     return NULL;
   }
   PyObject *func_res;
@@ -588,38 +599,135 @@ PyObject *functimer_timeit_enh(
     return NULL;
   }
   // call functimer_repeat with new_args, new_kwargs (borrowed refs) and get
-  // res_list, the list of times in seconds for each of the repeat trials
-  PyObject *res_list = functimer_repeat(self, new_args, new_kwargs);
+  // times_list, the list of times in seconds for each of the repeat trials
+  PyObject *times_list = functimer_repeat(self, new_args, new_kwargs);
   // if NULL, exception was set, so Py_DECREF as needed
-  if (res_list == NULL) {
+  if (times_list == NULL) {
     Py_DECREF(new_args);
     Py_DECREF(new_kwargs);
     Py_DECREF(number_);
     Py_DECREF(repeat_);
     return NULL;
   }
-  // create tuple out of res_list
-  PyObject *res_tuple = PySequence_Tuple(res_list);
+  // create tuple out of times_list and Py_DECREF times_list; no longer needed
+  PyObject *times_tuple = PySequence_Tuple(times_list);
+  Py_DECREF(times_list);
   // Py_DECREF as needed if error
-  if (res_tuple == NULL) {
+  if (times_tuple == NULL) {
     Py_DECREF(new_args);
     Py_DECREF(new_kwargs);
     Py_DECREF(number_);
     Py_DECREF(repeat_);
     return NULL;
   }
-  // best time (for now, in seconds, )
-  // get the best time out of the per-trial times in res_tuple
-  // no Py_[X]DECREF of func, func_args, func_kwargs since refs were stolen.
-  // however, we Py_DECREF new_args, new_kwargs, number_, repeat_, res_list
+  // best time (for now, in seconds, as double)
+  double best = DBL_MAX;
+  // loop through times in times_tuple
+  for (Py_ssize_t i = 0; i < PyTuple_GET_SIZE(times_tuple); i++) {
+    // try to convert item from times_tuple to PyFloatObject. won't be out of
+    // bounds, so no need to use PyTuple_GetItem. returned ref is borrowed.
+    PyObject *time_i_ = PyNumber_Float(PyTuple_GET_ITEM(times_tuple, i));
+    // if conversion to float fails, Py_DECREF as needed (include times_tuple)
+    if (time_i_ == NULL) {
+      Py_DECREF(new_args);
+      Py_DECREF(new_kwargs);
+      Py_DECREF(number_);
+      Py_DECREF(repeat_);
+      Py_DECREF(times_tuple);
+      return NULL;
+    }
+    // convert time_i_ to double and Py_DECREF (no longer needed)
+    double time_i = PyFloat_AsDouble(time_i_);
+    Py_DECREF(time_i_);
+    // if error occurred, Py_DECREF
+    if (PyErr_Occurred()) {
+      Py_DECREF(new_args);
+      Py_DECREF(new_kwargs);
+      Py_DECREF(number_);
+      Py_DECREF(repeat_);
+      Py_DECREF(times_tuple);
+      return NULL;
+    }
+    // update best based on the value of time_i
+    best = (time_i < best) ? time_i : best;
+  }
+  // divide best by number to get per-loop time
+  best = best / ((double) number);
+  /**
+   * if unit is NULL, then we call TimeitResult_autounit to return char const *
+   * pointer to TimeitResult_units (no need to free of course). the new value
+   * of best is written to the address best is stored in. unit is never NULL.
+   */
+  if (unit == NULL) {
+    unit = TimeitResult_autounit(best, &best);
+  }
+  /**
+   * now we start creating Python objects from C values to pass to the
+   * TimeitResult constructor. create new Python float from best time, in units
+   * of unit. Py_DECREF on error as needed.
+   */
+  PyObject *best_ = PyFloat_FromDouble(best);
+  if (best_ == NULL) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    Py_DECREF(repeat_);
+    Py_DECREF(times_tuple);
+    return NULL;
+  }
+  // create Python string from unit, Py_DECREF on error (include best_)
+  PyObject *unit_ = PyUnicode_FromString(unit);
+  if (unit_ == NULL) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    Py_DECREF(repeat_);
+    Py_DECREF(times_tuple);
+    Py_DECREF(best_);
+    return NULL;
+  }
+  // create Python int from precision, Py_DECREF on error (include unit_)
+  PyObject *precision_ = PyLong_FromLong(precision);
+  if (precision_ == NULL) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    Py_DECREF(repeat_);
+    Py_DECREF(times_tuple);
+    Py_DECREF(best_);
+    Py_DECREF(unit_);
+    return NULL;
+  }
+  // create new tuple of arguments to be passed to TimeitResult.__new__. note
+  // that since we use PyTuple_Pack, we still need to Py_DECREF on error.
+  //"best", "unit", "number", "repeat", "times", "precision", NULL
+  PyObject *res_args = PyTuple_Pack(
+    6, best_, unit_, number_, repeat_, times_tuple, precision_
+  );
+  if (res_args == NULL) {
+    Py_DECREF(new_args);
+    Py_DECREF(new_kwargs);
+    Py_DECREF(number_);
+    Py_DECREF(repeat_);
+    Py_DECREF(times_tuple);
+    Py_DECREF(best_);
+    Py_DECREF(unit_);
+    Py_DECREF(precision_);
+    return NULL;
+  }
+  /**
+   * no Py_[X]DECREF of func, func_args, func_kwargs since refs were stolen.
+   * however, we Py_DECREF everything else: new_args, new_kwargs, number_,
+   * repeat_, times_tuple, best_, unit_, precision_, res_args
+   */
   Py_DECREF(new_args);
   Py_DECREF(new_kwargs);
   Py_DECREF(number_);
   Py_DECREF(repeat_);
-  Py_DECREF(res_list);
-  // remove this Py_DECREF later when function is complete
-  Py_DECREF(res_tuple);
-  // dummy return 
-  Py_INCREF(Py_None);
-  return Py_None;
+  Py_DECREF(times_tuple);
+  Py_DECREF(best_);
+  Py_DECREF(unit_);
+  Py_DECREF(precision_);
+  //Py_DECREF(res_args);  // include after instantiation of TimeitResult
+  return res_args;
 }

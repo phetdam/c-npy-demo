@@ -118,6 +118,26 @@ NO_PY_C_API START_TEST(test_units_bases_length) {
 } END_TEST
 
 /**
+ * Test that `TimeitResult_autounit` works as intended.
+ */
+NO_PY_C_API START_TEST(test_autounit) {
+  // some times to pass to TimeitResult_autounit
+  double t1, t2, t3;
+  t1 = 1.2;
+  t2 = 3e-3;
+  t3 = 4.24e-5;
+  // unit should be seconds for t1
+  ck_assert_str_eq("sec", TimeitResult_autounit(t1, NULL));
+  // unit should be milliseconds for t2
+  ck_assert_str_eq("msec", TimeitResult_autounit(t2, NULL));
+  // unit should be microseconds for t3
+  ck_assert_str_eq("usec", TimeitResult_autounit(t3, NULL));
+  // check that conversion works appropriately
+  TimeitResult_autounit(t3, &t3);
+  ck_assert_double_eq_tol(42.4, t3, 1e-8);
+} END_TEST
+
+/**
  * Create test suite `"timeitresult_suite"` using static tests defined above.
  * 
  * Invokes unit tests for `TimeitResult` in two cases. The first case,
@@ -152,6 +172,7 @@ Suite *make_timeitresult_suite(double timeout) {
   tcase_add_test(tc_py_core, test_new_extern);
   tcase_add_test(tc_c_core, test_validate_unit);
   tcase_add_test(tc_c_core, test_units_bases_length);
+  tcase_add_test(tc_c_core, test_autounit);
   suite_add_tcase(suite, tc_py_core);
   suite_add_tcase(suite, tc_c_core);
   return suite;

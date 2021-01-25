@@ -79,6 +79,39 @@ int TimeitResult_validate_unit(char const *unit) {
 }
 
 /**
+ * Automatically determine units a time should be displayed in.
+ * 
+ * This is when `unit` is not passed to `functimer_timeit_enh` and will choose
+ * the largest unit of time such that `fabs(best) >= 1`.
+ * 
+ * @param best Time in units of seconds
+ * @param conv_p Memory location to write `best` converted to units returned
+ *     by the function. If `NULL`, no writing is done.
+ * @returns `char const *` to a value in `TimeitResult_units`
+ */
+char const *TimeitResult_autounit(double const best, double * const conv_p) {
+  int i = 0;
+  /**
+   * loop through TimeitResult_unit_bases until we reach NULL or a unit such
+   * that multiplying by the corresponding base b_i results in fabs(b_i * best)
+   * to be less than 1. the final index is then decremented.
+   */
+  while (TimeitResult_unit_bases[i] != 0) {
+    if (fabs(TimeitResult_unit_bases[i] * best) < 1) {
+      break;
+    }
+    i++;
+  }
+  i--;
+  // if conv_p is not NULL, write the converted time to that location
+  if (conv_p != NULL) {
+    *conv_p = TimeitResult_unit_bases[i] * best;
+  }
+  // return appropriate char const * from TimeitResult_units
+  return TimeitResult_units[i];
+}
+
+/**
  * Custom destructor for the `TimeitResult` class.
  * 
  * Checks if `self` is `NULL` so that it can be safely used from C.

@@ -216,3 +216,5 @@ def test_timeit_enh_sanity(func_and_args):
         functimer.timeit_enh(
             *func_and_args, precision = TimeitResult.MAX_PRECISION // 2
         )
+    # this should run normally
+    print(functimer.timeit_enh(*func_and_args))

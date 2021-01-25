@@ -80,9 +80,17 @@ extern double const TimeitResult_unit_bases[];
 int _TimeitResult_validate_units_bases(
   char const * const * const, double const * const
 );
-// helper function for checking if unit has taken a valid string value, i.e.
-// one of the values in TimeitResult_units. returns 1 if valid, 0 otherwise.
+// internal helper function for checking if unit has taken a valid string value,
+// i.e. a value in TimeitResult_units. returns 1 if valid, 0 otherwise.
 int TimeitResult_validate_unit(char const *);
+/**
+ * internal helper function for automatically determining a unit in
+ * TimitResult_units to display the given double time in. if a non-NULL
+ * double * is passed as the second argument, the time passed to the first
+ * argument will be converted to the unit returned as char const * and written
+ * to that memory location (this is for convenience).
+ */
+char const *TimeitResult_autounit(double const, double * const);
 
 // custom destructor (operates on self)
 void TimeitResult_dealloc(TimeitResult *);
