@@ -728,6 +728,13 @@ PyObject *functimer_timeit_enh(
   Py_DECREF(best_);
   Py_DECREF(unit_);
   Py_DECREF(precision_);
-  //Py_DECREF(res_args);  // include after instantiation of TimeitResult
-  return res_args;
+  // create new TimeitResult instance using res_args and Py_DECREF res_args
+  PyObject *tir = TimeitResult_new(&TimeitResult_type, res_args, NULL);
+  Py_DECREF(res_args);
+  // TimeitResult_new will set error indicator on error
+  if (tir == NULL) {
+    return NULL;
+  }
+  // return new reference
+  return tir;
 }

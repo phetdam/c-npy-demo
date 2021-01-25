@@ -166,7 +166,7 @@ def test_repeat_sanity(func_and_args):
 
 
 def test_repeat_memleak(func_and_args):
-    """Check if :func:`~c_npy_demo.functier.repeat` is leaking memory.
+    """Check if :func:`~c_npy_demo.functimer.repeat` is leaking memory.
 
     :param func_and_args: ``pytest`` fixture.
     :type func_and_args: tuple
@@ -217,4 +217,21 @@ def test_timeit_enh_sanity(func_and_args):
             *func_and_args, precision = TimeitResult.MAX_PRECISION // 2
         )
     # this should run normally
-    print(functimer.timeit_enh(*func_and_args))
+    functimer.timeit_enh(*func_and_args)
+
+
+def test_timeit_enh_memleak(func_and_args):
+    """Check if :func:`~c_npy_demo.functimer.timeit_enh` is leaking memory.
+
+    :param func_and_args: ``pytest`` fixture.
+    :type func_and_args: tuple
+    """
+    # filter so that memory allocation tracing is limited to repeat call
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 233)]
+    # take snapshots before and after running timeit_once
+    snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
+    functimer.timeit_enh(*func_and_args, precision = 2)
+    snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
+    # compare second to first snapshot and print differences (top 10)
+    diffs = snap_2.compare_to(snap_1, "lineno")
+    print(diffs[0])

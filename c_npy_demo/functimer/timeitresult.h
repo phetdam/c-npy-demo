@@ -106,4 +106,7 @@ PyObject *TimeitResult_getbrief(TimeitResult *, void *);
 // custom __repr__ implementation (operates on self)
 PyObject *TimeitResult_repr(TimeitResult *);
 
+// defined in _modinit.c. PyTypeObject struct holding TimeitResult type info
+extern PyTypeObject TimeitResult_type;
+
 #endif /* TIMEITRESULT_H */

@@ -210,8 +210,8 @@ static PyGetSetDef TimeitResult_getters[] = {
   {NULL, NULL, NULL, NULL, NULL}
 };
 
-// static type definition struct
-static PyTypeObject TimeitResult_type = {
+// type definition struct. non-static for extern visibility.
+PyTypeObject TimeitResult_type = {
   PyVarObject_HEAD_INIT(NULL, 0)
   // full type name is c_npy_demo.MODULE_NAME.TimeitResult
   .tp_name = "c_npy_demo." MODULE_NAME "." TIMEITRESULT_NAME,
