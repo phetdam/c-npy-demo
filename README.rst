@@ -9,11 +9,11 @@ c_npy_demo
    :alt: GitHub Workflow Status
 
 *We should forget about small efficiencies, say about 97% of the time: premature
-optimization is the root of all evil* [#]_
+optimization is the root of all evil* [#]_.
 
-   Note:
+.. leave note as comment
 
-   The contents of this repository will see significant change in the near
+.. The contents of this repository will see significant change in the near
    future, as I have decided to greatly simplify the code being used. The
    implied volatility stuff will be moved to a new repository, whose name will
    be yet another play on snake-related stuff. There is more code than I
@@ -133,7 +133,7 @@ use the Python C API and should be tested using a C unit testing framework.
 However, incorrectly C code loaded as an extension module may also cause
 segmentation faults and crash the interpreter. Ideally, unit tests should be
 run in a separate address space so that the test runner doesn't get killed by
-the OS if a particular test causes a segmentation fault.
+the operating system if a particular test causes a segmentation fault.
 
 For this project, I used `pytest`__ and `Check`__, embedding the Python
 interpreter into and using Check unit tests inside a test runner to test both
