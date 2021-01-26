@@ -116,8 +116,7 @@ TBA.
 Documentation
 -------------
 
-In progress, and will be eventually be hosted on `Read the Docs`__. For now,
-the ``doc`` directory probably only has ``conf.py`` and ``index.rst``.
+In progress, and will be eventually be hosted on `Read the Docs`__.
 
 .. __: https://readthedocs.org/
 
