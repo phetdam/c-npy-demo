@@ -53,11 +53,38 @@ From source
 Building from source using this repo will probably only work on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
 Github Actions runners were done within the `manylinux1 Docker images`__
-provided by PyPA. To build, you will need to have the latest `setuptools`__ [#]_
-installed on your system, with `wheel`__ also installed if you like to create a
-prebuilt wheel for your own specific platform. You of course will need whatever
-C compiler is used to build Python on your system which will be determined by
-``setuptools``.
+provided by PyPA. To build, you will need ``numpy>=1.19`` and the latest
+`setuptools`__ [#]_ installed on your system. Preferably, you should also have
+GNU Make on your system, but using ``make`` is mostly for convenience and not
+strictly necessary. You of course will need whatever C compiler is used to
+build Python on your system which will be determined by ``setuptools``.
+
+First, use ``git clone`` or download + unzip to get the repo source code.
+Assuming ``numpy>=1.19`` has already been installed and that the current
+working directory is the repository root, you can build the C extension modules
+and install directly from the repo source with
+
+.. code:: bash
+
+   make inplace && pip3 install .
+
+If you don't have or don't wish to use ``make``, you may instead use
+
+.. code:: bash
+
+   python3 setup.py build_ext --inplace && pip3 install .
+
+``setuptools`` will also create an entry point to access the benchmarking code
+titled ``c_npy_demo.bench``. Running it should produce the ``timeit``\ -like
+output
+
+.. code:: text
+
+   numpy.ndarray shape (40, 5, 10, 10, 50, 5), size 5000000
+   pyscale.stdscale -- 2 loops, best of 5: 157.1 msec per loop
+   cscale.stdscale -- 5 loops, best of 5: 57.9 msec per loop
+
+For usage details, try ``c_npy_demo.bench --help``.
 
 .. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__, but
    since a (tiny) C extension module has to be built in this package the legacy
@@ -68,8 +95,6 @@ C compiler is used to build Python on your system which will be determined by
 .. __: https://github.com/pypa/manylinux
 
 .. __: https://setuptools.readthedocs.io/en/latest/
-
-.. __: https://wheel.readthedocs.io/en/stable/
 
 .. __: https://www.python.org/dev/peps/pep-0517/
 
