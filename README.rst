@@ -54,15 +54,13 @@ Building from source using this repo will probably only work on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
 Github Actions runners were done within the `manylinux1 Docker images`__
 provided by PyPA. To build, you will need ``numpy>=1.19`` and the latest
-`setuptools`__ [#]_ installed on your system. Preferably, you should also have
-GNU Make on your system, but using ``make`` is mostly for convenience and not
-strictly necessary. You of course will need whatever C compiler is used to
-build Python on your system which will be determined by ``setuptools``.
+`setuptools`__ [#]_ installed on your system. Your C compiler should be a recent
+version of gcc, but ``setuptools`` will sort out the details.
 
-First, use ``git clone`` or download + unzip to get the repo source code.
-Assuming ``numpy>=1.19`` has already been installed and that the current
-working directory is the repository root, you can build the C extension modules
-and install directly from the repo source with
+First, use ``git clone`` or download + unzip to get the repo source code. Then,
+install ``numpy>=1.19``, as it is required by ``setup.py``. With the current
+working directory the repository root, you can build the C extension modules
+and install directly with
 
 .. code:: bash
 
@@ -75,8 +73,8 @@ If you don't have or don't wish to use ``make``, you may instead use
    python3 setup.py build_ext --inplace && pip3 install .
 
 ``setuptools`` will also create an entry point to access the benchmarking code
-titled ``c_npy_demo.bench``. Running it should produce the ``timeit``\ -like
-output
+titled ``c_npy_demo.bench``. Just typing the name of the entry point in the
+terminal should produce the ``timeit``\ -like output
 
 .. code:: text
 
