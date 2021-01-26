@@ -22,7 +22,7 @@ optimization is the root of all evil* [#]_.
    ``timeit.main`` results in double allocation of a ``numpy`` array in the
    benchmarking script.
 
-.. __: https://docs.python.org/3/library/timeit.html
+.. .. __: https://docs.python.org/3/library/timeit.html
 
 A tiny demo Python package comparing speed differences between NumPy's Python
 and C APIs that also serves as an example project for writing a C extension
