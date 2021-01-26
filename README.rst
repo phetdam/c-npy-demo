@@ -124,7 +124,53 @@ the ``doc`` directory probably only has ``conf.py`` and ``index.rst``.
 Unit tests
 ----------
 
-TBA.
+The unit test requirements for a C extension module are rather unique. Although
+one is writing C code, the resulting shared object built by ``setuptools`` is
+to be loaded by the Python interpreter, so it easier to conduct unit tests for
+the Python-accessible functions by using Python unit testing tools. However, it
+is possible that the extension module also contains some C functions that don't
+use the Python C API and should be tested using a C unit testing framework.
+However, incorrectly C code loaded as an extension module may also cause
+segmentation faults and crash the interpreter. Ideally, unit tests should be
+run in a separate address space so that the test runner doesn't get killed by
+the OS if a particular test causes a segmentation fault.
+
+For this project, I used `pytest`__ and `Check`__, embedding the Python
+interpreter into and using Check unit tests inside a test runner to test both
+from the Python interpreter and directly from C. Check runs unit tests in a
+separate address space so the test runner doesn't get killed when a unit test
+segfaults, but this can be disabled so that ``gdb`` can be used on the test
+runner to debug C extension module behavior when its members are accessed by
+the Python interpreter.
+
+To build the test runner, you will need ``pytest`` and Check. ``pytest`` can be
+easily installed with ``pip`` but Check is best built from source as the
+versions available on some platforms are rather outdated. To build Check,
+download the source from the `Check GitHub releases page`__ [#]_ and follow
+the installation instructions in `the homepage`__ ``README.md`` [#]_. Then,
+with the working directory the repository root, the test runner can be built
+and run with
+
+.. code:: bash
+
+   make check
+
+Type ``./runner --help`` for details on additional options that can be passed.
+
+.. [#] `Check 0.15.2`__ was used in this project.
+
+.. [#] I built ``libcheck`` using the standard ``./configure && make`` method
+   with automake/autoconf.
+
+.. __: https://pytest.readthedocs.io/
+
+.. __: https://libcheck.github.io/check/
+
+.. __: https://github.com/libcheck/check/releases
+
+.. __: https://github.com/libcheck/check
+
+.. __: https://github.com/libcheck/check/releases/tag/0.15.2
 
 Lessons
 -------
