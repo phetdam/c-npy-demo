@@ -346,11 +346,14 @@ PyObject *TimeitResult_getbrief(TimeitResult *self, void *closure) {
     if (best_round == NULL) {
       return NULL;
     }
-    // get new reference to formatted string. use %R to use result of
-    // PyObject_Repr on best_round in the formatted string.
+    /**
+     * get new reference to formatted string. use %R to use result of
+     * PyObject_Repr on best_round in the formatted string. note that if
+     * number == 1, then we write "loop" instead of "loops"
+     */
     self->brief = PyUnicode_FromFormat(
-      "%zd loops, best of %zd: %R %s per loop", self->number, self->repeat,
-      best_round, self->unit
+      "%zd loop%s, best of %zd: %R %s per loop", self->number,
+      (self->number == 1) ? "" : "s", self->repeat, best_round, self->unit
     );
     // don't need best_round anymore so Py_DECREF it
     Py_DECREF(best_round);

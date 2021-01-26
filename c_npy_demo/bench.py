@@ -5,6 +5,10 @@ import gc
 import numpy as np
 import timeit
 
+# pylint: disable=no-name-in-module
+from . import cscale, pyscale
+from .functimer import timeit_enh
+
 _BENCH_DESC = """\
 Benchmarking script comparing the Python and C stdscale implementations.
 
@@ -12,24 +16,31 @@ Compares the speed of the Python and C stdscale implementations on a relatively
 large random multidimensional numpy.ndarray using the timeit module. Random
 ndarray is created with a call to numpy.random.normal.
 
-Timing with timeit uses the main method exposed when timeit is run as a module
-from the command line, i.e. with `python3 -m timeit [args] [statements]`.
-
-Note: Using the timeit module here is quite inefficient because the setup, i.e.
-the ndarray allocation, can be quite expensive depending on the size of the
-ndarray. Therefore, for large ndarrays, there will be a delay before each of the
-two calls to timeit.main when the array is [re-]allocated. In subsequent
-releases, a dedicating comparative timeit-based timing implementation will be
-written to prevent this double allocation from being performed.\
+Timing is performed with the c_npy_demo.functimer module, a purpose-built
+timing module implemented as a C extension. The reason timeit is not used is
+because subsequent calls to timeit cannot be used to time different functions
+with shared arguments. Since the requested numpy.ndarray can be rather large,
+using timeit would result in double allocation. The c_npy_demo.functimer
+module allows sharing arguments between separate timing calls for different
+functions and so avoids this double allocation issue.\
 """
 _HELP_SHAPE = """\
 The shape of the random ndarray to allocate, default 40,5,10,10,50,5. Shape
 must be specified with a comma-separated list of positive integers.\
 """
-_HELP_NUMBER = "Number of times to execute the statement, passed to timeit.main"
-_HELP_REPEAT = "Number of times to repeat statement, passed to timeit.main"
-_HELP_UNIT = "Time unit for timer output, passed to timeit.main"
-_HELP_VERBOSE = "Print raw timing results, passed to timeit.main"
+_HELP_NUMBER = """\
+Number of times to execute each function in a trial. If not specified, this is
+automatically determined by c_npy_demo.functimer.timeit_enh using the same
+strategy employed by timeit.Timer.autorange.\
+"""
+_HELP_REPEAT = "Number of timing trials for each function, default 5"
+_HELP_UNIT = """\
+Time unit to display result with. If not specified, this automatically
+determined by c_npy_demo.functimer.timeit_enh using the same strategy employed
+by timeit.main, the method invoked by `python3 -m timeit`. Available options
+are sec, msec, usec, nsec, the same options given by timeit.main.\
+"""
+_HELP_PRECISION = "Number of decimals printed in output, default 1"
 
 
 def comma_list_to_shape(s):
@@ -70,42 +81,28 @@ def main(args = None):
         "-s", "--shape", default = (40, 5, 10, 10, 50, 5),
         type = comma_list_to_shape, help = _HELP_SHAPE
     )
-    arp.add_argument("-n", "--number", help = _HELP_NUMBER)
-    arp.add_argument("-r", "--repeat", help = _HELP_REPEAT)
+    arp.add_argument("-n", "--number", type = int, help = _HELP_NUMBER)
+    arp.add_argument("-r", "--repeat", type = int, help = _HELP_REPEAT)
     arp.add_argument("-u", "--unit", help = _HELP_UNIT)
     # use count and default 0 to count verbosity levels
     arp.add_argument(
-        "-v", "--verbose", action = "count", default = 0, help = _HELP_VERBOSE
+        "-p", "--precision", default = 1, type = int, help = _HELP_PRECISION
     )
     # parse arguments
     args = arp.parse_args(args = args)
-    # collect args for timeit.main
-    timeit_args = []
-    if args.number is not None:
-        timeit_args += ["-n", args.number]
-    if args.repeat is not None:
-        timeit_args += ["-r", args.repeat]
-    if args.unit is not None:
-        timeit_args += ["-u", args.unit]
-    if args.verbose is not None:
-        timeit_args += ["-v"] * args.verbose
-    # print shape and number of elements in array
+    # collect named args for c_npy_demo.functimer.timeit_enh that are not None
+    # except for the shape argument. functimer_args will be directly unpacked
+    # into c_npy_demo.functimer.timeit_enh
+    dict_args = vars(args)
+    functimer_args = {}
+    for k, v in dict_args.items():
+        if (k != "shape") and (v is not None):
+            functimer_args[k] = v
+    # print shape and number of elements in array + allocate random array
     print(f"numpy.ndarray shape {args.shape}, size {np.prod(args.shape)}")
-    # setup of the random ndarray and execution statement for stdscale
-    ex_setup = f"import numpy as np\nar = np.random.normal(size = {args.shape})"
-    ex_snippet = "stdscale(ar)"
-    # call timeit.main with timeit_args for both pyscale and cscale stdscale
-    ## not efficient!! double allocation of numpy array ##
-    timeit.main(
-        timeit_args + [
-            "-s", "from c_npy_demo.pyscale import stdscale\n" + ex_setup,
-            ex_snippet
-        ]
-    )
-    gc.collect()
-    timeit.main(
-        timeit_args + [
-            "-s", "from c_npy_demo.cscale import stdscale\n" + ex_setup,
-            ex_snippet
-        ]
-    )
+    ar = np.random.normal(size = args.shape)
+    # get results for pyscale.stdscale and cscale.stdscale + print results
+    py_res = timeit_enh(pyscale.stdscale, (ar,), **functimer_args)
+    print(f"pyscale.stdscale -- {py_res.brief}")
+    c_res = timeit_enh(cscale.stdscale, (ar,), **functimer_args)
+    print(f" cscale.stdscale -- {c_res.brief}")
