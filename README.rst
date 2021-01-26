@@ -130,10 +130,10 @@ to be loaded by the Python interpreter, so it easier to conduct unit tests for
 the Python-accessible functions by using Python unit testing tools. However, it
 is possible that the extension module also contains some C functions that don't
 use the Python C API and should be tested using a C unit testing framework.
-However, incorrectly C code loaded as an extension module may also cause
-segmentation faults and crash the interpreter. Ideally, unit tests should be
-run in a separate address space so that the test runner doesn't get killed by
-the operating system if a particular test causes a segmentation fault.
+It's also very possible that incorrectly written C code loaded as an extension
+module may cause a segmentation fault and crash the interpreter. Ideally, unit
+tests should be run in a separate address space so that the test runner doesn't
+get killed by the operating system if a particular test causes a segfault.
 
 For this project, I used `pytest`__ and `Check`__, embedding the Python
 interpreter into and using Check unit tests inside a test runner to test both
