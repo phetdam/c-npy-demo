@@ -57,10 +57,9 @@ provided by PyPA. To build, you will need ``numpy>=1.19`` and the latest
 `setuptools`__ [#]_ installed on your system. Your C compiler should be a recent
 version of gcc, but ``setuptools`` will sort out the details.
 
-First, use ``git clone`` or download + unzip to get the repo source code. Then,
-install ``numpy>=1.19``, as it is required by ``setup.py``. With the current
-working directory the repository root, you can build the C extension modules
-and install directly with
+First, use ``git clone`` or download + unzip to get the repo source code and
+install ``numpy>=1.19``. With the current working directory the repository root,
+you can build the C extension modules and install directly with
 
 .. code:: bash
 
