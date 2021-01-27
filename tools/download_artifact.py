@@ -81,8 +81,8 @@ def main(args = None):
     )
     # parse arguments
     args = arp.parse_args(args = args)
-    # base curl command to use
-    curl_cmd = (
+    # base curl command to use to get the download URL
+    curl_get_url = (
         "curl -H \"Accept: application/vnd.github.v3+json\" "
         f"https://api.github.com/repos/{args.repo}/actions/artifacts"
     )
@@ -91,11 +91,11 @@ def main(args = None):
     # if id is not None, then look for the artifact with the specific ID
     if args.id is not None:
         curl_res = subprocess.run(
-            (curl_cmd + f"/{args.id}").split(), **run_args
+            (curl_get_url + f"/{args.id}").split(), **run_args
         )
     # else return all the artifacts
     else:
-        curl_res = subprocess.run(curl_cmd.split(), **run_args)
+        curl_res = subprocess.run(curl_get_url.split(), **run_args)
     # load result from curl_res.stdout
     artifacts = json.loads(curl_res.stdout)
     # download URL for the artifact
@@ -126,13 +126,13 @@ def main(args = None):
         return 1
     # set args.id to the ID in the download URL
     args.id = download_url.split("/")[-2]
-    # wget command to download artifact
-    wget_cmd = (
-        f"wget --header \"Authorization: token {args.token}\" "
-        f"--output-document {args.download_dir}/{args.name}.zip {download_url}"
+    # curl command to download artifact
+    curl_get_obj = (
+        f"curl -H \"Accept: application/vnd.github.v3+json\" {download_url}"
     )
     # download artifact
-    wget_res = subprocess.run(wget_cmd.split(), **run_args)
+    wget_res = subprocess.run(curl_get_obj.split(), **run_args)
+    print(wget_res.stdout.decode("utf-8"))
     # if error code != 0, there was an error
     if (wget_res.returncode != 0): 
         print(
@@ -142,8 +142,10 @@ def main(args = None):
         )
         return wget_res.returncode
     # if downloaded and -u/--unzip is passed, unzip the file
+    """
     with zipfile.ZipFile(f"{args.download_dir}/{args.name}.zip") as zf:
         zf.extractall(path = args.download_dir)
+    """
 
 
 if __name__ == "__main__":
