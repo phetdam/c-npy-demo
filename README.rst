@@ -112,12 +112,11 @@ For usage details, try ``c_npy_demo.bench --help``.
 .. __: https://docs.python.org/3/library/timeit.html
 
 .. [#] Previously, I had used `timeit.main`__ for its pretty output, but
-   unlike the callable API provided by ``timeit``, there is no way to pass in
-   a global symbol table to avoid repeated setup. Therefore, the
-   ``numpy.ndarray`` allocated in the benchmarking code is allocated twice. I
-   took the liberty of writing an alternative that provides
-   ``timeit.main``\ -like capabilities with a callable API, intended for use
-   with functions. The result was ``c_npy_demo.functimer``, written as a C
+   unlike the callable API provided by ``timeit``, one cannot pass in a global
+   symbol table to avoid repeated setup. Therefore, the ``numpy.ndarray``
+   allocated in the benchmarking code is allocated twice. I thus wrote
+   ``c_npy_demo.functimer``, which provides ``timeit.main``\ -like capabilities
+   with a callable API intended for use with functions. It is written as a C
    extension module to reduce the timing measurement error resulting from
    timing ``n`` executions of a statement within a Python loop, which has a
    higher per-loop overhead than a C for loop.
