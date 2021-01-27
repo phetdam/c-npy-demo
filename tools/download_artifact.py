@@ -133,8 +133,7 @@ def main(args = None):
     )
     """
     curl_get_obj = (
-        f"curl -X GET --url {download_url} -H "
-        f"\"Authorization: token {args.token}\""
+        f"curl -H \"Authorization: token {args.token}\" -X GET {download_url}"
     )
     # download artifact
     curl_res = subprocess.run(curl_get_obj.split(), **run_args)
