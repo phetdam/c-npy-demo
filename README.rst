@@ -119,7 +119,7 @@ the entry point in the terminal should produce the ``timeit``\ -like output
 
    numpy.ndarray shape (40, 5, 10, 10, 50, 5), size 5000000
    pyscale.stdscale -- 2 loops, best of 5: 157.1 msec per loop
-   cscale.stdscale -- 5 loops, best of 5: 57.9 msec per loop
+    cscale.stdscale -- 5 loops, best of 5: 57.9 msec per loop
 
 For usage details, try ``c_npy_demo.bench --help``.
 
