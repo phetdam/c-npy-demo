@@ -26,23 +26,12 @@ optimization is the root of all evil* [#]_.
 
 A tiny demo Python package comparing speed differences between NumPy's Python
 and C APIs that also serves as an example project for writing a C extension
-module that uses the `NumPy C API`__. I personally went through a decent amount
-of pain, sweat, and tears to get this working, so I hope this will be useful
-example for one interested in doing something similar. However, I think it's
-generally best to decouple C and Python code as much as possible, so for
-example, if you to do computations in C code for speed increases, you should
-allocate memory in Python, pass pointers to your C code using `ctypes`__, and
-then have your C function write to the memory allocated by the Python
-interpreter. Since the `GIL`__ is released when calling foreign C code, you can
-then multithread using OpenMP, etc.
+module that uses the `NumPy C API`__.
 
 .. [#] Attributed to Sir Tony Hoare, popularized by Donald Knuth.
 
 .. __: https://numpy.org/devdocs/user/c-info.html
 
-.. __: https://docs.python.org/3/library/ctypes.html
-
-.. __: https://docs.python.org/3/glossary.html#term-global-interpreter-lock
 
 Installation
 ------------
@@ -181,3 +170,19 @@ was definitely a difficult but rewarding journey.
 TBA. I learned a great lesson on using ``tp_new`` and ``tp_dealloc`` by having
 the unpleasant experience of having a double ``Py_DECREF`` lead to a
 segmentation fault during ``pytest`` test discovery.
+
+.. leave remarks on C/C++/Python mixing practices as comment
+
+.. I personally went through a decent amount of pain, sweat, and tears to get
+   this working, so I hope this will be useful example for one interested in
+   doing something similar. However, I think it's generally best to decouple
+   C/C++ and Python code as much as possible, so for example, if you to do
+   computations in C/C++ code for speed increases, you should allocate memory
+   in Python, pass pointers to your C/C++ code using `ctypes`__, and then have
+   your C/C++ function write to the memory allocated by the Python interpreter.
+   Since the `GIL`__ is released when calling foreign C/C++ code, you can
+   then multithread using OpenMP, etc.
+
+..   .. __: https://docs.python.org/3/library/ctypes.html
+
+.. .. __: https://docs.python.org/3/glossary.html#term-global-interpreter-lock
