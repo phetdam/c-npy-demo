@@ -31,7 +31,7 @@ Specify to also unzip the downloaded artifact files to the directory specified
 by -d/--download-dir after the artifact has been downloaded.\
 """
 _HELP_TOKEN = """\
-GitHub authentication token. This is not required if the GITHUB_TOKEN
+GitHub authentication token. This is not required if the GITHUB_ACCESS_TOKEN
 environment variable is set.\
 """
 
@@ -75,8 +75,8 @@ def main(args = None):
     )
     arp.add_argument(
         "-t", "--token", default = (
-            None if "GITHUB_TOKEN" not in os.environ
-            else os.environ["GITHUB_TOKEN"]
+            None if "GITHUB_ACCESS_TOKEN" not in os.environ
+            else os.environ["GITHUB_ACCESS_TOKEN"]
         ), help = _HELP_TOKEN
     )
     # parse arguments
