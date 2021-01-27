@@ -84,14 +84,16 @@ jobs:
         # automatically stripped from tag_name and release_name
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
-        body: ${{ env.RELEASE_VERSION }} deployed by GitHub Actions build
+        body: >
+          ${{ format('{0} deployed by GitHub Actions build',
+          env.RELEASE_VERSION) }}
     - name: Upload .tar.gz to release URL
       uses: actions/upload-release-asset@v1
       with:
         # use upload URL from the release creation step's outputs
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         # path to the asset, given by SRC_ARTIFACT_PATH
-        asset_path: dist/${{ env.SRC_ARTIFACT_PATH }}
+        asset_path: ${{ env.SRC_ARTIFACT_PATH }}
         # upload name for the asset, given by SRC_ARTIFACT_NAME
         asset_name: ${{ env.SRC_ARTIFACT_NAME }}
         # appropriate content type
