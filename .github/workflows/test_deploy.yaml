@@ -17,8 +17,8 @@ jobs:
         python-version: 3.6
     - name: Download .tar.gz and manylinux wheel artifacts
       run: >
-        python3 tools/download_artifact.py $GITHUB_REPOSITORY -n dist_artifact
-        -d dist -u
+        mkdir dist && python3 tools/download_artifact.py $GITHUB_REPOSITORY
+        -n dist_artifact -d dist -u
     - name: Deploy manylinux wheels and tar.gz source to Test PyPI
       uses: pypa/gh-action-pypi-publish@v1.4.1
       with:
