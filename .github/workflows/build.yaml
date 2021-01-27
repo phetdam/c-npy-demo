@@ -65,8 +65,7 @@ jobs:
         name: dist_artifact
         path: dist
     - name: >
-        Create new env variables SRC_ARTIFACT_PATH, RELEASE_VERSION,
-        SRC_ARTIFACT_NAME
+        Create new env variables SRC_ARTIFACT_PATH, SRC_ARTIFACT_NAME
       # appends definition to the GITHUB_ENV environment file.
       # SRC_ARTIFACT_PATH is the path to the .tar.gz source, RELEASE_VERSION
       # gives the version specified by the git tag, SRC_ARTIFACT_NAME is the
@@ -81,8 +80,10 @@ jobs:
       uses: actions/create-release@v1
       # tag and release name are identical
       with:
-        tag_name: ${{ env.RELEASE_VERSION }}
-        release_name: ${{ env.RELEASE_VERSION }}
+        # don't use RELEASE_VERSION since instances of refs/tags/ are 
+        # automatically stripped from tag_name and release_name
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
         body: ${{ env.RELEASE_VERSION }} deployed by GitHub Actions build
     - name: Upload .tar.gz to release URL
       uses: actions/upload-release-asset@v1
