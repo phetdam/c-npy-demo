@@ -60,18 +60,6 @@ If you don't have or don't wish to use ``make``, you may instead use
 
    python3 setup.py build_ext --inplace && pip3 install .
 
-``setuptools`` will also create an entry point to access the benchmarking code
-titled ``c_npy_demo.bench``. Just typing the name of the entry point in the
-terminal should produce the ``timeit``\ -like output
-
-.. code:: text
-
-   numpy.ndarray shape (40, 5, 10, 10, 50, 5), size 5000000
-   pyscale.stdscale -- 2 loops, best of 5: 157.1 msec per loop
-   cscale.stdscale -- 5 loops, best of 5: 57.9 msec per loop
-
-For usage details, try ``c_npy_demo.bench --help``.
-
 .. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__, but
    since a C extension modules have to be built in this package the legacy
    ``setup.py`` method of building distributions still has to be used. Note that
@@ -100,7 +88,42 @@ Windows and Mac using GitHub Actions workflows.
 Contents
 --------
 
-TBA.
+The Python package contains three modules, two of which are C extension
+modules. The first module is ``c_npy_demo.pyscale``, which is a pure Python
+module containing one function that is two lines of ``numpy``\ -enabled Python
+code. It is the "benchmark" for the C extension module ``c_npy_demo.cscale``
+as both extension modules contain a single function that centers and scales to
+unit variance a ``numpy.ndarray``. The last module is ``c_npy_demo.functimer``,
+a purpose-written C extension module with a callable API for timing the
+execution of a function with optional arguments in a `timeit`__\ -like
+fashion [#]_.
+
+On installation, ``setuptools`` will also create an entry point titled
+``c_npy_demo.bench`` to access the benchmarking code. Just typing the name of
+the entry point in the terminal should produce the ``timeit``\ -like output
+
+.. code:: text
+
+   numpy.ndarray shape (40, 5, 10, 10, 50, 5), size 5000000
+   pyscale.stdscale -- 2 loops, best of 5: 157.1 msec per loop
+   cscale.stdscale -- 5 loops, best of 5: 57.9 msec per loop
+
+For usage details, try ``c_npy_demo.bench --help``.
+
+.. __: https://docs.python.org/3/library/timeit.html
+
+.. [#] Previously, I had used `timeit.main`__ for its pretty output, but
+   unlike the callable API provided by ``timeit``, there is no way to pass in
+   a global symbol table. Therefore, the ``numpy.ndarray`` allocated in the
+   benchmarking script ``c_npy_demo.bench`` has to be allocated twice. I took
+   the liberty of writing an alternative that provides ``timeit.main``\ -like
+   capabilities with a callable API, intended for use with functions. The
+   result was ``c_npy_demo.functimer``, written as a C extension module to
+   reduce the timing measurement error resulting from timing ``n`` executions
+   of a statement within a Python loop, which has a higher per-loop overhead
+   than a C for loop.
+
+.. __: https://docs.python.org/3/library/timeit.html#command-line-interface
 
 Documentation
 -------------
