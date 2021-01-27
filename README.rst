@@ -1,7 +1,19 @@
-.. README for c_numpy_demo
+.. README for c_npy_demo
 
 c_npy_demo
 ==========
+
+.. image:: https://img.shields.io/pypi/v/c-npy-demo
+   :target: https://pypi.org/project/c-npy-demo/
+   :alt: PyPI
+
+.. image:: https://img.shields.io/pypi/wheel/c-npy-demo
+   :target: https://pypi.org/project/c-npy-demo/
+   :alt: PyPI - Wheel
+
+.. image:: https://img.shields.io/pypi/pyversions/c-npy-demo
+   :target: https://pypi.org/project/c-npy-demo/
+   :alt: PyPI - Python Version
 
 .. image:: https://img.shields.io/github/workflow/status/phetdam/c_npy_demo/
    build?logo=github
