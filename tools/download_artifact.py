@@ -127,20 +127,25 @@ def main(args = None):
     # set args.id to the ID in the download URL
     args.id = download_url.split("/")[-2]
     # curl command to download artifact
+    """
     curl_get_obj = (
-        f"curl -H \"Accept: application/vnd.github.v3+json\" {download_url}"
+        f"curl -v -H \"Authorization: token {args.token}\" {download_url}"
+    )
+    """
+    curl_get_obj = (
+        f"curl -X GET --url {download_url} -H "
+        f"\"Authorization: token {args.token}\""
     )
     # download artifact
-    wget_res = subprocess.run(curl_get_obj.split(), **run_args)
-    print(wget_res.stdout.decode("utf-8"))
+    curl_res = subprocess.run(curl_get_obj.split(), **run_args)
     # if error code != 0, there was an error
-    if (wget_res.returncode != 0): 
+    if (curl_res.returncode != 0): 
         print(
             f"{_PROGNAME}: error: wget couldn't download artifact {args.name} "
             f"in repo {args.repo} (id={args.id}) to target "
             f"{args.download_dir}/{args.name}.zip"
         )
-        return wget_res.returncode
+        return curl_res.returncode
     # if downloaded and -u/--unzip is passed, unzip the file
     """
     with zipfile.ZipFile(f"{args.download_dir}/{args.name}.zip") as zf:
