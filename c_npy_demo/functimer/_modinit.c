@@ -109,8 +109,35 @@ PyDoc_STRVAR(
 PyDoc_STRVAR(
   FUNCTIMER_TIMEIT_ENH_DOC,
   "timeit_enh(func, args=None, kwargs=None, *, timer=None, number=None, "
-  "repeat=None, unit=None, precision=1)\n"
+  "repeat=5, unit=None, precision=1)\n"
   "--\n\n"
+  "A callable, C-implemented emulation of :func:`timeit.main`. Returns a\n"
+  ":class:`TimeitResult` object with timing statistics whose attribute\n"
+  ":attr:`TimeitResult.brief` provides the same exact output as\n"
+  ":func:`timeit.main`."
+  "\n\n"
+  ":param func: Callable to time\n"
+  ":type func: callable\n"
+  ":param args: Tuple of positional args to pass to ``func``\n"
+  ":type args: tuple, optional\n"
+  ":param kwargs: Dict of named arguments to pass to ``func``\n"
+  ":type kwargs: dict, optional\n"
+  ":param timer: Timer function, defaults to :func:`time.perf_counter` which\n"
+  "    returns time in seconds. If specified, must return time in fractional\n"
+  "    seconds and not take any arguments.\n"
+  ":type timer: function, optional\n"
+  ":param number: Number of times to call ``func``. If not specified, this\n"
+  "    is automatically determined by :func:`autorange` internally.\n"
+  ":type number: int, optional\n"
+  ":param repeat: Number of times to repeat the call to :func:`timeit_once`\n"
+  ":param repeat: int, optional\n"
+  ":param unit: Units to display :attr:`TimeitResult.brief` results in. If\n"
+  "    specified, this is automatically determined internally. Accepts the\n"
+  "    same values that :func:`timeit.main` accepts.\n"
+  ":type unit: str, optional\n"
+  ":param precision: Number of decimal places to display\n"
+  "    :attr:`TimeitResult.brief` results in.\n"
+  ":type precision: int, optional\n"
   ":rtype: :class:`~c_npy_demo.functimer.TimeitResult`"
 );
 // TimeitResult class docstring
@@ -151,6 +178,33 @@ PyDoc_STRVAR(
   "Like :attr:`~TimeitResult.brief`, this is a cached property computed on\n"
   "the first access that yields new references on subsequent accesses."
 );
+// TimeitResult docstrings for read-only members
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_BEST_DOC,
+  "The best average execution time of the timed function in units specified\n"
+  "by :attr:`TimeitResult.unit`."
+);
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_UNIT_DOC,
+  "The time unit that :attr:`TimeitResult.best` is displayed in."
+);
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_NUMBER_DOC,
+  "Number of times the function is called in a single timing trial."
+);
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_REPEAT_DOC,
+  "The total number of timing trials."
+);
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_TIMES_DOC,
+  "A tuple of the total execution times in seconds for each timing trial."
+);
+PyDoc_STRVAR(
+  FUNCTIMER_TIMEITRESULT_PRECISION_DOC,
+  "Number of decimal places used when displaying :attr:`TimeitResult.best`\n"
+  "in :attr:`TimeitResult.brief`."
+);
 
 // static array of module methods
 static PyMethodDef functimer_methods[] = {
@@ -186,12 +240,30 @@ static PyMethodDef functimer_methods[] = {
 // standard members for TimeitResult, all read-only
 // todo: add docstrings for the members?
 static PyMemberDef TimeitResult_members[] = {
-  {"best", T_DOUBLE, offsetof(TimeitResult, best), READONLY, NULL},
-  {"unit", T_STRING, offsetof(TimeitResult, unit), READONLY, NULL},
-  {"number", T_PYSSIZET, offsetof(TimeitResult, number), READONLY, NULL},
-  {"repeat", T_PYSSIZET, offsetof(TimeitResult, repeat), READONLY, NULL},
-  {"times", T_OBJECT_EX, offsetof(TimeitResult, times), READONLY, NULL},
-  {"precision", T_INT, offsetof(TimeitResult, precision), READONLY, NULL},
+  {
+    "best",T_DOUBLE, offsetof(TimeitResult, best), READONLY,
+    FUNCTIMER_TIMEITRESULT_BEST_DOC
+  },
+  {
+    "unit", T_STRING, offsetof(TimeitResult, unit), READONLY,
+    FUNCTIMER_TIMEITRESULT_UNIT_DOC
+  },
+  {
+    "number", T_PYSSIZET, offsetof(TimeitResult, number), READONLY,
+    FUNCTIMER_TIMEITRESULT_NUMBER_DOC
+  },
+  {
+    "repeat", T_PYSSIZET, offsetof(TimeitResult, repeat), READONLY,
+    FUNCTIMER_TIMEITRESULT_REPEAT_DOC
+  },
+  {
+    "times", T_OBJECT_EX, offsetof(TimeitResult, times), READONLY,
+    FUNCTIMER_TIMEITRESULT_TIMES_DOC
+  },
+  {
+    "precision", T_INT, offsetof(TimeitResult, precision), READONLY,
+    FUNCTIMER_TIMEITRESULT_PRECISION_DOC
+  },
   // required sentinel, at least name must be NULL
   {NULL, 0, 0, 0, NULL}
 };

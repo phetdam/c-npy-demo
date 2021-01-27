@@ -77,11 +77,13 @@ If you don't have or don't wish to use ``make``, you may instead use
 From PyPI
 ~~~~~~~~~
 
-Although this package is not on PyPI (yet), I have successfully built
-``manylinux1`` wheels using Github Actions on the ``manylinux1`` Docker images
-provided by PyPA, of which more information can be found at the
-`manylinux GitHub`__. Once I finish the source, I will try to build wheels for
-Windows and Mac using GitHub Actions workflows.
+`manylinux1`__ wheels may be conveniently installed directly from PyPI with
+
+.. code:: bash
+
+   pip3 install c-npy-demo
+
+At some point in time, Windows and Mac binary wheels may be made available.
 
 .. __: https://github.com/pypa/manylinux
 
