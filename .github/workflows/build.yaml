@@ -71,9 +71,9 @@ jobs:
       # gives the version specified by the git tag, SRC_ARTIFACT_NAME is the
       # name of the .tar.gz that we upload to the release
       run: |
-        echo 'SRC_ARTIFACT_PATH=`find dist/*.tar.gz`' >> $GITHUB_ENV
-        echo 'RELEASE_VERSION=${GITHUB_REF##*/}' >> $GITHUB_ENV
-        echo 'SRC_ARTIFACT_NAME="$RELEASE_VERSION.tar.gz"' >> $GITHUB_ENV
+        echo "SRC_ARTIFACT_PATH=$(find dist/*.tar.gz)" >> $GITHUB_ENV
+        echo "RELEASE_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        echo "SRC_ARTIFACT_NAME=$RELEASE_VERSION.tar.gz" >> $GITHUB_ENV
     - name: Create production release
       # need id so we can reference the upload URL later to upload SRC_ARTIFACT
       id: create_release
