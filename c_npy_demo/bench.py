@@ -1,6 +1,7 @@
 __doc__ = "Benchmarking :mod:`c_npy_demo.cscale` and :mod:`c_npy_demo.pyscale`."
 
 import argparse
+from functools import partial
 import gc
 import numpy as np
 import timeit
@@ -72,10 +73,13 @@ def main(args = None):
         :meth:`argparse.ArgumentParser.parse_args`
     :type args: list, optional
     """
-    # instantiate ArgumentParse and add arguments
+    # instantiate ArgumentParse and add arguments. help width is set to 80 cols
+    # although we are technically using the private argparse API.
     arp = argparse.ArgumentParser(
         description = _BENCH_DESC,
-        formatter_class = argparse.RawDescriptionHelpFormatter
+        formatter_class = partial(
+            argparse.RawDescriptionHelpFormatter, width = 80
+        )
     )
     arp.add_argument(
         "-s", "--shape", default = (40, 5, 10, 10, 50, 5),
