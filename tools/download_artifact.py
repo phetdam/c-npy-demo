@@ -14,14 +14,15 @@ _PROGNAME = __file__.replace("\\", "/").split("/")[-1]
 # argparse argument help strings
 _HELP_REPO = "Name of the target repository, in the format owner/repo_name"
 _HELP_NAME = """\
-Name of the artifact to download. If -i/--id is specified, the value of this
-option is ignored (even if there is no artifact that has this name).\
+Name of the artifact to download. This may not be specified together with the
+-i/--id option.\
 """
 _HELP_ID = """\
 ID of the artifact to download. If not specified, then if there are multiple
 artifacts with the same name, the latest one will be downloaded. Corresponds to
 the \"id\" key in the JSON object describing an artifact. See
-https://docs.github.com/en/rest/reference/actions for more details.\
+https://docs.github.com/en/rest/reference/actions for more details. This may
+not be specified together with the -n/--name option.\
 """
 _HELP_DOWNLOAD_DIR = """\
 Directory to download the artifact to. Defaults to the current directory.\
@@ -65,8 +66,10 @@ def main(args = None):
         )
     )
     arp.add_argument("repo", help = _HELP_REPO)
-    arp.add_argument("-n", "--name", help = _HELP_NAME)
-    arp.add_argument("-i", "--id", type = int, help = _HELP_ID)
+    # name and id are mutually exclusive and one is required
+    group = arp.add_mutually_exclusive_group(required = True)
+    group.add_argument("-n", "--name", help = _HELP_NAME)
+    group.add_argument("-i", "--id", type = int, help = _HELP_ID)
     arp.add_argument(
         "-d", "--download-dir", default = ".", help = _HELP_DOWNLOAD_DIR
     )
@@ -127,16 +130,15 @@ def main(args = None):
     # set args.id to the ID in the download URL
     args.id = download_url.split("/")[-2]
     # curl command to download artifact
-    """
     curl_get_obj = (
-        f"curl -v -H \"Authorization: token {args.token}\" {download_url}"
+        f"curl -L -H \"Authorization: token {args.token}\" "
+        f"-H \"Accept: application/vnd.github.v3_json\" {download_url} "
+        f"-o {args.download_dir}/{args.name}.zip"
     )
-    """
-    curl_get_obj = (
-        f"curl -H \"Authorization: token {args.token}\" -X GET {download_url}"
-    )
-    # download artifact
-    curl_res = subprocess.run(curl_get_obj.split(), **run_args)
+    # download artifact (for some reason, must run in shell)
+    curl_res = subprocess.run(curl_get_obj, **run_args, shell = True)
+    print(curl_res.stderr.decode("utf-8"))
+    print(curl_res.stdout.decode("utf-8"))
     # if error code != 0, there was an error
     if (curl_res.returncode != 0): 
         print(
