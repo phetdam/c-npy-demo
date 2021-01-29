@@ -1,8 +1,8 @@
 # setup.py for building c_npy_demo package. since extension modules can't be
 # built without setup.py, we can't use the new PEP 517 format.
 
-from setuptools import Extension, setup
 from numpy import get_include
+from setuptools import Extension, setup
 
 # package name
 _PACKAGE_NAME = "c_npy_demo"
