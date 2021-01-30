@@ -66,15 +66,8 @@ static struct PyModuleDef cscale_def = {
 
 // module initialization function
 PyMODINIT_FUNC PyInit_cscale(void) {
-  // create the module
-  PyObject *module;
-  module = PyModule_Create(&cscale_def);
-  // import numpy api
+  // import numpy api. on error, error indicator is set and NULL returned
   import_array();
-  // error check?
-  if (PyErr_Occurred()) {
-    return NULL;
-  }
-  // return module pointer (NULL on failure)
-  return module;
+  // create and return module pointer (NULL on failure)
+  return PyModule_Create(&cscale_def);
 }
