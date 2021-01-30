@@ -2,7 +2,7 @@
 /build/*
 /dist/*
 /*.egg-info/*
-# __pycahce__, emacs autosave files, shared objects, vs code settings
+# __pycache__, emacs autosave files, shared objects, vs code settings
 **/__pycache__
 **/*~
 **/*.so
