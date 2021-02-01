@@ -202,9 +202,22 @@ Remarks on a few lessons I learned the hard way from mixing Python code,
 foreign C code, the Python and NumPy C APIs, and Python C extension modules. It
 was definitely a difficult but rewarding journey.
 
-TBA. I learned a great lesson on using ``tp_new`` and ``tp_dealloc`` by having
-the unpleasant experience of having a double ``Py_DECREF`` lead to a
-segmentation fault during ``pytest`` test discovery.
+TBA, but I learned a great lesson on using ``tp_new`` and ``tp_dealloc`` by
+having the unpleasant experience of having a double ``Py_DECREF`` lead to a
+segmentation fault during ``pytest`` test discovery. This was caused by the
+fact that the `PyArg_ParseTupleAndKeywords`__ call in the ``tp_new`` function
+was parsing a `PyObject *`__. If parsing the ``PyObject *`` failed due to an
+earlier argument failing to parse correctly, the address in my C struct that
+the ``PyObject *`` was supposed to be written to will contain garbage. Then,
+the ``tp_dealloc`` function `Py_XDECREF`__\ 's the garbage pointer value at
+that address and boom, segmentation fault. The fix is to set the pointer value
+at the address in my C struct to ``NULL`` so ``Py_XDECREF`` has no effect.
+
+.. __: https://docs.python.org/3/c-api/structures.html#c.PyObject
+
+.. __: https://docs.python.org/3/c-api/arg.html#c.PyArg_ParseTupleAndKeywords
+
+.. __: https://docs.python.org/3/c-api/refcounting.html#c.Py_XDECREF
 
 .. leave remarks on C/C++/Python mixing practices as comment
 
