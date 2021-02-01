@@ -211,7 +211,8 @@ earlier argument failing to parse correctly, the address in my C struct that
 the ``PyObject *`` was supposed to be written to will contain garbage. Then,
 the ``tp_dealloc`` function `Py_XDECREF`__\ 's the garbage pointer value at
 that address and boom, segmentation fault. The fix is to set the pointer value
-at the address in my C struct to ``NULL`` so ``Py_XDECREF`` has no effect.
+at the address in my C struct to ``NULL`` so on error, the ``Py_XDECREF`` has
+no effect since it will be passed ``NULL``.
 
 .. __: https://docs.python.org/3/c-api/structures.html#c.PyObject
 
