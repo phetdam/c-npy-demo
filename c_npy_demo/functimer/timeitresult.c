@@ -175,7 +175,8 @@ PyObject *TimeitResult_new(
   if (self == NULL) {
     return NULL;
   }
-  // set pointers to NULL to be overwritten later with args, kwargs
+  // set pointers to NULL to be overwritten later. self->loop_times and
+  // self->brief also need to be NULL so that dealloc works correctly.
   self->unit = NULL;
   self->times = self->loop_times = self->brief = NULL;
   // set default value for self->precision
@@ -184,18 +185,25 @@ PyObject *TimeitResult_new(
   char *argnames[] = {
     "best", "unit", "number", "repeat", "times", "precision", NULL
   };
-  // parse args and kwargs. pass field addresses to PyArg_ParseTupleAndKeywords.
-  // on error, need to Py_DECREF self, which is a new reference.
+  /**
+   * parse args and kwargs. pass field addresses to PyArg_ParseTupleAndKeywords.
+   * on error, need to Py_DECREF self, which is a new reference. we also first
+   * need to set self->times to NULL in the case that self->times is correctly
+   * parsed but self->precision is not, as then the dealloc function will
+   * Py_DECREF a borrowed reference, which of course is dangerous.
+   */
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "dsnnO|i", argnames, &(self->best), &(self->unit),
-      &(self->number), &(self->repeat), &(self->times), &(self->precision)
+      args, kwargs, "dsnnO!|i", argnames, &(self->best), &(self->unit),
+      &(self->number), &(self->repeat), &PyTuple_Type, &(self->times),
+      &(self->precision)
     )
   ) {
+    self->times = NULL;
     Py_DECREF(self);
     return NULL;
   }
-  // increase reference count to times since it is a Python object
+  // increase reference count to times since it is borrowed
   Py_INCREF(self->times);
   /**
    * check that unit is one of several accepted values recorded in
@@ -235,12 +243,6 @@ PyObject *TimeitResult_new(
     PyErr_Format(
       PyExc_ValueError, "precision is capped at %d", TimeitResult_MAX_PRECISION
     );
-    Py_DECREF(self);
-    return NULL;
-  }
-  // times must be tuple. on error, Py_DECREF self and set error indicator
-  if (!PyTuple_CheckExact(self->times)) {
-    PyErr_SetString(PyExc_TypeError, "times must be a tuple");
     Py_DECREF(self);
     return NULL;
   }

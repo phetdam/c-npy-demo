@@ -63,7 +63,7 @@ def test_TimeitResult_new(__new__args, tuple_replace):
     with pytest.raises(ValueError, match = "repeat must be positive"):
         TimeitResult(*tuple_replace(__new__args, (3, 0)))
     # times tuple must be a tuple
-    with pytest.raises(TypeError, match = "times must be a tuple"):
+    with pytest.raises(TypeError):
         TimeitResult(*tuple_replace(__new__args, (4, [])))
     # len(times) must equal repeat
     with pytest.raises(ValueError, match = r"len\(times\) must equal repeat"):
