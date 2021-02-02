@@ -214,9 +214,9 @@ that address and boom, segmentation fault. The fix is to set the pointer value
 at the address in my C struct to ``NULL`` so on error, the ``Py_XDECREF`` has
 no effect since it will be passed ``NULL``.
 
-.. __: https://docs.python.org/3/c-api/structures.html#c.PyObject
-
 .. __: https://docs.python.org/3/c-api/arg.html#c.PyArg_ParseTupleAndKeywords
+
+.. __: https://docs.python.org/3/c-api/structures.html#c.PyObject
 
 .. __: https://docs.python.org/3/c-api/refcounting.html#c.Py_XDECREF
 
