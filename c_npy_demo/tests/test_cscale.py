@@ -20,13 +20,13 @@ def test_cscale_missing_args(ddof_kwarg):
     :param ddof_kwarg: Dict to unpack for ``ddof`` parameter
     :type ddof_kwarg: dict
     """
-    with pytest.raises(ValueError, match = "argument parsing failure"):
+    with pytest.raises(TypeError):
         cscale.stdscale(**ddof_kwarg)
 
 
 def test_cscale_ar_ndarray():
     "Test :func:`c_npy_demo.cscale.stdscale` raise when ``ar`` is not array."
-    with pytest.raises(TypeError, match = "ar must be of type numpy.ndarray"):
+    with pytest.raises(TypeError):
         cscale.stdscale([[2, 4], [1, 2]])
 
 

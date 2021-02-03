@@ -1,6 +1,7 @@
 /**
  * @file cscale.c
- * @brief Core function to broadcast arbitrary Python inputs into 1D ndarray.
+ * @brief C extension module containing core function to take a `numpy.ndarray`
+ *     and return a transformed version with zero mean and unit variance. 
  */
 
 #define PY_SSIZE_T_CLEAN
@@ -10,14 +11,41 @@
 
 // don't include deprecated numpy C API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL CSCALE_ARRAY_API
 // arrayobject.h gives access to the array API, npymath.h the core math library
 #include "numpy/arrayobject.h"
 #include "numpy/npy_math.h"
-// cscale.h has include guards so it won't re-include headers/re-define symbols
-#include "cscale.h"
 
+// warns if NpyIter_Deallocate fails on PyArrayObject ar's NpyIter iter
+#define NpyIter_DeallocAndWarn(iter, ar) if (NpyIter_Deallocate(iter) == \
+  NPY_FAIL) { PyErr_WarnEx(PyExc_RuntimeWarning, "unable to deallocate " \
+  "iterator of " #ar, 1); }
+
+// module name and docstring
+#define MODULE_NAME "cscale"
+PyDoc_STRVAR(
+  module_doc, "The C implementation of :func:`c_npy_demo.pyscale.stdscale`."
+);
+
+/**
+ * docstring for cscale.stdscale. for the function signature to be correctly
+ * parse and show up in Python, we include it in the docstring and follow it
+ * with "\n--\n\n"
+ */
+PyDoc_STRVAR(
+  cscale_stdscale_doc,
+  "stdscale(ar, ddof = 1)\n--\n\n"
+  "Centers and scales array to have zero mean and unit variance.\n\n"
+  ":param args: Arbitrary :class:`numpy.ndarray`\n"
+  ":type args: :class:`numpy.ndarray`\n"
+  ":param ddof: Delta degrees of freedom, i.e. so that the divisor used\n"
+  "    in standard deviation calculations is ``n_obs - ddof``.\n"
+  ":type ddof: int\n"
+  ":returns: Centered and scaled :class:`numpy.ndarray`\n"
+  ":rtype: :class:`numpy.ndarray`"
+);
+// argument names for cscale_stdscale
+static char *stdscale_argnames[] = {"ar", "ddof", NULL};
 /**
  * Centers and scale a `numpy.ndarray` to zero mean, unit variance.
  * 
@@ -25,23 +53,18 @@
  * @param kwargs Keyword arguments
  * @returns `PyArrayObject *` cast to `PyObject *` 
  */
-PyObject *cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
+static PyObject *
+cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
   // numpy ndarray and delta degrees of freedom
   PyArrayObject *ar;
-  int ddof = 0;
-  // argument names
-  char *argnames[] = {"ar", "ddof", NULL};
-  // check args and kwargs. | indicates that all args after it are optional
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|i", argnames, &ar, &ddof)) {
-    PyErr_SetString(
-      PyExc_ValueError, "argument parsing failure. check that the positional "
-      "arg ar has been passed to the function and that ddof is an int"
-    );
-    return NULL;
-  }
-  // check that ar is a numpy ndarray
-  if (!PyArray_Check(ar)) {
-    PyErr_SetString(PyExc_TypeError, "ar must be of type numpy.ndarray");
+  int ddof = 0;  
+  // check args and kwargs. | indicates that all args after it are optional.
+  // exception is set on error automatically.
+  if (
+    !PyArg_ParseTupleAndKeywords(
+      args, kwargs, "O!|i", stdscale_argnames, &PyArray_Type, &ar, &ddof
+    )
+  ) {
     return NULL;
   }
   // check that ar is of the correct types
@@ -157,4 +180,42 @@ PyObject *cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
   NpyIter_DeallocAndWarn(iter, ar);
   // return centered and scaled out_ar
   return (PyObject *) ar;
+}
+
+// static array of module methods
+static PyMethodDef cscale_methods[] = {
+  {
+    "stdscale",
+    // cast PyCFunctionWithKeywords to PyCFunction (silences compiler warning)
+    (PyCFunction) cscale_stdscale,
+    METH_VARARGS | METH_KEYWORDS,
+    cscale_stdscale_doc
+  },
+  /**
+   * see https://stackoverflow.com/questions/43371780/why-does-pymethoddef-
+   * arrays-require-a-sentinel-element-containing-multiple-nulls. at least one
+   * NULL should be present; defining a NULL method is more consistent.
+   */
+  {NULL, NULL, 0, NULL}
+};
+
+// module definition struct
+static struct PyModuleDef cscale_def = {
+  PyModuleDef_HEAD_INIT,
+  /**
+   * module name, module docstring, per-interpreter module state (-1 required
+   * if state is maintained through globals), static pointer to methods
+   */
+  MODULE_NAME,
+  module_doc,
+  -1,
+  cscale_methods
+};
+
+// module initialization function
+PyMODINIT_FUNC PyInit_cscale(void) {
+  // import numpy api. on error, error indicator is set and NULL returned
+  import_array();
+  // create and return module pointer (NULL on failure)
+  return PyModule_Create(&cscale_def);
 }

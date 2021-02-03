@@ -21,10 +21,7 @@ def _get_ext_modules():
     return [
         Extension(
             name = "cscale",
-            sources = [
-                _PACKAGE_NAME + "/cscale/cscale.c",
-                _PACKAGE_NAME + "/cscale/_modinit.c"
-            ],
+            sources = [_PACKAGE_NAME + "/cscale.c"],
             include_dirs = [get_include()],
             extra_compile_args = ["-std=gnu11"]
         ),
