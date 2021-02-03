@@ -1,6 +1,9 @@
 /**
  * @file functimer.c
- * @brief Implementations for declarations in `functimer.h`.
+ * @brief C extension module that provides a callable API for the timing of
+ *     Python functions. The implementation in C means that there is less
+ *     measurement error introduced by the slow execution speed of Python
+ *     loops (see the implementation of the `timeit` module).
  */
 
 #define PY_SSIZE_T_CLEAN
