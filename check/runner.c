@@ -13,7 +13,6 @@
 #include <check.h>
 
 #include "pytest_suite.h"
-#include "test_helpers.h"
 // if C_NPY_DEMO_DEBUG is not defined, we won't have TimeitResult test suite
 #ifdef C_NPY_DEMO_DEBUG
 #include "timeitresult_suite.h"

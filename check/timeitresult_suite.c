@@ -15,6 +15,7 @@
 
 #include <check.h>
 
+#define NO_TEST_HELPERS_DEFINE
 #include "test_helpers.h"
 
 // only includes unit tests for the TimeitResult class if -DC_NPY_DEMO_DEBUG is

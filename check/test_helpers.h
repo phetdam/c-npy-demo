@@ -1,6 +1,9 @@
 /**
  * @file test_helpers.h
  * @brief Header file containing useful declarations usable by all test suites.
+ * @note must `#define NO_TEST_HELPERS_DEFINE` before all `#include`s of
+ *     `test_helpers.h` except for one since the `py_setup`, `py_teardown`
+ *     definitions are included in this header.
  */
 
 #ifndef TEST_HELPERS_H
@@ -29,10 +32,24 @@ extern int Py_Finalize_err_stop;
   fprintf(stderr, "error: %s: Py_FinalizeEx error\n", __func__); \
   if (Py_Finalize_err_stop) { exit(120); } else { return ret; } }
 
-// Python interpreter fixture setup to allow use of the Python C API
+// guard to only include definitions once. see note
+#ifdef NO_TEST_HELPERS_DEFINE
 void py_setup(void);
-
-// Python interpreter fixture teardown to finalize interpreter
 void py_teardown(void);
+#else
+/**
+ * Python interpreter fixture setup to allow use of the Python C API
+ */
+void py_setup(void) {
+  Py_Initialize();
+}
+
+/**
+ * Python interpreter fixture teardown to finalize interpreter
+ */
+void py_teardown(void) {
+  Py_FinalizeEx_handle_err()
+}
+#endif /* NO_TEST_HELPERS_DEFINE */
 
 #endif /* TEST_HELPERS_H */
