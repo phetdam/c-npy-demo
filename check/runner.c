@@ -71,6 +71,13 @@ int main(int argc, char **argv) {
   double timeout = 300;
   verbosity_flag = false;
   fork_mode_flag = true;
+// print warning to stderr if C_NPY_DEMO_DEBUG not passed during compilation
+#ifndef C_NPY_DEMO_DEBUG
+  fprintf(
+    stderr, "%s: warning: runner compiled without -DC_NPY_DEMO_DEBUG. no "
+    "TimeitResult tests can be added and run", __func__
+  );
+#endif /* C_NPY_DEMO_DEBUG */
   // get arguments using getopt_long
   while (true) {
     // long option index and value (short option flag) returned by getopt_long
@@ -162,13 +169,6 @@ int main(int argc, char **argv) {
   srunner_set_fork_status(runner, fork_mode_flag ? CK_FORK : CK_NOFORK);
 #ifdef C_NPY_DEMO_DEBUG
   srunner_add_suite(runner, timeitresult_suite);
-#endif /* C_NPY_DEMO_DEBUG */
-// print warning to stderr if C_NPY_DEMO_DEBUG not passed during compilation
-#ifndef C_NPY_DEMO_DEBUG
-  fprintf(
-    stderr, "%s: warning: runner compiled without -DC_NPY_DEMO_DEBUG. no "
-    "TimeitResult tests can be added and run", __func__
-  );
 #endif /* C_NPY_DEMO_DEBUG */
   srunner_run_all(runner, verbosity_flag ? CK_VERBOSE : CK_ENV);
   // get number of failed tests and free runner
