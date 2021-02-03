@@ -2,17 +2,15 @@
 
 # package name
 PKG_NAME       = c_npy_demo
-# source folder for the timing module (also a C extension)
-_TIMER_DIR     = $(PKG_NAME)/functimer
 # directory for libcheck test runner code
 CHECK_DIR      = check
 # c compiler, of course
 CC             = gcc
 # dependencies for the extension modules
-XDEPS          = $(wildcard $(PKG_NAME)/*.c) $(wildcard $(_TIMER_DIR)/*.c)
-# dependencies for test running code. since we are testing a helper function in
-# $(_TIMER_DIR)/timeitresult.c, we include it as a dependency.
-CHECK_DEPS     = $(wildcard $(CHECK_DIR)/*.c) $(_TIMER_DIR)/timeitresult.c
+XDEPS          = $(wildcard $(PKG_NAME)/*.c)
+# dependencies for test running code. since we are testing helper functions in
+# functimer.c, we include it as a dependency.
+CHECK_DEPS     = $(wildcard $(CHECK_DIR)/*.c) $(PKG_NAME)/functimer.c
 # required Python source files in the package (modules and tests)
 PYDEPS         = $(wildcard $(PKG_NAME)/*.py) $(wildcard $(PKG_NAME)/*/*.py)
 # set python; on docker specify PYTHON value externally using absolute path
@@ -30,7 +28,7 @@ PY_LDFLAGS    ?= $(shell python3-config --embed --ldflags)
 # compile flags for compiling test runner. my libcheck is in /usr/local/lib.
 # note we define C_NPY_DEMO_DEBUG macro so that the helper functions are
 # non-static and can be accessed by the test runner.
-CHECK_CFLAGS   = $(PY_CFLAGS) -I$(_TIMER_DIR) -DC_NPY_DEMO_DEBUG
+CHECK_CFLAGS   = $(PY_CFLAGS) -DC_NPY_DEMO_DEBUG
 # linker flags for compiling test runner
 CHECK_LDFLAGS  = $(PY_LDFLAGS) -L$(PKG_NAME) -lcheck
 # flags to pass to the libcheck test runner

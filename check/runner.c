@@ -14,7 +14,13 @@
 
 #include "pytest_suite.h"
 #include "test_helpers.h"
+// if C_NPY_DEMO_DEBUG is not defined, we won't have TimeitResult test suite
+#ifdef C_NPY_DEMO_DEBUG
 #include "timeitresult_suite.h"
+#else
+#warning "C_NPY_DEMO_DEBUG not defined. recompile with -DC_NPY_DEMO_DEBUG " \
+  "for test runner to add an run TimeitResult unit tests"
+#endif /* C_NPY_DEMO_DEBUG */
 
 // whether to exit the test runner immediately the Py_FinalizeEx returns an
 // error. set to false by default so other tests can run.
@@ -138,6 +144,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "error: %s: make_pytest_suite returned NULL\n", __func__);
     return EXIT_FAILURE;
   }
+#ifdef C_NPY_DEMO_DEBUG
   Suite *timeitresult_suite = make_timeitresult_suite(timeout);
   if (timeitresult_suite == NULL) {
     fprintf(
@@ -145,6 +152,7 @@ int main(int argc, char **argv) {
     );
     return EXIT_FAILURE;
   }
+#endif /* C_NPY_DEMO_DEBUG */
   /**
    * create our suite runner and run all tests. CK_ENV uses value of environment
    * variable CK_VERBOSITY and defaults to CK_NORMAL if CK_VERBOSITY not set.
@@ -153,7 +161,16 @@ int main(int argc, char **argv) {
    */
   SRunner *runner = srunner_create(pytest_suite);
   srunner_set_fork_status(runner, fork_mode_flag ? CK_FORK : CK_NOFORK);
+#ifdef C_NPY_DEMO_DEBUG
   srunner_add_suite(runner, timeitresult_suite);
+#endif /* C_NPY_DEMO_DEBUG */
+// print warning to stderr if C_NPY_DEMO_DEBUG not passed during compilation
+#ifndef C_NPY_DEMO_DEBUG
+  fprintf(
+    stderr, "%s: warning: runner compiled without -DC_NPY_DEMO_DEBUG. no "
+    "TimeitResult tests can be added and run", __func__
+  );
+#endif /* C_NPY_DEMO_DEBUG */
   srunner_run_all(runner, verbosity_flag ? CK_VERBOSE : CK_ENV);
   // get number of failed tests and free runner
   int n_failed = srunner_ntests_failed(runner);

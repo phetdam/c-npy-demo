@@ -6,6 +6,8 @@ from setuptools import Extension, setup
 
 # package name
 _PACKAGE_NAME = "c_npy_demo"
+# extra compilation arguments for extension modules
+_EXTRA_COMPILE_ARGS = ["-std=gnu11"]
 
 
 def _get_ext_modules():
@@ -23,16 +25,12 @@ def _get_ext_modules():
             name = "cscale",
             sources = [_PACKAGE_NAME + "/cscale.c"],
             include_dirs = [get_include()],
-            extra_compile_args = ["-std=gnu11"]
+            extra_compile_args = _EXTRA_COMPILE_ARGS
         ),
         Extension(
             name = "functimer",
-            sources = [
-                _PACKAGE_NAME + "/functimer/functimer.c",
-                _PACKAGE_NAME + "/functimer/timeitresult.c",
-                _PACKAGE_NAME + "/functimer/_modinit.c"
-            ],
-            extra_compile_args = ["-std=gnu11"]
+            sources = [_PACKAGE_NAME + "/functimer.c"],
+            extra_compile_args = _EXTRA_COMPILE_ARGS
         )
     ]
 
