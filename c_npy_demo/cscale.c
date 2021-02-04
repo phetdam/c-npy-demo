@@ -78,7 +78,7 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
     return NULL;
   }
   // get total number of elements in the array
-  npy_int ar_size = PyArray_Size(ar);
+  npy_intp ar_size = PyArray_Size(ar);
   // if there aren't any elements, raise runtime warning and return NaN
   if (ar_size == 0) {
     PyErr_WarnEx(PyExc_RuntimeWarning, "mean of empty array", 1);
