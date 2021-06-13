@@ -19,8 +19,9 @@ build_cp3_wheels() {
             $PY_BIN/python3 -m venv ~/.venv
             source $HOME/.venv/bin/activate
             # build wheel for this python version. first install dependencies 
-            # from tools/requirements.txt, then run sdist bdist_wheel. this is
-            # because we mounted repo home to DOCKER_MNT.
+            # from tools/requirements.txt (numpy is required since we need
+            # numpy includes) then run sdist bdist_wheel. repo home is
+            # mounted to DOCKER_MNT, so we just treat $DOCKER_MNT as .
             $PY_BIN/pip3 install -r $DOCKER_MNT/tools/requirements.txt
             # use absolute path for python3 and absolute dist path
             make bdist_wheel PYTHON=$PY_BIN/python3 \
