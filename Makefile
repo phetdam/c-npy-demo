@@ -15,10 +15,10 @@ CHECK_DEPS     = $(wildcard $(CHECK_DIR)/*.c) $(PKG_NAME)/functimer.c
 PYDEPS         = $(wildcard $(PKG_NAME)/*.py) $(wildcard $(PKG_NAME)/*/*.py)
 # set python; on docker specify PYTHON value externally using absolute path
 PYTHON        ?= python3
-# flags to pass to setup.py build
+# flags to pass to setup.py build, sdist, bdist_wheel
 BUILD_FLAGS    =
 # directory to save distributions to; use absolute path on docker
-DIST_FLAGS    ?= --dist-dir ./dist
+DIST_FLAGS    ?=
 # python compiler and linker flags for use when linking python into external C
 # code (our test runner); can be externally specified. gcc requires -fPIE.
 PY_CFLAGS     ?= -fPIE $(shell python3-config --cflags)
@@ -66,6 +66,14 @@ check: $(CHECK_DEPS) inplace
 # make source and wheel
 dist: build
 	@$(PYTHON) setup.py sdist bdist_wheel $(DIST_FLAGS)
+
+# make just wheels
+bdist_wheel: build
+	@$(PYTHON) setup.py bdist_wheel $(DIST_FLAGS)
+
+# make only source tar.gz (doesn't require full build)
+sdist: $(PYDEPS) $(XDEPS)
+	@$(PYTHON) setup.py sdist $(DIST_FLAGS)
 
 # perform root install by default (intended for use with venv)
 install: install_root

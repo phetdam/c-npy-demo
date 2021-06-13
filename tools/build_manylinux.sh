@@ -23,7 +23,7 @@ build_cp3_wheels() {
             # because we mounted repo home to DOCKER_MNT.
             $PY_BIN/pip3 install -r $DOCKER_MNT/tools/requirements.txt
             # use absolute path for python3 and absolute dist path
-            make dist PYTHON=$PY_BIN/python3 \
+            make bdist_wheel PYTHON=$PY_BIN/python3 \
                 DIST_FLAGS="--dist-dir $DOCKER_MNT/dist"
             # deactivate and remove virtual environment
             deactivate

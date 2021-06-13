@@ -14,7 +14,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  build:
+  # build manylinux1 wheels
+  build_manylinux:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -22,8 +23,8 @@ jobs:
         docker_image:
         - quay.io/pypa/manylinux1_x86_64
         - quay.io/pypa/manylinux1_i686
-      # run sequentially so upload of tar.gz source isn't corrupted
-      max-parallel: 1
+      # no need to specify max-parallel as we upload wheels with different
+      # names to the same artifact; this can be done in parallel.
     steps:
     - uses: actions/checkout@v2
     - name: Pull manylinux docker image
@@ -43,23 +44,60 @@ jobs:
         docker container run -e DOCKER_MNT=$DOCKER_MNT -e
         DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
         ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/test_manylinux.sh
-    - name: Upload .tar.gz and manylinux wheel artifacts
+    - name: Upload manylinux wheel artifacts
       uses: actions/upload-artifact@v2
       with:
         name: dist_artifact
         path: dist
         # if no files, error
         if-no-files-found: error
-        # can delete artifacts in the workflow summary page
+  # build windows wheels
+  build_windows:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        # python versions to test with (currently use only 1)
+        python-version: [3.6, 3.7, 3.8]
+      # no need to specify max-parallel as we upload wheels with different
+      # names to the same artifact; this can be done in parallel.
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Python dependencies from requirements.txt
+      run: pip3 install -r tools/requirements.txt
+    - name: Build Windows wheels
+      run: python setup.py bdist_wheel
+    - name: Upload windows wheel artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist_artifact
+        path: dist
+        if-no-files-found: error
+  # simply create tar.gz in dist which is uploaded to dist_artifact
+  build_sdist:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create tar.gz sdist
+      run: python3 setup.py sdist
+    - name: Upload sdist artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist_artifact
+        path: dist
+        if-no-files-found: error
+  # deploy job, depends on build_manylinux, build_windows, build_sdist
   deploy:
     runs-on: ubuntu-18.04
     # can only deploy after building
-    needs: build
+    needs: build_manylinux
     # run only if version tag is present
     if: ${{ contains(github.ref, 'refs/tags/v') }}
     steps:
     - uses: actions/checkout@v2
-    - name: Download .tar.gz and manylinux wheel artifacts
+    - name: Download .tar.gz, manylinux wheel, and windows wheel artifacts
       uses: actions/download-artifact@v2
       with:
         name: dist_artifact
