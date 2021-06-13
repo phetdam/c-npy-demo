@@ -20,8 +20,8 @@ c_npy_demo
    :target: https://github.com/phetdam/c_npy_demo/actions
    :alt: GitHub Workflow Status
 
-*We should forget about small efficiencies, say about 97% of the time: premature
-optimization is the root of all evil* [#]_.
+*We should forget about small efficiencies, say about 97% of the time:
+premature optimization is the root of all evil* [#]_.
 
 .. leave note as comment
 
@@ -51,12 +51,13 @@ Installation
 From source
 ~~~~~~~~~~~
 
-Building from source using this repo will probably only work on Linux systems.
+Building from source using this repo has only been tested on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
 Github Actions runners were done within the `manylinux1 Docker images`__
 provided by PyPA. To build, you will need ``numpy>=1.19`` and the latest
-`setuptools`__ [#]_ installed on your system. Your C compiler should be a recent
-version of gcc, but ``setuptools`` will sort out the details.
+`setuptools`__ [#]_ installed on your system. Your C compiler should be
+appropriate for your platform, ex. gcc for Linux, MSVC for Windows, but
+``setuptools`` will (hopefully) sort out the details.
 
 First, use ``git clone`` or download + unzip to get the repo source code and
 install ``numpy>=1.19``. With the current working directory the repository root,
