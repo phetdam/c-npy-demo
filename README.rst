@@ -51,7 +51,6 @@ Installation
 From source
 ~~~~~~~~~~~
 
-Building from source using this repo has only been tested on Linux systems.
 Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds on
 Github Actions runners were done within the `manylinux1 Docker images`__
 provided by PyPA. To build, you will need ``numpy>=1.19`` and the latest
