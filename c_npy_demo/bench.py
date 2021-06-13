@@ -66,7 +66,7 @@ def comma_list_to_shape(s):
     return shape
 
 
-def main(args = None):
+def main(args=None):
     """Main entry point for the benchmarking script.
 
     :param args: List of string arguments to pass to
@@ -76,24 +76,22 @@ def main(args = None):
     # instantiate ArgumentParse and add arguments. help width is set to 80 cols
     # although we are technically using the private argparse API.
     arp = argparse.ArgumentParser(
-        description = _BENCH_DESC,
-        formatter_class = partial(
-            argparse.RawDescriptionHelpFormatter, width = 80
-        )
+        description=_BENCH_DESC,
+        formatter_class=partial(argparse.RawDescriptionHelpFormatter, width=80)
     )
     arp.add_argument(
-        "-s", "--shape", default = (40, 5, 10, 10, 50, 5),
-        type = comma_list_to_shape, help = _HELP_SHAPE
+        "-s", "--shape", default=(40, 5, 10, 10, 50, 5),
+        type=comma_list_to_shape, help=_HELP_SHAPE
     )
-    arp.add_argument("-n", "--number", type = int, help = _HELP_NUMBER)
-    arp.add_argument("-r", "--repeat", type = int, help = _HELP_REPEAT)
-    arp.add_argument("-u", "--unit", help = _HELP_UNIT)
+    arp.add_argument("-n", "--number", type=int, help=_HELP_NUMBER)
+    arp.add_argument("-r", "--repeat", type=int, help=_HELP_REPEAT)
+    arp.add_argument("-u", "--unit", help=_HELP_UNIT)
     # use count and default 0 to count verbosity levels
     arp.add_argument(
-        "-p", "--precision", default = 1, type = int, help = _HELP_PRECISION
+        "-p", "--precision", default=1, type=int, help=_HELP_PRECISION
     )
     # parse arguments
-    args = arp.parse_args(args = args)
+    args = arp.parse_args(args=args)
     # collect named args for c_npy_demo.functimer.timeit_enh that are not None
     # except for the shape argument. functimer_args will be directly unpacked
     # into c_npy_demo.functimer.timeit_enh
@@ -104,7 +102,7 @@ def main(args = None):
             functimer_args[k] = v
     # print shape and number of elements in array + allocate random array
     print(f"numpy.ndarray shape {args.shape}, size {np.prod(args.shape)}")
-    ar = np.random.normal(size = args.shape)
+    ar = np.random.normal(size=args.shape)
     # get results for pyscale.stdscale and cscale.stdscale + print results
     py_res = timeit_enh(pyscale.stdscale, (ar,), **functimer_args)
     print(f"pyscale.stdscale -- {py_res.brief}")
