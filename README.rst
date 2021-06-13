@@ -59,8 +59,8 @@ appropriate for your platform, ex. gcc for Linux, MSVC for Windows, but
 ``setuptools`` will (hopefully) sort out the details.
 
 First, use ``git clone`` or download + unzip to get the repo source code and
-install ``numpy>=1.19``. With the current working directory the repository root,
-you can build the C extension modules and install directly with
+install ``numpy>=1.19``. With the current working directory the repository
+root, you can build the C extension modules and install directly with
 
 .. code:: bash
 
@@ -89,13 +89,17 @@ If you don't have or don't wish to use ``make``, you may instead use
 From PyPI
 ~~~~~~~~~
 
-`manylinux1`__ wheels may be conveniently installed directly from PyPI with
+`manylinux1`__ and Windows wheels may be installed directly from PyPI with
 
 .. code:: bash
 
    pip3 install c-npy-demo
 
-At some point in time, Windows and Mac binary wheels may be made available.
+At some point in time, Mac binary wheels may be made available, but for now
+PyPI will just retrieve the tar.gz source and attempt to build a local wheel.
+
+Currently wheels support only Python 3.6-3.8, but Python 3.9 wheels will be
+available soon.
 
 .. __: https://github.com/pypa/manylinux
 
