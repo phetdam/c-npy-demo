@@ -68,11 +68,14 @@ jobs:
     # numpy get_include is used in setup.py so we need numpy
     - name: Install Python dependencies from requirements.txt
       run: pip3 install -r tools/requirements.txt
-    - name: Build Windows wheels
+    - name: Build Windows wheel
       run: python setup.py bdist_wheel
-    - name: Test Windows wheels with pytest
-      run: pytest -rsxXP --pyargs c_npy_demo.tests
-    - name: Upload Windows wheel artifacts
+    - name: Install and test Windows wheel with pytest
+      run: |
+        pip install `find dist/*.whl`
+        pytest -rsxXP --pyargs c_npy_demo.tests
+        c_npy_demo.bench -s 20,10
+    - name: Upload Windows wheel artifact
       uses: actions/upload-artifact@v2
       with:
         name: dist_artifact
