@@ -11,7 +11,6 @@
 
 // don't include deprecated numpy C API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#define PY_ARRAY_UNIQUE_SYMBOL CSCALE_ARRAY_API
 // arrayobject.h gives access to the array API, npymath.h the core math library
 #include "numpy/arrayobject.h"
 #include "numpy/npy_math.h"
