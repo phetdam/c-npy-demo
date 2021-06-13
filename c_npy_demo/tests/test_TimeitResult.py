@@ -10,7 +10,7 @@ import pytest
 from ..functimer import TimeitResult
 
 
-@pytest.fixture(scope = "module")
+@pytest.fixture(scope="module")
 def __new__args():
     """Valid args to pass to ``partial(TimeitResult.__new__, TimeitResult)``.
 
@@ -26,7 +26,7 @@ def __new__args():
     return 88., "usec", 10000, 5, (0.88, 1.02, 1.04, 1.024, 1)
 
 
-@pytest.fixture(scope = "module")
+@pytest.fixture(scope="module")
 def tuple_replace():
     """Return a new tuple from an existing tuple with element modifications.
 
@@ -54,36 +54,36 @@ def test_TimeitResult_new(__new__args, tuple_replace):
     with pytest.raises(TypeError):
         TimeitResult()
     # unit must be valid
-    with pytest.raises(ValueError, match = "unit must be one of"):
+    with pytest.raises(ValueError, match="unit must be one of"):
         TimeitResult(*tuple_replace(__new__args, (1, "oowee")))
     # loop count must be valid (positive)
-    with pytest.raises(ValueError, match = "number must be positive"):
+    with pytest.raises(ValueError, match="number must be positive"):
         TimeitResult(*tuple_replace(__new__args, (2, 0)))
     # number of repeats (trials) must be valid (positive)
-    with pytest.raises(ValueError, match = "repeat must be positive"):
+    with pytest.raises(ValueError, match="repeat must be positive"):
         TimeitResult(*tuple_replace(__new__args, (3, 0)))
     # times tuple must be a tuple
     with pytest.raises(TypeError):
         TimeitResult(*tuple_replace(__new__args, (4, [])))
     # len(times) must equal repeat
-    with pytest.raises(ValueError, match = r"len\(times\) must equal repeat"):
+    with pytest.raises(ValueError, match=r"len\(times\) must equal repeat"):
         TimeitResult(*tuple_replace(__new__args, (4, (0.99, 0.99))))
     # times must only contain floats or ints
-    with pytest.raises(TypeError, match = ""):
+    with pytest.raises(TypeError, match=""):
         TimeitResult(
             *tuple_replace(__new__args, (4, (0.9, 0.99, "invalid", None, "2")))
         )
     # check that precision can be passed as both kwarg and positional arg
     TimeitResult(*__new__args, 1)
-    TimeitResult(*__new__args, precision = 1)
+    TimeitResult(*__new__args, precision=1)
     # check that precision must be valid (int in [1, 20])
-    with pytest.raises(ValueError, match = "precision must be positive"):
-        TimeitResult(*__new__args, precision = 0)
+    with pytest.raises(ValueError, match="precision must be positive"):
+        TimeitResult(*__new__args, precision=0)
     with pytest.raises(
         ValueError,
-        match = f"precision is capped at {TimeitResult.MAX_PRECISION}"
+        match=f"precision is capped at {TimeitResult.MAX_PRECISION}"
     ):
-        TimeitResult(*__new__args, precision = TimeitResult.MAX_PRECISION + 1)
+        TimeitResult(*__new__args, precision=TimeitResult.MAX_PRECISION + 1)
     # should initialize correctly
     TimeitResult(*__new__args)
 

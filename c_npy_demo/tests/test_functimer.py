@@ -12,7 +12,7 @@ from ..functimer import TimeitResult
 tracemalloc.start()
 
 
-@pytest.fixture(scope = "module")
+@pytest.fixture(scope="module")
 def func_and_args():
     """Default function and positional arguments used during unit testing.
 
@@ -31,28 +31,28 @@ def test_timeit_once_sanity(func_and_args):
     """
     # one positional argument required
     with pytest.raises(TypeError):
-        functimer.timeit_once(args = (1,))
+        functimer.timeit_once(args=(1,))
     # args must be tuple
-    with pytest.raises(TypeError, match = "args must be a tuple"):
-        functimer.timeit_once(max, args = [1, 2])
+    with pytest.raises(TypeError, match="args must be a tuple"):
+        functimer.timeit_once(max, args=[1, 2])
     # kwargs must be dict
-    with pytest.raises(TypeError, match = "kwargs must be a dict"):
-        functimer.timeit_once(max, args = ((),), kwargs = ["bogus"])
+    with pytest.raises(TypeError, match="kwargs must be a dict"):
+        functimer.timeit_once(max, args=((),), kwargs=["bogus"])
     # timer must be callable
     with pytest.raises(TypeError):
-        functimer.timeit_once(*func_and_args, timer = None)
+        functimer.timeit_once(*func_and_args, timer=None)
     # timer must have correct signature
     with pytest.raises(TypeError):
-        functimer.timeit_once(*func_and_args, timer = lambda x: x)
+        functimer.timeit_once(*func_and_args, timer=lambda x: x)
     # number must be int
     with pytest.raises(TypeError):
-        functimer.timeit_once(*func_and_args, number = 1.2)
+        functimer.timeit_once(*func_and_args, number=1.2)
     # number must be positive
     with pytest.raises(ValueError):
-        functimer.timeit_once(*func_and_args, number = -1)
+        functimer.timeit_once(*func_and_args, number=-1)
     # number must be less than sys.maxsize (PY_SSIZE_T_MAX)
     with pytest.raises(OverflowError):
-        functimer.timeit_once(*func_and_args, number = sys.maxsize + 999)
+        functimer.timeit_once(*func_and_args, number=sys.maxsize + 999)
 
 
 def test_timeit_once_timer(func_and_args):
@@ -62,8 +62,8 @@ def test_timeit_once_timer(func_and_args):
     :type func_and_args: tuple
     """
     # must return a numeric value
-    with pytest.raises(TypeError, match = "timer must return a numeric value"):
-        functimer.timeit_once(*func_and_args, timer = lambda: "cheese")
+    with pytest.raises(TypeError, match="timer must return a numeric value"):
+        functimer.timeit_once(*func_and_args, timer=lambda: "cheese")
 
 
 def test_timeit_once_memleak(func_and_args):
@@ -80,10 +80,10 @@ def test_timeit_once_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to timeit_once call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 86)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno=86)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    functimer.timeit_once(*func_and_args, number = 1000)
+    functimer.timeit_once(*func_and_args, number=1000)
     snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     # compare second to first snapshot and print differences (top 10)
     diffs = snap_2.compare_to(snap_1, "lineno")
@@ -98,16 +98,16 @@ def test_autorange_sanity(func_and_args):
     """
     # one positional argument required
     with pytest.raises(TypeError):
-        functimer.autorange(args = ())
+        functimer.autorange(args=())
     # args must be a tuple (raised by timeit_once)
-    with pytest.raises(TypeError, match = "args must be a tuple"):
-        functimer.autorange(max, args = [1, 2])
+    with pytest.raises(TypeError, match="args must be a tuple"):
+        functimer.autorange(max, args=[1, 2])
     # kwargs must be a dict (raised by timeit_once)
-    with pytest.raises(TypeError, match = "kwargs must be a dict"):
-        functimer.autorange(max, args = ((),), kwargs = ["also bogus"])
+    with pytest.raises(TypeError, match="kwargs must be a dict"):
+        functimer.autorange(max, args=((),), kwargs=["also bogus"])
     # timer must be callable (raised by timeit_once)
     with pytest.raises(TypeError):
-        functimer.autorange(*func_and_args, timer = None)
+        functimer.autorange(*func_and_args, timer=None)
 
 
 def test_autorange_memleak(func_and_args):
@@ -117,7 +117,7 @@ def test_autorange_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to autorange call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 123)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno=123)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     functimer.autorange(*func_and_args)
@@ -135,34 +135,34 @@ def test_repeat_sanity(func_and_args):
     """
     # one positional argument required
     with pytest.raises(TypeError):
-        functimer.repeat(args = ())
+        functimer.repeat(args=())
     # args must be a tuple (raised by timeit_once)
-    with pytest.raises(TypeError, match = "args must be a tuple"):
-        functimer.repeat(max, args = [1, 2])
+    with pytest.raises(TypeError, match="args must be a tuple"):
+        functimer.repeat(max, args=[1, 2])
     # kwargs must be dict (raised by timeit_once)
-    with pytest.raises(TypeError, match = "kwargs must be a dict"):
-        functimer.repeat(max, args = ((),), kwargs = ["bogus"])
+    with pytest.raises(TypeError, match="kwargs must be a dict"):
+        functimer.repeat(max, args=((),), kwargs=["bogus"])
     # timer must be callable (raised by timeit_once)
     with pytest.raises(TypeError):
-        functimer.repeat(*func_and_args, timer = None)
+        functimer.repeat(*func_and_args, timer=None)
     # timer must have correct signature (raised by timeit_once)
     with pytest.raises(TypeError):
-        functimer.repeat(*func_and_args, timer = lambda x: x)
+        functimer.repeat(*func_and_args, timer=lambda x: x)
     # number must be int (raised by timeit_once)
     with pytest.raises(TypeError):
-        functimer.repeat(*func_and_args, number = 1.2)
+        functimer.repeat(*func_and_args, number=1.2)
     # number must be positive (raised by timeit_once)
     with pytest.raises(ValueError):
-        functimer.repeat(*func_and_args, number = -1)
+        functimer.repeat(*func_and_args, number=-1)
     # number must be <= sys.maxsize (PY_SSIZE_T_MAX). raised by timeit_once
     with pytest.raises(OverflowError):
-        functimer.repeat(*func_and_args, number = sys.maxsize + 999)
+        functimer.repeat(*func_and_args, number=sys.maxsize + 999)
     # repeat must be positive
-    with pytest.raises(ValueError, match = "repeat must be positive"):
-        functimer.repeat(*func_and_args, repeat = -1)
+    with pytest.raises(ValueError, match="repeat must be positive"):
+        functimer.repeat(*func_and_args, repeat=-1)
     # repeat must be <= sys.maxsize (PY_SSIZE_T_MAX)
     with pytest.raises(OverflowError):
-        functimer.repeat(*func_and_args, repeat = sys.maxsize + 999)
+        functimer.repeat(*func_and_args, repeat=sys.maxsize + 999)
 
 
 def test_repeat_memleak(func_and_args):
@@ -172,10 +172,10 @@ def test_repeat_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to repeat call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 178)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno=178)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    functimer.repeat(*func_and_args, number = 400, repeat = 2)
+    functimer.repeat(*func_and_args, number=400, repeat=2)
     snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     # compare second to first snapshot and print differences (top 10)
     diffs = snap_2.compare_to(snap_1, "lineno")
@@ -193,28 +193,28 @@ def test_timeit_enh_sanity(func_and_args):
     :type func_and_args: tuple
     """
     # number must be positive
-    with pytest.raises(ValueError, match = "number must be positive"):
-        functimer.timeit_enh(*func_and_args, number = 0)
+    with pytest.raises(ValueError, match="number must be positive"):
+        functimer.timeit_enh(*func_and_args, number=0)
     # repeat must be positive
-    with pytest.raises(ValueError, match = "repeat must be positive"):
-        functimer.timeit_enh(*func_and_args, repeat = 0)
+    with pytest.raises(ValueError, match="repeat must be positive"):
+        functimer.timeit_enh(*func_and_args, repeat=0)
     # unit must be valid
-    with pytest.raises(ValueError, match = "unit must be one of"):
-        functimer.timeit_enh(*func_and_args, unit = "bloops")
+    with pytest.raises(ValueError, match="unit must be one of"):
+        functimer.timeit_enh(*func_and_args, unit="bloops")
     # precision must be positive and less than TimeitResult.MAX_PRECISION
-    with pytest.raises(ValueError, match = "precision must be positive"):
-        functimer.timeit_enh(*func_and_args, precision = 0)
+    with pytest.raises(ValueError, match="precision must be positive"):
+        functimer.timeit_enh(*func_and_args, precision=0)
     with pytest.raises(
         ValueError,
-        match = f"precision is capped at {TimeitResult.MAX_PRECISION}"
+        match=f"precision is capped at {TimeitResult.MAX_PRECISION}"
     ):
         functimer.timeit_enh(
-            *func_and_args, precision = TimeitResult.MAX_PRECISION + 1
+            *func_and_args, precision=TimeitResult.MAX_PRECISION + 1
         )
     # warning will be raised if precision >= TimeitResult.MAX_PRECISION // 2
-    with pytest.warns(UserWarning, match = "precision is rather high"):
+    with pytest.warns(UserWarning, match="precision is rather high"):
         functimer.timeit_enh(
-            *func_and_args, precision = TimeitResult.MAX_PRECISION // 2
+            *func_and_args, precision=TimeitResult.MAX_PRECISION // 2
         )
     # this should run normally
     tir = functimer.timeit_enh(*func_and_args)
@@ -228,10 +228,10 @@ def test_timeit_enh_memleak(func_and_args):
     :type func_and_args: tuple
     """
     # filter so that memory allocation tracing is limited to repeat call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno = 234)]
+    trace_filters = [tracemalloc.Filter(True, __file__, lineno=234)]
     # take snapshots before and after running timeit_once
     snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    functimer.timeit_enh(*func_and_args, precision = 2)
+    functimer.timeit_enh(*func_and_args, precision=2)
     snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     # compare second to first snapshot and print differences (top 10)
     diffs = snap_2.compare_to(snap_1, "lineno")

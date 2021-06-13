@@ -36,7 +36,7 @@ def test_cscale_ar_ndarray_type(test_mat):
     :param test_mat: ``pytest`` fixture for test matrix.
     :type test_mat: :class:`numpy.ndarray`
     """
-    with pytest.raises(TypeError, match = "ar must have dtype int or float"):
+    with pytest.raises(TypeError, match="ar must have dtype int or float"):
         cscale.stdscale(test_mat.astype(str))
 
 
@@ -46,13 +46,13 @@ def test_cscale_ddof(test_mat):
     :param test_mat: ``pytest`` fixture for test matrix.
     :type test_mat: :class:`numpy.ndarray`
     """
-    with pytest.raises(ValueError, match = "ddof must be a nonnegative int"):
-        cscale.stdscale(test_mat, ddof = -1)
+    with pytest.raises(ValueError, match="ddof must be a nonnegative int"):
+        cscale.stdscale(test_mat, ddof=-1)
 
 
 def test_cscale_empty():
     "Test :func:`c_npy_demo.cscale.stdscale` warn when ``ar`` is empty."
-    with pytest.warns(RuntimeWarning, match = "mean of empty array"):
+    with pytest.warns(RuntimeWarning, match="mean of empty array"):
         cscale.stdscale(np.array([]))
 
 
