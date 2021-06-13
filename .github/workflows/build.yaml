@@ -70,7 +70,9 @@ jobs:
       run: pip3 install -r tools/requirements.txt
     - name: Build Windows wheels
       run: python setup.py bdist_wheel
-    - name: Upload windows wheel artifacts
+    - name: Test Windows wheels with pytest
+      run: pytest -rsxXP --pyargs c_npy_demo.tests
+    - name: Upload Windows wheel artifacts
       uses: actions/upload-artifact@v2
       with:
         name: dist_artifact
