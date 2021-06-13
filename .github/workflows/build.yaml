@@ -75,6 +75,8 @@ jobs:
         pip install $(find dist/*.whl)
         pytest -rsxXP --pyargs c_npy_demo.tests
         c_npy_demo.bench -s 20,10
+      # use bash shell since i don't know PowerShell
+      shell: bash
     - name: Upload Windows wheel artifact
       uses: actions/upload-artifact@v2
       with:
@@ -99,8 +101,8 @@ jobs:
   # deploy job, depends on build_manylinux, build_windows, build_sdist
   deploy:
     runs-on: ubuntu-18.04
-    # can only deploy after building
-    needs: build_manylinux
+    # can only deploy after building wheels and tar.gz
+    needs: [build_manylinux, build_windows, build_sdist]
     # run only if version tag is present
     if: ${{ contains(github.ref, 'refs/tags/v') }}
     steps:
