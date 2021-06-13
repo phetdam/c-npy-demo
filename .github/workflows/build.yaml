@@ -72,7 +72,7 @@ jobs:
       run: python setup.py bdist_wheel
     - name: Install and test Windows wheel with pytest
       run: |
-        pip install `find dist/*.whl`
+        pip install $(find dist/*.whl)
         pytest -rsxXP --pyargs c_npy_demo.tests
         c_npy_demo.bench -s 20,10
     - name: Upload Windows wheel artifact

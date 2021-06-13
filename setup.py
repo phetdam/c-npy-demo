@@ -2,14 +2,18 @@
 # built without setup.py, we can't use the new PEP 517 format.
 
 from numpy import get_include
+import platform
 from setuptools import Extension, setup
 
 from c_npy_demo import __version__
 
 # package name
 _PACKAGE_NAME = "c_npy_demo"
-# extra compilation arguments for extension modules
-_EXTRA_COMPILE_ARGS = ["-std=gnu11"]
+# extra compilation arguments for extension modules. C99+ required for gcc.
+if platform.system() == "Linux":
+    _EXTRA_COMPILE_ARGS = ["-std=gnu11"]
+else:
+    _EXTRA_COMPILE_ARGS = None
 
 
 def _get_ext_modules():
@@ -27,12 +31,12 @@ def _get_ext_modules():
             name="cscale",
             sources=[_PACKAGE_NAME + "/cscale.c"],
             include_dirs=[get_include()],
-            #extra_compile_args=_EXTRA_COMPILE_ARGS
+            extra_compile_args=_EXTRA_COMPILE_ARGS
         ),
         Extension(
             name="functimer",
             sources=[_PACKAGE_NAME + "/functimer.c"],
-            #extra_compile_args=_EXTRA_COMPILE_ARGS
+            extra_compile_args=_EXTRA_COMPILE_ARGS
         )
     ]
 
