@@ -23,7 +23,7 @@ def _get_ext_modules():
        function. Use alternate means to build foreign C code.
     
     :rtype: list
-    """ 
+    """
     # use get_include to get numpy include directory + add -std=gnu11 so that
     # the extension will build on older distros with old gcc like 4.8.2
     return [

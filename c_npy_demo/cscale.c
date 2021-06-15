@@ -33,7 +33,7 @@ PyDoc_STRVAR(
  */
 PyDoc_STRVAR(
   cscale_stdscale_doc,
-  "stdscale(ar, ddof = 1)\n--\n\n"
+  "stdscale(ar, ddof=1)\n--\n\n"
   "Centers and scales array to have zero mean and unit variance.\n\n"
   ":param args: Arbitrary :class:`numpy.ndarray`\n"
   ":type args: :class:`numpy.ndarray`\n"
