@@ -32,7 +32,8 @@ CHECK_PATH     = /usr/local
 # non-static and can be accessed by the test runner.
 check_cflags   = -DC_NPY_DEMO_DEBUG -I$(CHECK_PATH)/include $(PY_CFLAGS)
 # linker flags for compiling test runner
-check_ldflags  = -L$(CHECK_PATH)/lib -lcheck $(PY_LDFLAGS)
+check_ldflags  = -L$(CHECK_PATH)/lib -Wl,-rpath,$(CHECK_PATH)/lib \
+	-lcheck $(PY_LDFLAGS)
 # flags to pass to the libcheck test runner
 RUNNER_FLAGS   =
 
