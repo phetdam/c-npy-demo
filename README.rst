@@ -95,7 +95,7 @@ From PyPI
 
    pip3 install c-npy-demo
 
-At some point in time, Mac binary wheels may be available, but for now `pip`
+At some point in time, Mac binary wheels may be available, but for now ``pip``
 will attempt to build from source.
 
 Currently wheels support only Python 3.6-3.8, but Python 3.9 wheels will be
