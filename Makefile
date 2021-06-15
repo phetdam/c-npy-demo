@@ -43,9 +43,8 @@ RUNNER_FLAGS   =
 dummy:
 	@echo "Please specify a target to build."
 
-# removes emacs autosave files and local build, dist, egg-info, test directories
+# removes local build, dist, egg-info directories
 clean:
-	@rm -vf *~
 	@rm -vrf build
 	@rm -vrf $(pkg_name).egg-info
 	@rm -vrf dist
