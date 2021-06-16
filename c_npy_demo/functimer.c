@@ -1217,8 +1217,7 @@ PyObject *functimer_timeit_enh(
   // if NULL, only need to Py_DECREF new_args, as func, func_args, func_kwargs
   // had references stolen by new_args
   if (new_kwargs == NULL) {
-    Py_DECREF(new_args);
-    return NULL;
+    goto except_new_args;
   }
   // if timer is not NULL, add timer to new_kwargs (borrow ref)
   if (timer != NULL) {
@@ -1233,19 +1232,14 @@ PyObject *functimer_timeit_enh(
     number_ = functimer_autorange(self, new_args, new_kwargs);
     // on error, need to Py_DECREF new_args, new_kwargs (new refs)
     if (number_ == NULL) {
-      Py_DECREF(new_args);
-      Py_DECREF(new_kwargs);
-      return NULL;
+      goto except_new_kwargs;
     }
     // attempt to convert number_ into Py_ssize_t
     number = PyLong_AsSsize_t(number_);
     // if number == -1, error (don't even need to check PyErr_Occurred). then
     // Py_DECREF new_args, new_kwargs, number_ (also new ref)
     if (number == -1) {
-      Py_DECREF(new_args);
-      Py_DECREF(new_kwargs);
-      Py_DECREF(number_);
-      return NULL;
+      goto except_number_;
     }
   }
   // if number_ is NULL, it wasn't initialized in if statement, so initialize
@@ -1253,56 +1247,36 @@ PyObject *functimer_timeit_enh(
     number_ = PyLong_FromSsize_t(number);
     // Py_DECREF new_args, new_kwargs on error
     if (number_ == NULL) {
-      Py_DECREF(new_args);
-      Py_DECREF(new_kwargs);
-      return NULL;
+      goto except_new_args;
     }
   }
   // add number_ to new_kwargs. Py_DECREF new_args, new_kwargs, number_ if err
   if (PyDict_SetItemString(new_kwargs, "number", number_) < 0) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    return NULL;
+    goto except_number_;
   }
   // repeat as a PyLongObject * to be passed to new_kwargs
   PyObject *repeat_ = PyLong_FromSsize_t(repeat);
   // on error, Py_DECREF new_args, new_kwargs, number_
   if (repeat_ == NULL) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    return NULL;
+    goto except_number_;
   }
   // add repeat_ to new_kwargs, Py_DECREF on error (include repeat_)
   if (PyDict_SetItemString(new_kwargs, "repeat", repeat_) < 0) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    Py_DECREF(repeat_);
-    return NULL;
+    goto except_repeat_;
   }
   // call functimer_repeat with new_args, new_kwargs (borrowed refs) and get
   // times_list, the list of times in seconds for each of the repeat trials
   PyObject *times_list = functimer_repeat(self, new_args, new_kwargs);
   // if NULL, exception was set, so Py_DECREF as needed
   if (times_list == NULL) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    Py_DECREF(repeat_);
-    return NULL;
+    goto except_repeat_;
   }
   // create tuple out of times_list and Py_DECREF times_list; no longer needed
   PyObject *times_tuple = PySequence_Tuple(times_list);
   Py_DECREF(times_list);
   // Py_DECREF as needed if error
   if (times_tuple == NULL) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    Py_DECREF(repeat_);
-    return NULL;
+    goto except_repeat_;
   }
   // best time (for now, in seconds, as double)
   double best = DBL_MAX;
@@ -1313,24 +1287,14 @@ PyObject *functimer_timeit_enh(
     PyObject *time_i_ = PyNumber_Float(PyTuple_GET_ITEM(times_tuple, i));
     // if conversion to float fails, Py_DECREF as needed (include times_tuple)
     if (time_i_ == NULL) {
-      Py_DECREF(new_args);
-      Py_DECREF(new_kwargs);
-      Py_DECREF(number_);
-      Py_DECREF(repeat_);
-      Py_DECREF(times_tuple);
-      return NULL;
+      goto except_times_tuple;
     }
     // convert time_i_ to double and Py_DECREF (no longer needed)
     double time_i = PyFloat_AsDouble(time_i_);
     Py_DECREF(time_i_);
     // if error occurred, Py_DECREF
     if (PyErr_Occurred()) {
-      Py_DECREF(new_args);
-      Py_DECREF(new_kwargs);
-      Py_DECREF(number_);
-      Py_DECREF(repeat_);
-      Py_DECREF(times_tuple);
-      return NULL;
+      goto except_times_tuple;
     }
     // update best based on the value of time_i
     best = (time_i < best) ? time_i : best;
@@ -1352,35 +1316,17 @@ PyObject *functimer_timeit_enh(
    */
   PyObject *best_ = PyFloat_FromDouble(best);
   if (best_ == NULL) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    Py_DECREF(repeat_);
-    Py_DECREF(times_tuple);
-    return NULL;
+    goto except_times_tuple;
   }
   // create Python string from unit, Py_DECREF on error (include best_)
   PyObject *unit_ = PyUnicode_FromString(unit);
   if (unit_ == NULL) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    Py_DECREF(repeat_);
-    Py_DECREF(times_tuple);
-    Py_DECREF(best_);
-    return NULL;
+    goto except_best_;
   }
   // create Python int from precision, Py_DECREF on error (include unit_)
   PyObject *precision_ = PyLong_FromLong(precision);
   if (precision_ == NULL) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    Py_DECREF(repeat_);
-    Py_DECREF(times_tuple);
-    Py_DECREF(best_);
-    Py_DECREF(unit_);
-    return NULL;
+    goto except_unit_;
   }
   // create new tuple of arguments to be passed to TimeitResult.__new__. note
   // that since we use PyTuple_Pack, we still need to Py_DECREF on error.
@@ -1389,15 +1335,7 @@ PyObject *functimer_timeit_enh(
     6, best_, unit_, number_, repeat_, times_tuple, precision_
   );
   if (res_args == NULL) {
-    Py_DECREF(new_args);
-    Py_DECREF(new_kwargs);
-    Py_DECREF(number_);
-    Py_DECREF(repeat_);
-    Py_DECREF(times_tuple);
-    Py_DECREF(best_);
-    Py_DECREF(unit_);
-    Py_DECREF(precision_);
-    return NULL;
+    goto except_precision_;
   }
   /**
    * no Py_[X]DECREF of func, func_args, func_kwargs since refs were stolen.
@@ -1424,6 +1362,24 @@ PyObject *functimer_timeit_enh(
   }
   // return new reference
   return tir;
+// clean up in order from last to first allocated on exception
+except_precision_:
+  Py_DECREF(precision_);
+except_unit_:
+  Py_DECREF(unit_);
+except_best_:
+  Py_DECREF(best_);
+except_times_tuple:
+  Py_DECREF(times_tuple);
+except_repeat_:
+  Py_DECREF(repeat_);
+except_number_:
+  Py_DECREF(number_);
+except_new_kwargs:
+  Py_DECREF(new_kwargs);
+except_new_args:
+  Py_DECREF(new_args);
+  return NULL;
 }
 
 // static array of module methods
