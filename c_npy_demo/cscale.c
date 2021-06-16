@@ -20,12 +20,6 @@
   NPY_FAIL) { PyErr_WarnEx(PyExc_RuntimeWarning, "unable to deallocate " \
   "iterator of " #ar, 1); }
 
-// module name and docstring
-#define MODULE_NAME "cscale"
-PyDoc_STRVAR(
-  module_doc, "The C implementation of :func:`c_npy_demo.pyscale.stdscale`."
-);
-
 /**
  * docstring for cscale.stdscale. for the function signature to be correctly
  * parse and show up in Python, we include it in the docstring and follow it
@@ -55,130 +49,68 @@ static char *stdscale_argnames[] = {"ar", "ddof", NULL};
 static PyObject *
 cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
   // numpy ndarray and delta degrees of freedom
-  PyArrayObject *ar;
+  PyArrayObject *ar = NULL;
   int ddof = 0;  
   // check args and kwargs. | indicates that all args after it are optional.
   // exception is set on error automatically.
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O!|i", stdscale_argnames, &PyArray_Type, &ar, &ddof
+      args, kwargs, "O&|i", stdscale_argnames,
+      &PyArray_Converter, (void *) &ar, &ddof
     )
   ) {
-    return NULL;
+    goto except;
   }
   // check that ar is of the correct types
   if (!PyArray_ISINTEGER(ar) && !PyArray_ISFLOAT(ar)) {
     PyErr_SetString(PyExc_TypeError, "ar must have dtype int or float");
-    return NULL;
+    goto except;
   }
   // check that ddof is nonnegative
   if (ddof < 0) {
     PyErr_SetString(PyExc_ValueError, "ddof must be a nonnegative int");
-    return NULL;
+    goto except;
   }
   // get total number of elements in the array
-  npy_intp ar_size = PyArray_Size(ar);
-  // if there aren't any elements, raise runtime warning and return NaN
+  npy_intp ar_size = PyArray_SIZE(ar);
+  // if no elements, raise runtime warning and return ar (new ref)
   if (ar_size == 0) {
     PyErr_WarnEx(PyExc_RuntimeWarning, "mean of empty array", 1);
-    return PyFloat_FromDouble(NPY_NAN);
+    PyErr_WarnEx(PyExc_RuntimeWarning, "division by 0", 1);
+    return (PyObject *) ar;
   }
-  /**
-   * allocate output array onto ar. use C contiguous order, float64 (double)
-   * type, aligned memory, and writeable array. has same elements as original.
-   * 
-   * NPY_ARRAY_CARRAY = NPY_ARRAY_C_CONTINUOUS | NPY_ARRAY_BEHAVED
-   * NPY_ARRAY_BEHAVED = NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE
-   * 
-   * don't need to Py_INCREF the original ar.
-   */
-  ar = (PyArrayObject *) PyArray_FromArray(
-    ar, PyArray_DescrFromType(NPY_DOUBLE), NPY_ARRAY_CARRAY
+  // try to convert ar into double writeable C-contiguous array. NULL on error
+  PyArrayObject *ar_new = (PyArrayObject *) PyArray_FROM_OTF(
+    (PyObject *) ar, NPY_DOUBLE, NPY_ARRAY_CARRAY
   );
-  // if allocation fails, raise exception
-  if (ar == NULL) {
-    PyErr_SetString(
-      PyExc_RuntimeError, "unable to allocate new result array with same shape"
-    );
-    return NULL;
+  if (ar_new == NULL) {
+    goto except;
   }
-  // get typenum of ar
-  int typenum = PyArray_TYPE(ar);
-  // iterator, function to move to next inner loop, data pointer
-  NpyIter *iter;
-  NpyIter_IterNextFunc *iternext;
-  char **data_ptr;
-  /**
-   * get new iterator.
-   * 
-   * NPY_ITER_READWRITE - read and write to array
-   * NPY_ITER_C_INDEX - track raveled flat C index
-   * NPY_CORDER - interpret array in C order (it was created in C order)
-   * NPY_NO_CASTING - don't do any data type casts
-   * 
-   * technically specifying as a flag NPY_ITER_EXTERNAL_LOOP is supposed to be
-   * more efficient but for simplicity purposes, we exclude it. that means that
-   * *((double *) data_ptr[i]) is the current value for the ith array.
-   */
-  PyArray_Descr *dtype = PyArray_DescrFromType(typenum);
-  iter = NpyIter_New(
-    ar, NPY_ITER_READWRITE | NPY_ITER_C_INDEX, NPY_CORDER, NPY_NO_CASTING, dtype
-  );
-  // NpyIter_New doesn't steal a reference to dtype so we need to Py_DECREF
-  Py_DECREF(dtype);
-  // if iter is NULL, raise exception and Py_DECREF [new] ar
-  if (iter == NULL) {
-    PyErr_SetString(PyExc_RuntimeError, "unable to get iterator for ar");
-    Py_DECREF(ar);
-    return NULL;
-  }
-  // get NpyIter_IterNextFunc pointer for checking if we can still iterate
-  iternext = NpyIter_GetIterNext(iter, NULL);
-  // if iternext is NULL, raise exception, deallocate iter, Py_DECREF ar
-  if (iternext == NULL) {
-    PyErr_SetString(
-      PyExc_RuntimeError, "unable to get iternext from ar iterator"
-    );
-    // macro deallocating NpyIter iter of PyArrayObject ar with
-    // NpyIter_Deallocate that raises a RuntimeWarning if deallocation fails
-    NpyIter_DeallocAndWarn(iter, ar);    // don't actually need semicolon
-    Py_DECREF(ar);
-    return NULL;
-  }
-  // get pointer to data array. if we had multi-iterator, each ith element is
-  // char * pointing to current element of the ith array.
-  data_ptr = NpyIter_GetDataPtrArray(iter);
-  // mean, standard deviation of flattened ar
+  // else if successful, we can Py_DECREF original ar and swap pointers
+  Py_DECREF(ar);
+  ar = ar_new;
+  // since array is type double, we can operate directly on the data.
+  double *ar_data = PyArray_DATA(ar);
+  // compute mean, standard deviation of data (naively)
   double ar_mean, ar_std;
   ar_mean = ar_std = 0;
-  // iterate through the elements
-  do {
-    // since there is only one array (not multi-iterator), double-dereference.
-    // need to cast to double for correct type interpretation.
-    double cur_val = *((double *) *data_ptr);
-    // use ar_mean as sum, use ar_std as squared sum. update
-    ar_mean = ar_mean + cur_val;
-    ar_std = ar_std + cur_val * cur_val;
-  } while (iternext(iter));
-  // compute mean and std dev. std dev computed as sqrt(E[X^2] - E[X]^2).
-  ar_mean = ar_mean / ar_size;
-  ar_std = sqrt(ar_std / ar_size - ar_mean * ar_mean);
-  // reset the state of the iterator. if it fails, we need to raise exception,
-  // deallocate iter with NpyIter_Deallocate (warns), and Py_DECREF ar
-  if (NpyIter_Reset(iter, NULL) == NPY_FAIL) {
-    PyErr_SetString(PyExc_RuntimeError, "failed to reset ar iterator state");
-    NpyIter_DeallocAndWarn(iter, ar);
-    Py_DECREF(ar);
+  for (npy_intp i = 0; i < ar_size; i++) {
+    // use ar_mean for sum of elements and ar_std for sum of squared elements
+    ar_mean = ar_mean + ar_data[i];
+    ar_std = ar_std + ar_data[i] * ar_data[i];
   }
-  // iterate through elements, centering and scaling
-  do {
-    double cur_val = *((double *) *data_ptr);
-    *((double *) *data_ptr) = (cur_val - ar_mean) / ar_std;
-  } while (iternext(iter));
-  // done with iterator, so deallocate it. raise warning if failed
-  NpyIter_DeallocAndWarn(iter, ar);
-  // return centered and scaled out_ar
+  // compute mean and standard deviation
+  ar_mean = ar_mean / ar_size;
+  ar_std = sqrt(ar_std / ar_size - (ar_mean * ar_mean));
+  // loop through elements of array again, centering and scaling them
+  for (npy_intp i = 0; i < ar_size; i++) {
+    ar_data[i] = (ar_data[i] - ar_mean) / ar_std;
+  }
   return (PyObject *) ar;
+// clean up and return NULL on exceptions
+except:
+  Py_XDECREF(ar);
+  return NULL;
 }
 
 // static array of module methods
@@ -198,6 +130,9 @@ static PyMethodDef cscale_methods[] = {
   {NULL, NULL, 0, NULL}
 };
 
+PyDoc_STRVAR(
+  module_doc, "The C implementation of :func:`c_npy_demo.pyscale.stdscale`."
+);
 // module definition struct
 static struct PyModuleDef cscale_def = {
   PyModuleDef_HEAD_INIT,
@@ -205,7 +140,7 @@ static struct PyModuleDef cscale_def = {
    * module name, module docstring, per-interpreter module state (-1 required
    * if state is maintained through globals), static pointer to methods
    */
-  MODULE_NAME,
+  "cscale",
   module_doc,
   -1,
   cscale_methods

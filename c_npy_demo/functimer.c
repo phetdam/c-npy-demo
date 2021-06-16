@@ -266,8 +266,7 @@ TimeitResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
     )
   ) {
     self->times = NULL;
-    Py_DECREF(self);
-    return NULL;
+    goto except;
   }
   // increase reference count to times since it is borrowed
   Py_INCREF(self->times);
@@ -280,8 +279,7 @@ TimeitResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
     PyErr_SetString(
       PyExc_ValueError, "unit must be one of [" TimeitResult_UNITS_STR "]"
     );
-    Py_DECREF(self);
-    return NULL;
+    goto except;
   }
   /**
    * check that number, precision, repeat are positive. we don't check if best
@@ -290,18 +288,15 @@ TimeitResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
    */
   if (self->number < 1) {
     PyErr_SetString(PyExc_ValueError, "number must be positive");
-    Py_DECREF(self);
-    return NULL;
+    goto except;
   }
   if (self->repeat < 1) {
     PyErr_SetString(PyExc_ValueError, "repeat must be positive");
-    Py_DECREF(self);
-    return NULL;
+    goto except;
   }
   if (self->precision < 1) {
     PyErr_SetString(PyExc_ValueError, "precision must be positive");
-    Py_DECREF(self);
-    return NULL;
+    goto except;
   }
   // cap precison at TimeitResult_MAX_PRECISION. no human needs more precision
   // than the value given by TimeitResult_MAX_PRECISION.
@@ -309,8 +304,7 @@ TimeitResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
     PyErr_Format(
       PyExc_ValueError, "precision is capped at %d", TimeitResult_MAX_PRECISION
     );
-    Py_DECREF(self);
-    return NULL;
+    goto except;
   }
   /**
    * len(times) must equal repeat. if not, set error and Py_DECREF self. we can
@@ -319,8 +313,7 @@ TimeitResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
    */
   if (PyTuple_GET_SIZE(self->times) != self->repeat) {
     PyErr_SetString(PyExc_ValueError, "len(times) must equal repeat");
-    Py_DECREF(self);
-    return NULL;
+    goto except;
   }
   // check that all the elements of self->times are int or float
   for (Py_ssize_t i = 0; i < self->repeat; i++) {
@@ -330,12 +323,15 @@ TimeitResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
     // if neither int nor float, set error indicator, Py_DECREF self
     if (!PyLong_CheckExact(time_i) && !PyFloat_CheckExact(time_i)) {
       PyErr_SetString(PyExc_TypeError, "times must contain only int or float");
-      Py_DECREF(self);
-      return NULL;
+      goto except;
     }
   }
   // all checks are complete so return self
   return (PyObject *) self;
+// clean up self and return NULL on exception
+except:
+  Py_DECREF(self);
+  return NULL;
 }
 
 /**
@@ -371,7 +367,7 @@ TimeitResult_getloop_times(TimeitResult *self, void *closure) {
         time_i / ((double) self->number)
       );
       if (loop_time_i == NULL) {
-        Py_DECREF(self->times);
+        Py_DECREF(self->loop_times);
         return NULL;
       }
       // add loop_time_i to self->loop_times. no error checking needed here.
@@ -713,16 +709,13 @@ functimer_timeit_once(PyObject *self, PyObject *args, PyObject *kwargs) {
     time_module = PyImport_ImportModule("time");
     // if module failed to import, exception is set. Py_DECREF func_args
     if (time_module == NULL) {
-      Py_DECREF(func_args);
-      return NULL;
+      goto except_func_args;
     }
     // try to get perf_counter from time
     time_perf_counter = PyObject_GetAttrString(time_module, "perf_counter");
     // if NULL, exception set. Py_DECREF time_module, func_args
     if (time_perf_counter == NULL) {
-      Py_DECREF(time_module);
-      Py_DECREF(func_args);
-      return NULL;
+      goto except_time_module;
     }
     // set timer to time.perf_counter
     timer = time_perf_counter;
@@ -733,30 +726,20 @@ functimer_timeit_once(PyObject *self, PyObject *args, PyObject *kwargs) {
   start_time = PyObject_CallObject(timer, NULL);
   // if NULL, exception was raised. Py_DECREF and Py_XDECREF as needed
   if (start_time == NULL) {
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    return NULL;
+    goto except_time_perf_counter;
   }
   // if not numeric, raised exception. Py_DECREF and Py_XDECREF as needed. note
   // we also need to Py_DECREF start_time since it's a new reference
   if (!PyNumber_Check(start_time)) {
     PyErr_SetString(PyExc_TypeError, "timer must return a numeric value");
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    Py_DECREF(start_time);
-    return NULL;
+    goto except_start_time;
   }
   // get new start time; time was lost checking if start_time is valid
   Py_DECREF(start_time);
   start_time = PyObject_CallObject(timer, NULL);
   // if NULL, exception was raised. Py_DECREF and Py_XDECREF as needed
   if (start_time == NULL) {
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    return NULL;
+    goto except_time_perf_counter;
   }
   PyObject *func_res;
   // call function number times with func_args and func_kwargs
@@ -766,44 +749,26 @@ functimer_timeit_once(PyObject *self, PyObject *args, PyObject *kwargs) {
     Py_XDECREF(func_res);
     // if NULL is returned, an exception has been raised. Py_DECREF, Py_XDECREF
     if (func_res == NULL) {
-      Py_XDECREF(time_module);
-      Py_XDECREF(time_perf_counter);
-      Py_DECREF(func_args);
-      Py_DECREF(start_time);
-      return NULL;
+      goto except_start_time;
     }
   }
   // get ending time from timer function
   end_time = PyObject_CallObject(timer, NULL);
   // if NULL, exception raised; Py_DECREF and Py_XDECREF as needed
   if (end_time == NULL) {
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    Py_DECREF(start_time);
-    return NULL;
+    goto except_start_time;
   }
   // if not numeric, raised exception. Py_DECREF and Py_XDECREF as needed; also
   // need to Py_DECREF end_time since we got a new reference for it
   if (!PyNumber_Check(end_time)) {
     PyErr_SetString(PyExc_TypeError, "timer must return a numeric value");
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    Py_DECREF(start_time);
-    Py_DECREF(end_time);
-    return NULL;
+    goto except_end_time;
   }
   // compute time difference
   PyObject *timedelta = PyNumber_Subtract(end_time, start_time);
   // if NULL, failure. set message for exception, Py_DECREF and Py_XDECREF
   if (timedelta == NULL) {
-    Py_XDECREF(time_module);
-    Py_XDECREF(time_perf_counter);
-    Py_DECREF(func_args);
-    Py_DECREF(start_time);
-    Py_DECREF(end_time);
-    return NULL;
+    goto except_end_time;
   }
   // decrement refcounts for time_module, time_perf_counter (may be NULL)
   Py_XDECREF(time_module);
@@ -814,6 +779,22 @@ functimer_timeit_once(PyObject *self, PyObject *args, PyObject *kwargs) {
   Py_DECREF(end_time);
   // return the time delta
   return timedelta;
+// clean up end_time reference on exception
+except_end_time:
+  Py_DECREF(end_time);
+// clean up start_time reference on exception
+except_start_time:
+  Py_DECREF(start_time);
+// clean up time perf_counter reference on exception
+except_time_perf_counter:
+  Py_XDECREF(time_perf_counter);
+// clean up time module on exception
+except_time_module:
+  Py_XDECREF(time_module);
+// clean up func_args on exception
+except_func_args:
+  Py_DECREF(func_args);
+  return NULL;
 }
 
 PyDoc_STRVAR(
@@ -893,26 +874,24 @@ functimer_autorange(PyObject *self, PyObject *args, PyObject *kwargs) {
       return NULL;
     }
   }
+  // PyLongObject * that will be used to hold the loop count in Python
+  PyObject *number_;
   // keep going as long as number < PY_SSIZE_T_MAX / 10
   while (true) {
     // for each of the bases
     for (int i = 0; i < 3; i++) {
       // set number = bases[i] * multipler
       number = bases[i] * multipler;
-      // create new PyLongObject from number
-      PyObject *number_ = PyLong_FromSsize_t(number);
-      // if NULL, return NULL, but also remember to Py_DECREF kwargs
+      // create new PyLongObject from number. NULL on error
+      number_ = PyLong_FromSsize_t(number);
       if (number_ == NULL) {
-        Py_DECREF(kwargs);
-        return NULL;
+        goto except_kwargs;
       }
       // set time_total to 0 to initialize
       time_total = 0;
       // add number_ to kwargs. Py_DECREF kwargs, number_ on failure
       if (PyDict_SetItemString(kwargs, "number", number_) < 0) {
-        Py_DECREF(kwargs);
-        Py_DECREF(number_);
-        return NULL;
+        goto except_number_;
       }
       // save the returned time from functimer_timeit_once. the self, args,
       // kwargs refs are all borrowed so no need to Py_INCREF them.
@@ -920,9 +899,7 @@ functimer_autorange(PyObject *self, PyObject *args, PyObject *kwargs) {
       // if NULL, return NULL. let functimer_timeit set the error indicator.
       // Py_DECREF kwargs and number_ (they are new references)
       if (timeit_time == NULL) {
-        Py_DECREF(kwargs);
-        Py_DECREF(number_);
-        return NULL;
+        goto except_number_;
       }
       // convert timeit_time to Python float and Py_DECREF timeit_time_temp
       PyObject *timeit_time_temp = timeit_time;
@@ -930,9 +907,7 @@ functimer_autorange(PyObject *self, PyObject *args, PyObject *kwargs) {
       Py_DECREF(timeit_time_temp);
       // on error, exit. Py_DECREF kwargs and number_
       if (timeit_time == NULL) {
-        Py_DECREF(kwargs);
-        Py_DECREF(number_);
-        return NULL;
+        goto except_number_;
       }
       // attempt to get time_total from timeit_time (Py_DECREF'd when done)
       time_total = PyFloat_AsDouble(timeit_time);
@@ -941,9 +916,7 @@ functimer_autorange(PyObject *self, PyObject *args, PyObject *kwargs) {
       PyObject *err_type = PyErr_Occurred();
       // if not NULL, then exit. error indicator already set. do Py_DECREFs
       if (err_type != NULL) {
-        Py_DECREF(kwargs);
-        Py_DECREF(number_);
-        return NULL;
+        goto except_number_;
       }
       // done with number_ so Py_DECREF it
       Py_DECREF(number_);
@@ -963,8 +936,7 @@ functimer_autorange(PyObject *self, PyObject *args, PyObject *kwargs) {
           "return value will exceed PY_SSIZE_T_MAX / 10", 1
         ) < 0
       ) {
-        Py_DECREF(kwargs);
-        return NULL;
+        goto except_kwargs;
       }
       break;
     }
@@ -975,6 +947,13 @@ functimer_autorange(PyObject *self, PyObject *args, PyObject *kwargs) {
   Py_DECREF(kwargs);
   // return Python int from number. NULL returned on failure
   return PyLong_FromSsize_t(number);
+// clean up number_ on exception
+except_number_:
+  Py_DECREF(number_);
+// clean up kwargs on exception
+except_kwargs:
+  Py_DECREF(kwargs);
+  return NULL;
 }
 
 PyDoc_STRVAR(

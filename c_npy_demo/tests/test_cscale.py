@@ -24,12 +24,6 @@ def test_cscale_missing_args(ddof_kwarg):
         cscale.stdscale(**ddof_kwarg)
 
 
-def test_cscale_ar_ndarray():
-    "Test :func:`c_npy_demo.cscale.stdscale` raise when ``ar`` is not array."
-    with pytest.raises(TypeError):
-        cscale.stdscale([[2, 4], [1, 2]])
-
-
 def test_cscale_ar_ndarray_type(test_mat):
     """Test :func:`c_npy_demo.cscale.stdscale` raise when ``ar`` is not numeric.
 
