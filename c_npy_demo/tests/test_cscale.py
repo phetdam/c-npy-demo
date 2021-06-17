@@ -12,7 +12,7 @@ def test_mat():
     "Test array we use for unit tests."
     return np.array([[1, 2], [3, 4], [5, 6]])
 
-
+@pytest.mark.skip(reason="hunt for segfault")
 @pytest.mark.parametrize("ddof_kwarg", [{}, {"ddof": 1}])
 def test_cscale_missing_args(ddof_kwarg):
     """Test :func:`c_npy_demo.cscale.stdscale` raise when missing ``ar``.
@@ -24,6 +24,7 @@ def test_cscale_missing_args(ddof_kwarg):
         cscale.stdscale(**ddof_kwarg)
 
 
+@pytest.mark.skip(reason="hunt for segfault")
 def test_cscale_ar_ndarray_type(test_mat):
     """Test :func:`c_npy_demo.cscale.stdscale` raise when ``ar`` is not numeric.
 
@@ -34,6 +35,7 @@ def test_cscale_ar_ndarray_type(test_mat):
         cscale.stdscale(test_mat.astype(str))
 
 
+@pytest.mark.skip(reason="hunt for segfault")
 def test_cscale_ddof(test_mat):
     """Test :func:`c_npy_demo.cscale.stdscale` raise when ``ddof`` is negative.
 
@@ -44,12 +46,14 @@ def test_cscale_ddof(test_mat):
         cscale.stdscale(test_mat, ddof=-1)
 
 
+@pytest.mark.skip(reason="hunt for segfault")
 def test_cscale_empty():
     "Test :func:`c_npy_demo.cscale.stdscale` warn when ``ar`` is empty."
     with pytest.warns(RuntimeWarning, match="mean of empty array"):
         cscale.stdscale(np.array([]))
 
 
+@pytest.mark.skip(reason="hunt for segfault")
 @pytest.mark.parametrize("ddof", [0, 1, 3, 5])
 def test_cscale_allclose(test_mat, ddof):
     """Test :func:`c_npy_demo.cscale.stdscale` use of ``ddof``.
