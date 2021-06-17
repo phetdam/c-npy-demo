@@ -87,7 +87,7 @@ def test_timeit_once_memleak(func_and_args):
     snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
     # compare second to first snapshot and print differences (top 10)
     diffs = snap_2.compare_to(snap_1, "lineno")
-    print(diffs[0])
+    print(diffs)
 
 
 def test_autorange_sanity(func_and_args):
