@@ -90,7 +90,7 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
   Py_DECREF(ar);
   ar = ar_new;
   // since array is type double, we can operate directly on the data.
-  double *ar_data = PyArray_DATA(ar);
+  double *ar_data = (double *) PyArray_DATA(ar);
   // compute mean, standard deviation of data (naively)
   double ar_mean, ar_std;
   ar_mean = ar_std = 0;
@@ -136,10 +136,8 @@ PyDoc_STRVAR(
 // module definition struct
 static struct PyModuleDef cscale_def = {
   PyModuleDef_HEAD_INIT,
-  /**
-   * module name, module docstring, per-interpreter module state (-1 required
-   * if state is maintained through globals), static pointer to methods
-   */
+  // module name, module docstring, per-interpreter module state (-1 required
+  // if state is maintained through globals), static pointer to methods
   "cscale",
   module_doc,
   -1,

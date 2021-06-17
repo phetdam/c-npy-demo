@@ -142,7 +142,7 @@ TimeitResult_autounit(double const best, double * const conv_p) {
   /**
    * loop through TimeitResult_unit_bases until we reach NULL or a unit such
    * that multiplying by the corresponding base b_i results in fabs(b_i * best)
-   * to be less than 1. the final index is then decremented.
+   * to be less than 1. the final index is then decremented if i > 0.
    */
   while (TimeitResult_unit_bases[i] != 0) {
     if (fabs(TimeitResult_unit_bases[i] * best) < 1) {
@@ -150,7 +150,9 @@ TimeitResult_autounit(double const best, double * const conv_p) {
     }
     i++;
   }
-  i--;
+  if (i > 0) {
+    i--;
+  }
   // if conv_p is not NULL, write the converted time to that location
   if (conv_p != NULL) {
     *conv_p = TimeitResult_unit_bases[i] * best;
