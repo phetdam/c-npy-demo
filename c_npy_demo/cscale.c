@@ -15,11 +15,6 @@
 #include "numpy/arrayobject.h"
 #include "numpy/npy_math.h"
 
-// warns if NpyIter_Deallocate fails on PyArrayObject ar's NpyIter iter
-#define NpyIter_DeallocAndWarn(iter, ar) if (NpyIter_Deallocate(iter) == \
-  NPY_FAIL) { PyErr_WarnEx(PyExc_RuntimeWarning, "unable to deallocate " \
-  "iterator of " #ar, 1); }
-
 /**
  * docstring for cscale.stdscale. for the function signature to be correctly
  * parse and show up in Python, we include it in the docstring and follow it
