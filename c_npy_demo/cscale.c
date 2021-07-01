@@ -43,14 +43,17 @@ static char *stdscale_argnames[] = {"ar", "ddof", NULL};
  */
 static PyObject *
 cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
-  // numpy ndarray and delta degrees of freedom
-  PyArrayObject *ar = NULL;
-  int ddof = 0;  
+  // numpy ndarray, temp ndarray, delta degrees of freedom, size of ar
+  PyArrayObject *ar, *ar_new;
+  // on failed PyArg_ParseTupleAndKeyword, ar may not be modified
+  ar = NULL;
+  npy_intp ddof, ar_size;  
+  ddof = 0;
   // check args and kwargs. | indicates that all args after it are optional.
   // exception is set on error automatically.
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O&|i", stdscale_argnames,
+      args, kwargs, "O&|n", stdscale_argnames,
       &PyArray_Converter, (void *) &ar, &ddof
     )
   ) {
@@ -67,7 +70,7 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
     goto except;
   }
   // get total number of elements in the array
-  npy_intp ar_size = PyArray_SIZE(ar);
+  ar_size = PyArray_SIZE(ar);
   // if no elements, raise runtime warning and return ar (new ref)
   if (ar_size == 0) {
     PyErr_WarnEx(PyExc_RuntimeWarning, "mean of empty array", 1);
@@ -75,7 +78,7 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
     return (PyObject *) ar;
   }
   // try to convert ar into double writeable C-contiguous array. NULL on error
-  PyArrayObject *ar_new = (PyArrayObject *) PyArray_FROM_OTF(
+  ar_new = (PyArrayObject *) PyArray_FROM_OTF(
     (PyObject *) ar, NPY_DOUBLE, NPY_ARRAY_CARRAY
   );
   if (ar_new == NULL) {
@@ -91,12 +94,16 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
   ar_mean = ar_std = 0;
   for (npy_intp i = 0; i < ar_size; i++) {
     // use ar_mean for sum of elements and ar_std for sum of squared elements
-    ar_mean = ar_mean + ar_data[i];
-    ar_std = ar_std + ar_data[i] * ar_data[i];
+    ar_mean += ar_data[i];
+    ar_std += ar_data[i] * ar_data[i];
   }
-  // compute mean and standard deviation
+  // compute mean and standard deviation, with ddof built in
   ar_mean = ar_mean / ar_size;
-  ar_std = sqrt(ar_std / ar_size - (ar_mean * ar_mean));
+  // more numerically stable than computing the MLE variance and then
+  // multiplying  by ar / (ar_size - ddof), which is mathematically the same
+  ar_std = sqrt(
+    (ar_std - ar_size * ar_mean * ar_mean) / (ar_size - ddof)
+  );
   // loop through elements of array again, centering and scaling them
   for (npy_intp i = 0; i < ar_size; i++) {
     ar_data[i] = (ar_data[i] - ar_mean) / ar_std;
