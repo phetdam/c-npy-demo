@@ -8,6 +8,8 @@ import tracemalloc
 from .. import functimer
 from ..functimer import TimeitResult
 
+pytestmark = pytest.mark.skip(reason="temporarily disable for segfault hunt")
+
 # start tracemalloc so we can take memory snapshots
 tracemalloc.start()
 
