@@ -23,7 +23,6 @@ def test_cscale_missing_args(ddof_kwarg):
         cscale.stdscale(**ddof_kwarg)
 
 
-@pytest.mark.skip(reason="segfault hunt")
 def test_cscale_ar_ndarray_type(test_mat):
     """Test c_npy_demo.cscale.stdscale raise when ar is not numeric.
 

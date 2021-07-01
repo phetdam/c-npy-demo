@@ -140,10 +140,10 @@ static struct PyModuleDef cscale_def = {
   PyModuleDef_HEAD_INIT,
   // module name, module docstring, per-interpreter module state (-1 required
   // if state is maintained through globals), static pointer to methods
-  "cscale",
-  module_doc,
-  -1,
-  cscale_methods
+  .m_name = "cscale",
+  .m_doc = module_doc,
+  .m_size = -1,
+  .m_methods = cscale_methods
 };
 
 // module initialization function

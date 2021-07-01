@@ -1418,10 +1418,10 @@ static PyMethodDef functimer_methods[] = {
 // static module definition struct
 static struct PyModuleDef functimer_def = {
   PyModuleDef_HEAD_INIT,
-  MODULE_NAME,
-  module_doc,
-  -1,
-  functimer_methods
+  .m_name = MODULE_NAME,
+  .m_doc = module_doc,
+  .m_size = -1,
+  .m_methods = functimer_methods
 };
 
 // module initialization function
