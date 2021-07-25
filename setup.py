@@ -17,6 +17,7 @@ _SHORT_DESC = (
     "A tiny Python package showcasing speed differences between NumPy's "
     "Python and C APIs."
 )
+
 # extra compilation arguments for extension modules. C99+ required for gcc.
 if platform.system() == "Linux":
     _EXTRA_COMPILE_ARGS = ["-std=gnu11"]
