@@ -1,6 +1,6 @@
-.. README for c_npy_demo
+.. README for c-npy-demo
 
-c_npy_demo
+c-npy-demo
 ==========
 
 .. image:: https://img.shields.io/pypi/v/c-npy-demo
@@ -15,9 +15,9 @@ c_npy_demo
    :target: https://pypi.org/project/c-npy-demo/
    :alt: PyPI - Python Version
 
-.. image:: https://img.shields.io/github/workflow/status/phetdam/c_npy_demo/
+.. image:: https://img.shields.io/github/workflow/status/phetdam/c-npy-demo/
    build?logo=github
-   :target: https://github.com/phetdam/c_npy_demo/actions
+   :target: https://github.com/phetdam/c-npy-demo/actions
    :alt: GitHub Workflow Status
 
 *We should forget about small efficiencies, say about 97% of the time:
@@ -106,7 +106,7 @@ available soon.
 Package contents
 ----------------
 
-The ``c_npy_demo`` package contains a pure Python module and two C extension
+The ``c-npy-demo`` package contains a pure Python module and two C extension
 modules. The pure Python module is ``c_npy_demo.pyscale``, which contains one
 function that is two lines of ``numpy``\ -enabled Python code. It is the
 "benchmark" for the C extension module ``c_npy_demo.cscale`` as both modules

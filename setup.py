@@ -1,14 +1,22 @@
-# setup.py for building c_npy_demo package. since extension modules can't be
-# built without setup.py, we can't use the new PEP 517 format.
+"""setup.py for building c-npy-demo package.
+
+Extension modules require setup.py so we can't use PEP 517 format.
+
+.. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
+"""
 
 from numpy import get_include
 import platform
 from setuptools import Extension, setup
 
-from c_npy_demo import __version__
+from c_npy_demo import __package__, __version__
 
-# package name
-_PACKAGE_NAME = "c_npy_demo"
+# package name (underscores converted to dashes anyways in PyPI) + short desc
+_PACKAGE_NAME = "c-npy-demo"
+_SHORT_DESC = (
+    "A tiny Python package showcasing speed differences between NumPy's "
+    "Python and C APIs."
+)
 # extra compilation arguments for extension modules. C99+ required for gcc.
 if platform.system() == "Linux":
     _EXTRA_COMPILE_ARGS = ["-std=gnu11"]
@@ -17,12 +25,12 @@ else:
 
 
 def _get_ext_modules():
-    """Returns a list of :class:`~setuptools.Extension` modules to build.
+    """Returns a list of setuptools.Extension modules to build.
     
-    .. note:: The extensions must be true modules, i.e. define a ``PyInit_*``
+    .. note::
+
+       The extensions must be true modules, i.e. define a ``PyInit_*``
        function. Use alternate means to build foreign C code.
-    
-    :rtype: list
     """
     # use get_include to get numpy include directory + add -std=gnu11 so that
     # the extension will build on older distros with old gcc like 4.8.2
@@ -42,24 +50,20 @@ def _get_ext_modules():
 
 
 def _setup():
-    # short and long descriptions
-    short_desc = (
-        "A tiny Python package showcasing speed differences between NumPy's "
-        "Python and C APIs."
-    )
+    # get long description from README.rst
     with open("README.rst", "r") as rf:
         long_desc = rf.read()
     # perform setup
     setup(
         name=_PACKAGE_NAME,
         version=__version__,
-        description=short_desc,
+        description=_SHORT_DESC,
         long_description=long_desc,
         long_description_content_type="text/x-rst",
         author="Derek Huang",
         author_email="djh458@stern.nyu.edu",
         license="MIT",
-        url="https://github.com/phetdam/c_npy_demo",
+        url="https://github.com/phetdam/c-npy-demo",
         classifiers=[
             "License :: OSI Approved :: MIT License",
             "Operating System :: POSIX :: Linux",
@@ -68,18 +72,18 @@ def _setup():
             "Programming Language :: Python :: 3.8"
         ],
         project_urls={
-            "Source": "https://github.com/phetdam/c_npy_demo"
+            "Source": "https://github.com/phetdam/c-npy-demo"
         },
         python_requires=">=3.6",
-        packages=[_PACKAGE_NAME, _PACKAGE_NAME + ".tests"],
+        packages=[__package__, f"{__package__}.tests"],
         # benchmarking script
         entry_points={
             "console_scripts": [
-                _PACKAGE_NAME + ".bench = " + _PACKAGE_NAME + ".bench:main"
+                f"{__package__}.bench = {__package__}.bench:main"
             ]
         },
         install_requires=["numpy>=1.19"],
-        ext_package=_PACKAGE_NAME,
+        ext_package=__package__,
         ext_modules=_get_ext_modules()
     )
 

@@ -23,9 +23,9 @@ PyDoc_STRVAR(
   "executable string statements. This way, timings of several different\n"
   "callables avoid multiple setup statement calls, which is wasteful."
   "\n\n"
-  "Times obtained by default using :func:`time.perf_counter`."
+  "Times obtained by default using time.perf_counter. Functional API only."
   "\n\n"
-  "Functional API only."
+  ".. codeauthor:: Derek Huang <djh458@stern.nyu.edu>"
 );
 
 // definition for the TimeitResult struct. not subclassable.
@@ -530,7 +530,7 @@ static PyMemberDef TimeitResult_members[] = {
 // TimeitResult docstrings for cached properties
 PyDoc_STRVAR(
   functimer_timeitresult_getbrief_doc,
-  "A short string formatted similarly to that of :func:`timeit.main`."
+  "A short string formatted similarly to that of timeit.main."
   "\n\n"
   "For example, suppose that calling :func:`repr` on a :class:`TimeitResult`\n"
   "instance yields (manually wrapped for compactness)"
@@ -554,8 +554,8 @@ PyDoc_STRVAR(
   functimer_timeitresult_getloop_times_doc,
   "The unweighted average time taken per loop, per trial, in units of seconds."
   "\n\n"
-  "Like :attr:`~TimeitResult.brief`, this is a cached property computed on\n"
-  "the first access that yields new references on subsequent accesses."
+  "Like TimeitResult.brief, this is a cached property computed on the first\n"
+  "access and yields new references on subsequent accesses."
 );
 // getters for TimeitResult.brief and TimeitResult.loop_times
 static PyGetSetDef TimeitResult_getters[] = {
@@ -573,10 +573,10 @@ static PyGetSetDef TimeitResult_getters[] = {
 
 PyDoc_STRVAR(
   functimer_timeitresult_doc,
-  "An immutable type for holding timing results from :func:`timeit_enh`."
+  "An immutable type for holding timing results from functimer.timeit_enh."
   "\n\n"
-  "All attributes are read-only. :attr:`loop_times` and :attr:`brief` are\n"
-  "computed on demand when they are first accessed."
+  "All attributes are read-only. The loop_times and brief attributes are\n"
+  "cached properties computed on demand when they are first accessed."
 );
 // static PyTypeObject for the TimeitResult type. also conditionally compiled
 // since we need it to test TimeitResult_new in the test runner.

@@ -1,4 +1,4 @@
-__doc__ = """Unit tests for benchmarking script.
+"""Unit tests for benchmarking script.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """

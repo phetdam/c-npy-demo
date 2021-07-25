@@ -22,15 +22,23 @@
  */
 PyDoc_STRVAR(
   cscale_stdscale_doc,
-  "stdscale(ar, ddof=1)\n--\n\n"
-  "Centers and scales array to have zero mean and unit variance.\n\n"
-  ":param args: Arbitrary :class:`numpy.ndarray`\n"
-  ":type args: :class:`numpy.ndarray`\n"
-  ":param ddof: Delta degrees of freedom, i.e. so that the divisor used\n"
-  "    in standard deviation calculations is ``n_obs - ddof``.\n"
-  ":type ddof: int\n"
-  ":returns: Centered and scaled :class:`numpy.ndarray`\n"
-  ":rtype: :class:`numpy.ndarray`"
+  "stdscale(ar, ddof=1)"
+  "\n--\n\n"
+  "Centers and scales array to have zero mean and unit variance."
+  "\n\n"
+  "Parameters\n"
+  "----------\n"
+  "ar : numpy.ndarray\n"
+  "    Arbitrary numpy.ndarray that can be converted to NPY_DOUBLE type\n"
+  "ddof : int, default=0\n"
+  "    Delta degrees of freedom, i.e. so that the divisor used in standard\n"
+  "    deviation computation is ``n_obs - ddof``."
+  "\n\n"
+  "Returns\n"
+  "-------\n"
+  "numpy.ndarray"
+  "    A new numpy.ndarray centered and scaled with zero mean, unit variance,\n"
+  "    with type NPY_DOUBLE, flags NPY_ARRAY_CARRAY, same shape as ar."
 );
 // argument names for cscale_stdscale
 static char *stdscale_argnames[] = {"ar", "ddof", NULL};
@@ -43,31 +51,32 @@ static char *stdscale_argnames[] = {"ar", "ddof", NULL};
  */
 static PyObject *
 cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
-  // numpy ndarray, temp ndarray, delta degrees of freedom, size of ar
-  PyArrayObject *ar, *ar_new;
-  // on failed PyArg_ParseTupleAndKeyword, ar may not be modified
-  ar = NULL;
-  npy_intp ddof, ar_size;  
+  // numpy ndarray, delta degrees of freedom, size of ar
+  PyArrayObject *ar;
+  npy_intp ddof, ar_size;
+  // set default value of ddof, which like numpy.std is ddof=0
   ddof = 0;
   // check args and kwargs. | indicates that all args after it are optional.
   // exception is set on error automatically.
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O&|n", stdscale_argnames,
-      &PyArray_Converter, (void *) &ar, &ddof
+      args, kwargs, "O|n", stdscale_argnames, &ar, &ddof
     )
   ) {
-    goto except;
-  }
-  // check that ar is of the correct types
-  if (!PyArray_ISINTEGER(ar) && !PyArray_ISFLOAT(ar)) {
-    PyErr_SetString(PyExc_TypeError, "ar must have dtype int or float");
-    goto except;
+    return NULL;
   }
   // check that ddof is nonnegative
   if (ddof < 0) {
     PyErr_SetString(PyExc_ValueError, "ddof must be a nonnegative int");
-    goto except;
+    return NULL;
+  }
+  // try to convert ar into double writeable C-contiguous array. NULL on error.
+  // note that we will be returning a NEW array, so we ensure copy.
+  ar = (PyArrayObject *) PyArray_FROM_OTF(
+    (PyObject *) ar, NPY_DOUBLE, NPY_ARRAY_CARRAY | NPY_ARRAY_ENSURECOPY
+  );
+  if (ar == NULL) {
+    return NULL;
   }
   // get total number of elements in the array
   ar_size = PyArray_SIZE(ar);
@@ -77,16 +86,6 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyErr_WarnEx(PyExc_RuntimeWarning, "division by 0", 1);
     return (PyObject *) ar;
   }
-  // try to convert ar into double writeable C-contiguous array. NULL on error
-  ar_new = (PyArrayObject *) PyArray_FROM_OTF(
-    (PyObject *) ar, NPY_DOUBLE, NPY_ARRAY_CARRAY
-  );
-  if (ar_new == NULL) {
-    goto except;
-  }
-  // else if successful, we can Py_DECREF original ar and swap pointers
-  Py_DECREF(ar);
-  ar = ar_new;
   // since array is type double, we can operate directly on the data.
   double *ar_data = (double *) PyArray_DATA(ar);
   // compute mean, standard deviation of data (naively)
@@ -109,10 +108,6 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
     ar_data[i] = (ar_data[i] - ar_mean) / ar_std;
   }
   return (PyObject *) ar;
-// clean up and return NULL on exceptions
-except:
-  Py_XDECREF(ar);
-  return NULL;
 }
 
 // static array of module methods
@@ -133,7 +128,10 @@ static PyMethodDef cscale_methods[] = {
 };
 
 PyDoc_STRVAR(
-  module_doc, "The C implementation of :func:`c_npy_demo.pyscale.stdscale`."
+  module_doc,
+  "The C implementation of c_npy_demo.pyscale.stdscale."
+  "\n\n"
+  ".. codeauthor:: Derek Huang <djh458@stern.nyu.edu>"
 );
 // module definition struct
 static struct PyModuleDef cscale_def = {

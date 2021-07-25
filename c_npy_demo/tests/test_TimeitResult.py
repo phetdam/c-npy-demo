@@ -1,6 +1,8 @@
-__doc__ = """Unit tests for the :class:`c_npy_demo.functimer.TimeitResult`.
+"""Unit tests for the c_npy_demo.functimer.TimeitResult.
 
 Since this is a C extension type, it is especially tricky to debug.
+
+.. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
 
 import numpy as np

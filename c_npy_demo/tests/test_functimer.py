@@ -1,17 +1,14 @@
-__doc__ = "Unit tests for :mod:`c_npy_demo.functimer` functions."
+"""Unit tests for :mod:`c_npy_demo.functimer` functions.
+
+.. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
+"""
 
 import pytest
 import sys
-import tracemalloc
 
 # pylint: disable=relative-beyond-top-level,no-name-in-module
 from .. import functimer
 from ..functimer import TimeitResult
-
-pytestmark = pytest.mark.skip(reason="temporarily disable for segfault hunt")
-
-# start tracemalloc so we can take memory snapshots
-tracemalloc.start()
 
 
 @pytest.fixture(scope="module")
@@ -68,31 +65,6 @@ def test_timeit_once_timer(func_and_args):
         functimer.timeit_once(*func_and_args, timer=lambda: "cheese")
 
 
-def test_timeit_once_memleak(func_and_args):
-    """Check if :func:`~c_npy_demo.functimer.timeit_once` is leaking memory.
-
-    .. note::
-
-       Use of :mod:`tracemalloc` does not seem to be able to catch very small
-       memory leaks due to improper reference counting. It can, however, catch
-       allocation of new objects using the C API that leak their reference;
-       for example, a call made to ``PyTuple_New`` that leaks its reference.
-
-    :param func_and_args: ``pytest`` fixture.
-    :type func_and_args: tuple
-    """
-    # filter so that memory allocation tracing is limited to timeit_once call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno=86)]
-    # take snapshots before and after running timeit_once
-    snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    functimer.timeit_once(*func_and_args, number=1000)
-    snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    # compare second to first snapshot and print differences (top 10)
-    diffs = snap_2.compare_to(snap_1, "lineno")
-    #print(diffs[0])
-    print(diffs)
-
-
 def test_autorange_sanity(func_and_args):
     """Sanity checks for :func:`~c_npy_demo.functimer.autorange`.
 
@@ -111,23 +83,6 @@ def test_autorange_sanity(func_and_args):
     # timer must be callable (raised by timeit_once)
     with pytest.raises(TypeError):
         functimer.autorange(*func_and_args, timer=None)
-
-
-def test_autorange_memleak(func_and_args):
-    """Check if :func:`~c_npy_demo.functimer.autorange` is leaking memory.
-
-    :param func_and_args: ``pytest`` fixture.
-    :type func_and_args: tuple
-    """
-    # filter so that memory allocation tracing is limited to autorange call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno=123)]
-    # take snapshots before and after running timeit_once
-    snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    functimer.autorange(*func_and_args)
-    snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    # compare second to first snapshot and print differences (top 10)
-    diffs = snap_2.compare_to(snap_1, "lineno")
-    print(diffs[0])
 
 
 def test_repeat_sanity(func_and_args):
@@ -168,23 +123,6 @@ def test_repeat_sanity(func_and_args):
         functimer.repeat(*func_and_args, repeat=sys.maxsize + 999)
 
 
-def test_repeat_memleak(func_and_args):
-    """Check if :func:`~c_npy_demo.functimer.repeat` is leaking memory.
-
-    :param func_and_args: ``pytest`` fixture.
-    :type func_and_args: tuple
-    """
-    # filter so that memory allocation tracing is limited to repeat call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno=178)]
-    # take snapshots before and after running timeit_once
-    snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    functimer.repeat(*func_and_args, number=400, repeat=2)
-    snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    # compare second to first snapshot and print differences (top 10)
-    diffs = snap_2.compare_to(snap_1, "lineno")
-    print(diffs[0])
-
-
 def test_timeit_enh_sanity(func_and_args):
     """Sanity checks for :func:`~c_npy_demo.functimer.timeit_enh`.
 
@@ -222,20 +160,3 @@ def test_timeit_enh_sanity(func_and_args):
     # this should run normally
     tir = functimer.timeit_enh(*func_and_args)
     print(tir.brief)
-
-
-def test_timeit_enh_memleak(func_and_args):
-    """Check if :func:`~c_npy_demo.functimer.timeit_enh` is leaking memory.
-
-    :param func_and_args: ``pytest`` fixture.
-    :type func_and_args: tuple
-    """
-    # filter so that memory allocation tracing is limited to repeat call
-    trace_filters = [tracemalloc.Filter(True, __file__, lineno=234)]
-    # take snapshots before and after running timeit_once
-    snap_1 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    functimer.timeit_enh(*func_and_args, precision=2)
-    snap_2 = tracemalloc.take_snapshot().filter_traces(trace_filters)
-    # compare second to first snapshot and print differences (top 10)
-    diffs = snap_2.compare_to(snap_1, "lineno")
-    print(diffs[0])

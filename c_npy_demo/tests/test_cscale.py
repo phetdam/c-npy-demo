@@ -1,4 +1,4 @@
-__doc__ = """Unit tests for c_npy_demo.cscale.stdscale.
+"""Unit tests for c_npy_demo.cscale.stdscale.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
@@ -31,7 +31,7 @@ def test_cscale_ar_ndarray_type(test_mat):
     test_mat : numpy.ndarray
         pytest fixture. See local conftest.py.
     """
-    with pytest.raises(TypeError, match="ar must have dtype int or float"):
+    with pytest.raises(TypeError):
         cscale.stdscale(test_mat.astype(str))
 
 

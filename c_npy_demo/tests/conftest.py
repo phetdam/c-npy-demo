@@ -1,4 +1,4 @@
-__doc__ = """pytest test fixtures for the unit tests.
+"""pytest test fixtures for the unit tests.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
