@@ -80,7 +80,8 @@ def _setup():
         # benchmarking script
         entry_points={
             "console_scripts": [
-                f"{__package__}.bench = {__package__}.bench:main"
+                f"{__package__}.bench = {__package__}.bench:main",
+                f"{__package__} = {__package__}.bench:main"
             ]
         },
         install_requires=["numpy>=1.19"],

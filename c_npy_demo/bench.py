@@ -1,10 +1,11 @@
-__doc__ = "Benchmarking :mod:`c_npy_demo.cscale` and :mod:`c_npy_demo.pyscale`."
+"""Benchmarking module for c_npy_demo.cscale and c_npy_demo.pyscale.
+
+.. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
+"""
 
 import argparse
 from functools import partial
-import gc
 import numpy as np
-import timeit
 
 # pylint: disable=no-name-in-module
 from . import cscale, pyscale
@@ -49,9 +50,14 @@ def comma_list_to_shape(s):
 
     Trailing commas will raise an error.
 
-    :param s: A string of comma-separated positive integers.
-    :type s: str
-    :rtype: tuple
+    Parameters
+    ----------
+    s : str
+        A string of comma-separated positive integers.
+
+    Returns
+    -------
+    tuple
     """
     if not isinstance(s, str):
         raise TypeError("s must be a string")
@@ -69,9 +75,10 @@ def comma_list_to_shape(s):
 def main(args=None):
     """Main entry point for the benchmarking script.
 
-    :param args: List of string arguments to pass to
-        :meth:`argparse.ArgumentParser.parse_args`
-    :type args: list, optional
+    Parameters
+    ----------
+    args : list, default=None
+        List of string arguments to pass to argparse.ArgumentParser.parse_args.
     """
     # instantiate ArgumentParse and add arguments. help width is set to 80 cols
     # although we are technically using the private argparse API.
