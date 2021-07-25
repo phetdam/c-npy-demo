@@ -37,13 +37,13 @@ def _get_ext_modules():
     return [
         Extension(
             name="cscale",
-            sources=[_PACKAGE_NAME + "/cscale.c"],
+            sources=[f"{__package__}/cscale.c"],
             include_dirs=[get_include()],
             extra_compile_args=_EXTRA_COMPILE_ARGS
         ),
         Extension(
             name="functimer",
-            sources=[_PACKAGE_NAME + "/functimer.c"],
+            sources=[f"{__package__}/functimer.c"],
             extra_compile_args=_EXTRA_COMPILE_ARGS
         )
     ]
