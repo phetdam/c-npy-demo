@@ -1337,35 +1337,21 @@ PyInit_functimer(void) {
   if (PyType_Ready(&TimeitResult_type) < 0) {
     return NULL;
   }
-  /**
-   * now that type has been initialized, we can add more attributes to the
-   * dict at TimeitResult_type.tp_dict. we add TimeitResult_MAX_PRECISION as
-   * the MAX_PRECISION class attribute. NULL on error.
-   */
-  PyObject *max_precision = PyLong_FromLong(TimeitResult_MAX_PRECISION);
-  // no need to Py_DECREF &TimeitResult_type
-  if (max_precision == NULL) {
-    return NULL;
-  }
-  // add max_precision to Timeitresult_Type.tp_dict as MAX_PRECISION. if
-  // assignment fails, Py_DECREF max_precision
-  if (
-    PyDict_SetItemString(
-      TimeitResult_type.tp_dict, "MAX_PRECISION", max_precision
-    ) < 0
-  ) {
-    goto except_max_precision;
-  }
   // create the module. if NULL, clean up and return NULL
   PyObject *module = PyModule_Create(&functimer_def);
   if (module == NULL) {
-    goto except_max_precision;
+    return NULL;
   }
-  /**
-   * add PyTypeObject * to module. need to Py_INCREF &TimeitResult_type since
-   * it starts with zero references. PyModule_AddObject only steals a reference
-   * on success, so on error (returns -1), must Py_DECREF &Timeitresult_type.
-   */
+  // add TimeitResult_MAX_PRECISION to module. -1 on error
+  if (
+    PyModule_AddIntConstant(
+      module, "MAX_PRECISION", TimeitResult_MAX_PRECISION
+    ) < 0
+  ) {
+    return NULL;
+  }
+  // add PyTypeObject * to module. PyModule_AddObject only steals a reference
+  // on success, so on error (returns -1), must Py_DECREF &Timeitresult_type.
   Py_INCREF(&TimeitResult_type);
   if (
     PyModule_AddObject(
@@ -1373,15 +1359,8 @@ PyInit_functimer(void) {
     ) < 0
   ) {
     Py_DECREF(&TimeitResult_type);
-    goto except_module;
+    Py_DECREF(module);
+    return NULL;
   }
-  // clean up max_precision and return module pointer
-  Py_DECREF(max_precision);
   return module;
-// clean up on exception
-except_module:
-  Py_DECREF(module);
-except_max_precision:
-  Py_DECREF(max_precision);
-  return NULL;
 }
