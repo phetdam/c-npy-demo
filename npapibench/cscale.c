@@ -129,7 +129,7 @@ static PyMethodDef cscale_methods[] = {
 
 PyDoc_STRVAR(
   module_doc,
-  "The C implementation of npapibench.pyscale.stdscale."
+  "The C implementation of the stdscale function in the pyscale module."
   "\n\n"
   ".. codeauthor:: Derek Huang <djh458@stern.nyu.edu>"
 );
