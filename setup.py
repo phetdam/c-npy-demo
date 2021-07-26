@@ -1,4 +1,4 @@
-"""setup.py for building c-npy-demo package.
+"""setup.py for building numpy-api-bench package.
 
 Extension modules require setup.py so we can't use PEP 517 format.
 
@@ -9,12 +9,12 @@ from numpy import get_include
 import platform
 from setuptools import Extension, setup
 
-from c_npy_demo import __package__, __version__
+from npapibench import __package__, __version__
 
 # package name (underscores converted to dashes anyways in PyPI) + short desc
-_PACKAGE_NAME = "c-npy-demo"
+_PACKAGE_NAME = "numpy-api-bench"
 _SHORT_DESC = (
-    "A tiny Python package showcasing speed differences between NumPy's "
+    "A small Python package showcasing speed differences between NumPy's "
     "Python and C APIs."
 )
 
@@ -64,7 +64,7 @@ def _setup():
         author="Derek Huang",
         author_email="djh458@stern.nyu.edu",
         license="MIT",
-        url="https://github.com/phetdam/c-npy-demo",
+        url="https://github.com/phetdam/numpy-api-bench",
         classifiers=[
             "License :: OSI Approved :: MIT License",
             "Operating System :: POSIX :: Linux",
@@ -73,16 +73,13 @@ def _setup():
             "Programming Language :: Python :: 3.8"
         ],
         project_urls={
-            "Source": "https://github.com/phetdam/c-npy-demo"
+            "Source": "https://github.com/phetdam/numpy-api-bench"
         },
         python_requires=">=3.6",
         packages=[__package__, f"{__package__}.tests"],
         # benchmarking script
         entry_points={
-            "console_scripts": [
-                f"{__package__}.bench = {__package__}.bench:main",
-                f"{__package__} = {__package__}.bench:main"
-            ]
+            "console_scripts": [f"{__package__} = {__package__}.bench:main"]
         },
         install_requires=["numpy>=1.19"],
         ext_package=__package__,
