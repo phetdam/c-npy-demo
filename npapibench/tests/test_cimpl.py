@@ -10,7 +10,7 @@ import pytest
 from .. import cimpl, pyimpl
 
 
-def test_cscale_sanity(test_mat):
+def test_stdscale_sanity(test_mat):
     """Test cimpl.stdscale input checking sanity.
 
     Parameters
@@ -30,14 +30,14 @@ def test_cscale_sanity(test_mat):
         cimpl.stdscale(test_mat, ddof=-1)
 
 
-def test_cscale_empty():
+def test_stdscale_empty():
     """Test cimpl.stdscale warn when ar is empty."""
     with pytest.warns(RuntimeWarning, match="mean of empty array"):
         cimpl.stdscale(np.array([]))
 
 
 @pytest.mark.parametrize("ddof", [0, 1, 3, 5])
-def test_cscale_allclose(test_mat, ddof):
+def test_stdscale_allclose(test_mat, ddof):
     """Test cimpl.stdscale use of ddof and that it matches Python version.
 
     Parameters
