@@ -45,7 +45,11 @@ module that uses the `NumPy C API`__ [#]_.
 .. __: https://numpy.org/devdocs/user/c-info.html
 
 .. [#] This package is a fork of the latest version of `c-npy-demo`__
-   with more concise and efficient code as well as a new name.
+   with more concise and efficient code as well as a new name. ``c-npy-demo``
+   was written at a time when I was still struggling with the Python and NumPy
+   C APIs and had no idea how to test them, but now that I am much more
+   practiced with both APIs, I felt it right to use my new knowledge to rework
+   my old code.
 
    .. __: https://pypi.org/project/c-npy-demo/
 
@@ -145,8 +149,8 @@ For usage details, try ``npapibench --help``.
 
 .. __: https://docs.python.org/3/library/timeit.html#command-line-interface
 
-.. [#] ``npapibench`` is the ``numpy-api-bench`` analogue to the
-   ``c_npy_demo.bench`` entry point provided by ``c-npy-demo``.
+.. [#] ``npapibench`` is the ``numpy-api-bench`` analogue to
+   ``c_npy_demo.bench``, provided by ``c-npy-demo``.
 
 .. Unit tests
 .. ----------
