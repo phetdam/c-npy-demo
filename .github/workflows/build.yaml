@@ -6,7 +6,8 @@
 
 name: build
 
-on: push
+# make manual to disable any automatic running until repo is reorganized
+on: workflow_dispatch
 
 env:
   # where to mount the top-level directory of the repo in docker
