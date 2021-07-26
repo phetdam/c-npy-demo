@@ -18,7 +18,7 @@ _SHORT_DESC = (
     "Python and C APIs."
 )
 
-# extra compilation arguments for extension modules. C99+ required for gcc.
+# extra extension compilation args. must specify C99+ for older Linux gccs.
 if platform.system() == "Linux":
     _EXTRA_COMPILE_ARGS = ["-std=gnu11"]
 else:
@@ -37,14 +37,15 @@ def _get_ext_modules():
     # the extension will build on older distros with old gcc like 4.8.2
     return [
         Extension(
-            name="cscale",
-            sources=[f"{__package__}/cscale.c"],
+            name="cimpl",
+            sources=[f"{__package__}/cimpl.c"],
             include_dirs=[get_include()],
             extra_compile_args=_EXTRA_COMPILE_ARGS
         ),
         Extension(
             name="functimer",
             sources=[f"{__package__}/functimer.c"],
+            include_dirs=[get_include()],
             extra_compile_args=_EXTRA_COMPILE_ARGS
         )
     ]
