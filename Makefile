@@ -1,7 +1,7 @@
-# Makefile for c_npy_demo build + install.
+# Makefile for numpy-api-bench build + install.
 
-# package name
-pkg_name       = c_npy_demo
+# Python package name, not the same as the project name
+pkg_name       = npapibench
 # directory for libcheck test runner code
 check_dir      = check
 # c compiler, of course
