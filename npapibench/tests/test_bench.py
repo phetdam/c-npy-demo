@@ -10,7 +10,7 @@ from ..bench import comma_list_to_shape
 
 
 def test_comma_list_to_shape_sanity():
-    "Test input sanity of bench.comma_list_to_shape."
+    """Test input sanity of bench.comma_list_to_shape."""
     with pytest.raises(TypeError, match="s must be a string"):
         comma_list_to_shape(-100)
     with pytest.raises(ValueError, match="s is empty"):
