@@ -1,5 +1,5 @@
 /**
- * @file cscale.c
+ * @file cimpl.c
  * @brief C extension module containing core function to take a `numpy.ndarray`
  *     and return a transformed version with zero mean and unit variance. 
  */
@@ -9,19 +9,19 @@
 
 #include <math.h>
 
-// don't include deprecated numpy C API
+// minimum supported NumPy version is 1.7
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-// arrayobject.h gives access to the array API, npymath.h the core math library
+// arrayobject.h gives access to array API, npy_math.h the core math library
 #include <numpy/arrayobject.h>
 #include <numpy/npy_math.h>
 
 /**
- * docstring for cscale.stdscale. for the function signature to be correctly
+ * docstring for cimpl.stdscale. for the function signature to be correctly
  * parse and show up in Python, we include it in the docstring and follow it
  * with "\n--\n\n". See question 1104823 on StackOverflow.
  */
 PyDoc_STRVAR(
-  cscale_stdscale_doc,
+  stdscale_doc,
   "stdscale(ar, ddof=1)"
   "\n--\n\n"
   "Centers and scales array to have zero mean and unit variance."
@@ -40,7 +40,7 @@ PyDoc_STRVAR(
   "    A new numpy.ndarray centered and scaled with zero mean, unit variance,\n"
   "    with type NPY_DOUBLE, flags NPY_ARRAY_CARRAY, same shape as ar."
 );
-// argument names for cscale_stdscale
+// argument names for stdscale
 static char *stdscale_argnames[] = {"ar", "ddof", NULL};
 /**
  * Centers and scale a `numpy.ndarray` to zero mean, unit variance.
@@ -50,7 +50,8 @@ static char *stdscale_argnames[] = {"ar", "ddof", NULL};
  * @returns `PyArrayObject *` cast to `PyObject *` 
  */
 static PyObject *
-cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
+stdscale(PyObject *self, PyObject *args, PyObject *kwargs)
+{
   // numpy ndarray, delta degrees of freedom, size of ar
   PyArrayObject *ar;
   npy_intp ddof, ar_size;
@@ -111,13 +112,10 @@ cscale_stdscale(PyObject *self, PyObject *args, PyObject *kwargs) {
 }
 
 // static array of module methods
-static PyMethodDef cscale_methods[] = {
+static PyMethodDef cimpl_methods[] = {
   {
-    "stdscale",
-    // cast PyCFunctionWithKeywords to PyCFunction (silences compiler warning)
-    (PyCFunction) cscale_stdscale,
-    METH_VARARGS | METH_KEYWORDS,
-    cscale_stdscale_doc
+    "stdscale", (PyCFunction) stdscale,
+    METH_VARARGS | METH_KEYWORDS, stdscale_doc
   },
   /**
    * see https://stackoverflow.com/questions/43371780/why-does-pymethoddef-
@@ -134,20 +132,20 @@ PyDoc_STRVAR(
   ".. codeauthor:: Derek Huang <djh458@stern.nyu.edu>"
 );
 // module definition struct
-static struct PyModuleDef cscale_def = {
+static struct PyModuleDef cimpl_def = {
   PyModuleDef_HEAD_INIT,
   // module name, module docstring, per-interpreter module state (-1 required
   // if state is maintained through globals), static pointer to methods
-  .m_name = "cscale",
+  .m_name = "cimpl",
   .m_doc = module_doc,
   .m_size = -1,
-  .m_methods = cscale_methods
+  .m_methods = cimpl_methods
 };
 
 // module initialization function
-PyMODINIT_FUNC PyInit_cscale(void) {
+PyMODINIT_FUNC PyInit_cimpl(void) {
   // import numpy api. on error, error indicator is set and NULL returned
   import_array();
   // create and return module pointer (NULL on failure)
-  return PyModule_Create(&cscale_def);
+  return PyModule_Create(&cimpl_def);
 }
