@@ -1,4 +1,4 @@
-"""Benchmarking module for npapibench.cscale and npapibench.pyscale.
+"""Benchmarking module for npapibench.cimpl and npapibench.pyimpl.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
@@ -8,7 +8,7 @@ from functools import partial
 import numpy as np
 
 # pylint: disable=no-name-in-module,relative-beyond-top-level
-from . import cscale, pyscale
+from . import cimpl, pyimpl
 from .functimer import timeit_enh
 
 _BENCH_DESC = """\
@@ -110,8 +110,8 @@ def main(args=None):
     # print shape and number of elements in array + allocate random array
     print(f"numpy.ndarray shape {args.shape}, size {np.prod(args.shape)}")
     ar = np.random.normal(size=args.shape)
-    # get results for pyscale.stdscale and cscale.stdscale + print results
-    py_res = timeit_enh(pyscale.stdscale, (ar,), **functimer_args)
-    print(f"pyscale.stdscale -- {py_res.brief}")
-    c_res = timeit_enh(cscale.stdscale, (ar,), **functimer_args)
-    print(f" cscale.stdscale -- {c_res.brief}")
+    # get results for pyimpl.stdscale and cimpl.stdscale + print results
+    py_res = timeit_enh(pyimpl.stdscale, (ar,), **functimer_args)
+    print(f"pyimpl.stdscale -- {py_res.brief}")
+    c_res = timeit_enh(cimpl.stdscale, (ar,), **functimer_args)
+    print(f" cimpl.stdscale -- {c_res.brief}")
