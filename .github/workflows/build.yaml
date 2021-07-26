@@ -3,7 +3,7 @@
 # after valgrind has produced satisfactory results.
 #
 # can also deploy if commit is tagged with version-like tag.
-#
+
 name: build
 
 on: push

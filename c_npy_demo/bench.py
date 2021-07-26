@@ -7,7 +7,7 @@ import argparse
 from functools import partial
 import numpy as np
 
-# pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module,relative-beyond-top-level
 from . import cscale, pyscale
 from .functimer import timeit_enh
 
