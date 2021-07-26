@@ -16,5 +16,6 @@
 /test.c
 /.lessons.rst
 /tools/download_artifact.py
-# sorry, no docs
+# ignore check directory and docs directory
+/check
 /doc
