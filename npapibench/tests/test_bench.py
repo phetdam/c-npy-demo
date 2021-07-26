@@ -10,7 +10,7 @@ from ..bench import comma_list_to_shape
 
 
 def test_comma_list_to_shape_sanity():
-    "Test input sanity of c_npy_demo.bench.comma_list_to_shape."
+    "Test input sanity of bench.comma_list_to_shape."
     with pytest.raises(TypeError, match="s must be a string"):
         comma_list_to_shape(-100)
     with pytest.raises(ValueError, match="s is empty"):
@@ -18,7 +18,7 @@ def test_comma_list_to_shape_sanity():
 
 
 def test_comma_list_to_shape_split():
-    """Test c_npy_demo.bench.comma_list_to_shape splitting behavior.
+    """Test bench.comma_list_to_shape splitting behavior.
 
     ValueError raised if conversion fails.
     """
@@ -31,7 +31,7 @@ def test_comma_list_to_shape_split():
 
 
 def test_comma_list_to_shape_validity():
-    """Check that c_npy_demo.bench.comma_list_to_shape shape is valid.
+    """Check that bench.comma_list_to_shape shape is valid.
 
     Shape must contain only positive integers.
     """

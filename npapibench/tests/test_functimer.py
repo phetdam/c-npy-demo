@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`c_npy_demo.functimer` functions.
+"""Unit tests for functimer functions.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
@@ -23,7 +23,7 @@ def func_and_args():
 
 
 def test_timeit_once_sanity(func_and_args):
-    """Sanity checks for :func:`~c_npy_demo.functimer.timeit_once`.
+    """Sanity checks for functimer.timeit_once.
 
     :param func_and_args: ``pytest`` fixture.
     :type func_and_args: tuple

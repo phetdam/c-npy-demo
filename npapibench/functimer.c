@@ -7,8 +7,8 @@
  */
 
 #define PY_SSIZE_T_CLEAN
-#include "Python.h"
-#include "structmember.h"
+#include <Python.h>
+#include <structmember.h>
 
 #include <float.h>
 #include <stdbool.h>

@@ -5,20 +5,20 @@
  */
 
 #define PY_SSIZE_T_CLEAN
-#include "Python.h"
+#include <Python.h>
 
 #include <math.h>
 
 // don't include deprecated numpy C API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 // arrayobject.h gives access to the array API, npymath.h the core math library
-#include "numpy/arrayobject.h"
-#include "numpy/npy_math.h"
+#include <numpy/arrayobject.h>
+#include <numpy/npy_math.h>
 
 /**
  * docstring for cscale.stdscale. for the function signature to be correctly
  * parse and show up in Python, we include it in the docstring and follow it
- * with "\n--\n\n"
+ * with "\n--\n\n". See question 1104823 on StackOverflow.
  */
 PyDoc_STRVAR(
   cscale_stdscale_doc,
@@ -129,7 +129,7 @@ static PyMethodDef cscale_methods[] = {
 
 PyDoc_STRVAR(
   module_doc,
-  "The C implementation of c_npy_demo.pyscale.stdscale."
+  "The C implementation of npapibench.pyscale.stdscale."
   "\n\n"
   ".. codeauthor:: Derek Huang <djh458@stern.nyu.edu>"
 );

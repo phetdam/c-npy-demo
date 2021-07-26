@@ -1,4 +1,4 @@
-"""Benchmarking module for c_npy_demo.cscale and c_npy_demo.pyscale.
+"""Benchmarking module for npapibench.cscale and npapibench.pyscale.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
@@ -18,11 +18,11 @@ Compares the speed of the Python and C stdscale implementations on a relatively
 large random multidimensional numpy.ndarray using the timeit module. Random
 ndarray is created with a call to numpy.random.normal.
 
-Timing is performed with the c_npy_demo.functimer module, a purpose-built
+Timing is performed with the npapibench.functimer module, a purpose-built
 timing module implemented as a C extension. The reason timeit is not used is
 because subsequent calls to timeit cannot be used to time different functions
 with shared arguments. Since the requested numpy.ndarray can be rather large,
-using timeit would result in double allocation. The c_npy_demo.functimer
+using timeit would result in double allocation. The npapibench.functimer
 module allows sharing arguments between separate timing calls for different
 functions and so avoids this double allocation issue.\
 """
@@ -32,13 +32,13 @@ must be specified with a comma-separated list of positive integers.\
 """
 _HELP_NUMBER = """\
 Number of times to execute each function in a trial. If not specified, this is
-automatically determined by c_npy_demo.functimer.timeit_enh using the same
+automatically determined by npapibench.functimer.timeit_enh using the same
 strategy employed by timeit.Timer.autorange.\
 """
 _HELP_REPEAT = "Number of timing trials for each function, default 5"
 _HELP_UNIT = """\
 Time unit to display result with. If not specified, this automatically
-determined by c_npy_demo.functimer.timeit_enh using the same strategy employed
+determined by npapibench.functimer.timeit_enh using the same strategy employed
 by timeit.main, the method invoked by `python3 -m timeit`. Available options
 are sec, msec, usec, nsec, the same options given by timeit.main.\
 """
@@ -99,9 +99,9 @@ def main(args=None):
     )
     # parse arguments
     args = arp.parse_args(args=args)
-    # collect named args for c_npy_demo.functimer.timeit_enh that are not None
+    # collect named args for npapibench.functimer.timeit_enh that are not None
     # except for the shape argument. functimer_args will be directly unpacked
-    # into c_npy_demo.functimer.timeit_enh
+    # into npapibench.functimer.timeit_enh
     dict_args = vars(args)
     functimer_args = {}
     for k, v in dict_args.items():

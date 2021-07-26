@@ -1,4 +1,4 @@
-"""__init__.py for c_npy_demo test suite.
+"""__init__.py for numpy-api-bench test suite.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
