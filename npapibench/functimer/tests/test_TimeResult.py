@@ -79,7 +79,6 @@ def test_TimeResult_new_sanity(timeargs, tuple_replace):
     # wrapper for TimeResult with timeargs as default args. varargs accepts the
     # (idx, value) pairs used in tuple_replace varargs.
     TimeResult_Ex = lambda *args: TimeResult(*tuple_replace(timeargs, *args))
-    #
     # all arguments except precision are required
     with pytest.raises(TypeError):
         TimeResult()
