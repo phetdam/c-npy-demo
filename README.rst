@@ -3,15 +3,15 @@
 numpy-api-bench
 ===============
 
-.. image:: https://img.shields.io/pypi/v/numpy-api-bench
+.. .. image:: https://img.shields.io/pypi/v/numpy-api-bench
    :target: https://pypi.org/project/numpy-api-bench/
    :alt: PyPI
 
-.. image:: https://img.shields.io/pypi/wheel/numpy-api-bench
+.. .. image:: https://img.shields.io/pypi/wheel/numpy-api-bench
    :target: https://pypi.org/project/numpy-api-bench/
    :alt: PyPI - Wheel
 
-.. image:: https://img.shields.io/pypi/pyversions/numpy-api-bench
+.. .. image:: https://img.shields.io/pypi/pyversions/numpy-api-bench
    :target: https://pypi.org/project/numpy-api-bench/
    :alt: PyPI - Python Version
 
@@ -206,6 +206,9 @@ For usage details, try ``npapibench --help``.
 .. Lessons
 .. -------
 
+.. Testing Python C extensions
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. Remarks on a few lessons I learned the hard way from mixing Python code,
    foreign C code, the Python and NumPy C APIs, and Python C extension modules. It
    was definitely a difficult but rewarding journey.
@@ -243,3 +246,10 @@ For usage details, try ``npapibench --help``.
 ..   .. __: https://docs.python.org/3/library/ctypes.html
 
 .. .. __: https://docs.python.org/3/glossary.html#term-global-interpreter-lock
+
+.. Renaming projects
+.. ~~~~~~~~~~~~~~~~~
+
+.. big pain when it comes to changing names; changing releases, removing old
+   version tags, deleting PyPI project... might have been better to simply make
+   a new repository instead of renaming the old one. but too late rip
