@@ -100,6 +100,7 @@ def _setup():
             "console_scripts": [f"{__package__} = {__package__}.bench:main"]
         },
         install_requires=["numpy>=1.19"],
+        extras_require={"tests": ["pytest>=6.0.1"]},
         ext_package=__package__,
         ext_modules=_get_ext_modules()
     )
