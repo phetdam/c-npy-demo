@@ -113,7 +113,7 @@ TimeResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     self->times, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO | NPY_ARRAY_ENSURECOPY
   );
   if (self->times == NULL) {
-    // calls TimeResult_dealloc which will Py_DECREF self->times
+    // calls TimeResult_dealloc which will Py_XDECREF self->times
     goto except;
   }
   // make sure that self->times is 1D and has size equal to self->repeat. no
@@ -134,14 +134,10 @@ TimeResult_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     );
     goto except;
   }
-  // check that number, precision, repeat are positive. we don't check if best
-  // is positive; maybe a weird "negative timer" was passed
+  // check that number, precision are positive. we don't check if best is
+  // positive; maybe a weird "negative timer" was passed. repeat always > 0.
   if (self->number < 1) {
     PyErr_SetString(PyExc_ValueError, "number must be positive");
-    goto except;
-  }
-  if (self->repeat < 1) {
-    PyErr_SetString(PyExc_ValueError, "repeat must be positive");
     goto except;
   }
   if (self->precision < 1) {
