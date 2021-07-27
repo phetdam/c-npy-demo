@@ -100,6 +100,8 @@ def test_TimeResult_new_sanity(timeargs, tuple_replace):
     # check that precision must be valid, i.e. an int in [1, 20]
     with raise_gen("precision must be positive"):
         TimeResult(*timeargs, precision=0)
+    with raise_gen(f"precision is capped at {MAX_PRECISION}"):
+        TimeResult(*timeargs, precision=9001)
 
 
 def test_TimeResult_repr(timeargs):
