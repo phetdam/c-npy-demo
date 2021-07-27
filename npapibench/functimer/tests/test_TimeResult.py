@@ -126,33 +126,38 @@ def test_TimeResult_repr(timeargs):
     assert repr(res) == repr_ex
 
 
-@pytest.mark.skip(reason="needs refactoring")
 def test_TimeResult_loop_times(timeargs):
-    """Check that ``TimeResult.loop_times`` returns the expected.
+    """Check that TimeResult.loop_times works as expected.
 
-    :param timeargs: pytest fixture. See :func:`timeargs`.
-    :type timeargs: tuple
+    Parameters
+    ----------
+    timeargs : tuple
+        pytest fixture. See timeargs.
     """
     # compute loop times manually
     loop_times_ex = np.array(timeargs[4]) / timeargs[2]
-    # instantiate new TimeResult
-    tir = TimeResult(*timeargs)
-    # check using np.allclose that loop_times_ex matches tir.loop_times
-    np.testing.assert_allclose(tir.loop_times, loop_times_ex)
+    # instantiate new TimeResult and check its loop_times against loop_times_ex
+    res = TimeResult(*timeargs)
+    np.testing.assert_allclose(res.loop_times, loop_times_ex)
+    # check that repeated calls produce refs to the same object
+    assert id(res.loop_times) == id(res.loop_times)
 
 
-@pytest.mark.skip(reason="needs refactoring")
 def test_TimeResult_brief(timeargs):
-    """Check that ``TimeResult.brief`` returns the expected.
+    """Check that TimeResult.brief works as expected.
 
-    :param timeargs: pytest fixture. See :func:`timeargs`.
-    :type timeargs: tuple
+    Parameters
+    ----------
+    timeargs : tuple
+        pytest fixture. See timeargs.
     """
     # print expected brief string
     brief_ex = (
         f"{timeargs[2]} loops, best of {timeargs[3]}: "
         f"{timeargs[0]:.1f} {timeargs[1]} per loop"
     )
-    # instantiate new TimeResult and check that tir.brief matches brief_ex
-    tir = TimeResult(*timeargs)
-    assert tir.brief == brief_ex
+    # instantiate new TimeResult and check that res.brief matches brief_ex
+    res = TimeResult(*timeargs)
+    assert res.brief == brief_ex
+    # check that repeated calls produce refs to the same object
+    assert id(res.brief) == id(res.brief)

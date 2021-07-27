@@ -365,9 +365,6 @@ PyDoc_STRVAR(
   "\n\n"
   "Parameters\n"
   "----------\n"
-  "\n\n"
-  "Attributes\n"
-  "----------\n"
   "best : float\n"
   "    The best average function execution time in units of ``unit``.\n"
   "unit : {" Py__timeunit_UNITS_STR "}\n"
@@ -380,9 +377,14 @@ PyDoc_STRVAR(
   "    The total execution times in seconds for each timing trial, shape\n"
   "    (repeat,). ``times`` is read-only and has type ``NPY_DOUBLE``.\n"
   "precision : int\n"
-  "    The number of decimal places used to display ``best`` in ``brief``.\n"
+  "    The number of decimal places used to display ``best`` in ``brief``."
+  "\n\n"
+  "Attributes\n"
+  "----------\n"
   "brief : str\n"
-  "loop_times : numpy.ndarray"
+  "    A short string formatted similarly to that of timeit.main.\n"
+  "loop_times : numpy.ndarray\n"
+  "    The unweighted average times taken per loop, per trial, in seconds."
 );
 // type object for the TimeResult type
 static PyTypeObject TimeResult_type = {
