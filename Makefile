@@ -36,6 +36,7 @@ clean:
 	@rm -vrf $(pkg_name).egg-info
 	@rm -vrf dist
 	@rm -vrf $(pkg_name)/*.so
+	@rm -vrf $(pkg_name)/functimer/*.so
 
 # build extension module locally in ./build from source files with setup.py
 # triggers when any of the files that are required are touched/modified.
