@@ -38,7 +38,7 @@ premature optimization is the root of all evil* [#]_.
 
 A small Python package comparing speed differences between NumPy's Python and
 C APIs that also serves as an example project for writing a C extension
-module that uses the `NumPy C API`__ [#]_.
+modules that use the `NumPy C API`__ [#]_.
 
 .. [#] Attributed to Sir Tony Hoare, popularized by Donald Knuth.
 
