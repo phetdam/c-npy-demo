@@ -11,7 +11,7 @@ from .._timeresult import TimeResult
 from .._timeunit import MAX_PRECISION
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def timeargs():
     """Valid args to use when initializing a TimeResult.
 
