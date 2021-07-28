@@ -33,18 +33,18 @@ def resargs():
     return 88., "usec", 10000, 5, np.array([0.88, 1.02, 1.04, 1.024, 1])
 
 
-def test_TimeResult_new_sanity(resargs, tuple_replace):
+def test_TimeResult_new_sanity(pyvalue_raise, tuple_replace, resargs):
     """Sanity checks for TimeResult.__new__.
 
     Parameters
     ----------
-    resargs : tuple
-        pytest fixture. See resargs.
+    pyvalue_raise : function
+        pytest fixture. See top-level package conftest.py.
     tuple_replace : function
         pytest fixture. See top-level package conftest.py.
+    resargs : tuple
+        pytest fixture. See resargs.
     """
-    # generator for pytest.raises with ValueError and custom match
-    raise_gen = lambda x=None: pytest.raises(ValueError, match=x)
     # wrapper for TimeResult with resargs as default args. varargs accepts the
     # (idx, value) pairs used in tuple_replace varargs.
     TimeResult_Ex = lambda *args: TimeResult(*tuple_replace(resargs, *args))
@@ -53,22 +53,22 @@ def test_TimeResult_new_sanity(resargs, tuple_replace):
         TimeResult()
     # array of timing results must be convertible to double, 1D, with size
     # equal to the number of timing trials passed to TimeResult.__new__
-    with raise_gen():
+    with pyvalue_raise():
         TimeResult_Ex((4, ["a", "b", "c"]))
-    with raise_gen("times must be 1D"):
+    with pyvalue_raise("times must be 1D"):
         TimeResult_Ex((4, np.ones((2, 3))))
-    with raise_gen(r"times\.size must equal repeat"):
+    with pyvalue_raise(r"times\.size must equal repeat"):
         TimeResult_Ex((4, np.arange(10)))
     # unit must be valid, loop counts must be positive. trial counts always > 0
-    # and if not are caught by the previous with raise_gen block.
-    with raise_gen("unit must be one of"):
+    # and if not are caught by the previous with pyvalue_raise block.
+    with pyvalue_raise("unit must be one of"):
         TimeResult_Ex((1, "oowee"))
-    with raise_gen("number must be positive"):
+    with pyvalue_raise("number must be positive"):
         TimeResult_Ex((2, 0))
     # check that precision must be valid, i.e. an int in [1, 20]
-    with raise_gen("precision must be positive"):
+    with pyvalue_raise("precision must be positive"):
         TimeResult(*resargs, precision=0)
-    with raise_gen(f"precision is capped at {MAX_PRECISION}"):
+    with pyvalue_raise(f"precision is capped at {MAX_PRECISION}"):
         TimeResult(*resargs, precision=9001)
 
 
