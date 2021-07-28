@@ -12,7 +12,7 @@ from .._timeunit import MAX_PRECISION
 
 
 @pytest.fixture(scope="session")
-def timeargs():
+def resargs():
     """Valid args to use when initializing a TimeResult.
 
     .. note::
@@ -33,52 +33,21 @@ def timeargs():
     return 88., "usec", 10000, 5, np.array([0.88, 1.02, 1.04, 1.024, 1])
 
 
-@pytest.fixture(scope="session")
-def tuple_replace():
-    """Return a new tuple from an existing tuple with element modifications.
-
-    Changes to the new tuple are specified with (idx, value) pairs passed
-    after the tuple. The new tuple will be same length as the original tuple.
-
-    Parameters
-    ----------
-    orig : tuple
-        The original tuple whose elements are to be replaced
-    *args
-        Pairs of tuples in format (idx, value) where idx indexes orig and value
-        gives the value that orig[i] should be replaced with.
-
-    Returns
-    -------
-    tuple
-        New tuple with all the specified modifications.
-    """
-    def _tuple_replace(orig, *args):
-        orig_ = list(orig)
-        for idx, val in args:
-            orig_[idx] = val
-        return tuple(orig_)
-
-    _tuple_replace.__doc__ = tuple_replace.__doc__
-
-    return _tuple_replace
-
-
-def test_TimeResult_new_sanity(timeargs, tuple_replace):
+def test_TimeResult_new_sanity(resargs, tuple_replace):
     """Sanity checks for TimeResult.__new__.
 
     Parameters
     ----------
-    timeargs : tuple
-        pytest fixture. See timeargs.
+    resargs : tuple
+        pytest fixture. See resargs.
     tuple_replace : function
-        pytest fixture. See tuple_replace.
+        pytest fixture. See top-level package conftest.py.
     """
     # generator for pytest.raises with ValueError and custom match
     raise_gen = lambda x=None: pytest.raises(ValueError, match=x)
-    # wrapper for TimeResult with timeargs as default args. varargs accepts the
+    # wrapper for TimeResult with resargs as default args. varargs accepts the
     # (idx, value) pairs used in tuple_replace varargs.
-    TimeResult_Ex = lambda *args: TimeResult(*tuple_replace(timeargs, *args))
+    TimeResult_Ex = lambda *args: TimeResult(*tuple_replace(resargs, *args))
     # all arguments except precision are required
     with pytest.raises(TypeError):
         TimeResult()
@@ -98,67 +67,67 @@ def test_TimeResult_new_sanity(timeargs, tuple_replace):
         TimeResult_Ex((2, 0))
     # check that precision must be valid, i.e. an int in [1, 20]
     with raise_gen("precision must be positive"):
-        TimeResult(*timeargs, precision=0)
+        TimeResult(*resargs, precision=0)
     with raise_gen(f"precision is capped at {MAX_PRECISION}"):
-        TimeResult(*timeargs, precision=9001)
+        TimeResult(*resargs, precision=9001)
 
 
-def test_TimeResult_repr(timeargs):
+def test_TimeResult_repr(resargs):
     """Check that TimeResult.__repr__ works as expected.
 
     Parameters
     ----------
-    timeargs : tuple
-        pytest fixture. See timeargs.
+    resargs : tuple
+        pytest fixture. See resargs.
     """
-    # create expected __repr__ string from timeargs
+    # create expected __repr__ string from resargs
     repr_ex = "TimeResult("
     # each item is separated with ", " and has format "name=item". we append
-    # precision timeargs so that we can build the string with for loop only
+    # precision resargs so that we can build the string with for loop only
     for name, item in zip(
         ("best", "unit", "number", "repeat", "times", "precision"),
-        timeargs + (1,)
+        resargs + (1,)
     ):
         repr_ex += name + "=" + repr(item) + ", "
     # remove last ", " from repr_ex and append ")"
     repr_ex = repr_ex[:-2] + ")"
     # instantiate TimeResult and check that __repr__ works correctly
-    res = TimeResult(*timeargs)
+    res = TimeResult(*resargs)
     assert repr(res) == repr_ex
 
 
-def test_TimeResult_loop_times(timeargs):
+def test_TimeResult_loop_times(resargs):
     """Check that TimeResult.loop_times works as expected.
 
     Parameters
     ----------
-    timeargs : tuple
-        pytest fixture. See timeargs.
+    resargs : tuple
+        pytest fixture. See resargs.
     """
     # compute loop times manually
-    loop_times_ex = np.array(timeargs[4]) / timeargs[2]
+    loop_times_ex = np.array(resargs[4]) / resargs[2]
     # instantiate new TimeResult and check its loop_times against loop_times_ex
-    res = TimeResult(*timeargs)
+    res = TimeResult(*resargs)
     np.testing.assert_allclose(res.loop_times, loop_times_ex)
     # check that repeated calls produce refs to the same object
     assert id(res.loop_times) == id(res.loop_times)
 
 
-def test_TimeResult_brief(timeargs):
+def test_TimeResult_brief(resargs):
     """Check that TimeResult.brief works as expected.
 
     Parameters
     ----------
-    timeargs : tuple
-        pytest fixture. See timeargs.
+    resargs : tuple
+        pytest fixture. See resargs.
     """
     # print expected brief string
     brief_ex = (
-        f"{timeargs[2]} loops, best of {timeargs[3]}: "
-        f"{timeargs[0]:.1f} {timeargs[1]} per loop"
+        f"{resargs[2]} loops, best of {resargs[3]}: "
+        f"{resargs[0]:.1f} {resargs[1]} per loop"
     )
     # instantiate new TimeResult and check that res.brief matches brief_ex
-    res = TimeResult(*timeargs)
+    res = TimeResult(*resargs)
     assert res.brief == brief_ex
     # check that repeated calls produce refs to the same object
     assert id(res.brief) == id(res.brief)

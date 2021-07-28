@@ -10,34 +10,38 @@ import pytest
 from .. import cimpl, pyimpl
 
 
-def test_stdscale_sanity(test_mat):
+def test_cimpl_sanity(pytype_raise, pyvalue_raise, test_mat):
     """Test cimpl.stdscale input checking sanity.
 
     Parameters
     ----------
+    pytype_raise : function
+        pytest fixture. See top-level package conftest.py.
+    pyvalue_raise : function
+        pytest fixture. See top-level package conftest.py.
     test_mat : numpy.ndarray
         pytest fixture. See local conftest.py.
     """
     # TypeError raised if missing required ar or if ar can't be converted
-    with pytest.raises(TypeError):
+    with pytype_raise():
         cimpl.stdscale()
-    with pytest.raises(TypeError):
+    with pytype_raise():
         cimpl.stdscale(ddof=1)
-    with pytest.raises(TypeError):
+    with pytype_raise():
         cimpl.stdscale(test_mat.astype(str))
     # ValueError raised if ddof not nonnegative
-    with pytest.raises(ValueError, match="ddof must be a nonnegative int"):
+    with pyvalue_raise("ddof must be a nonnegative int"):
         cimpl.stdscale(test_mat, ddof=-1)
 
 
-def test_stdscale_empty():
+def test_cimpl_empty():
     """Test cimpl.stdscale warn when ar is empty."""
     with pytest.warns(RuntimeWarning, match="mean of empty array"):
         cimpl.stdscale(np.array([]))
 
 
 @pytest.mark.parametrize("ddof", [0, 1, 3, 5])
-def test_stdscale_allclose(test_mat, ddof):
+def test_cimpl_allclose(test_mat, ddof):
     """Test cimpl.stdscale use of ddof and that it matches Python version.
 
     Parameters
