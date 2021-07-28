@@ -253,8 +253,8 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
   // parse args and kwargs; sets appropriate exception so no need to check
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OO$O", (char **) autorange_argnames,
-      &func, &func_args, &func_kwargs, &timer
+      args, kwargs, "O|O!O!$O", (char **) autorange_argnames, &func,
+      &PyTuple_Type, &func_args, &PyDict_Type, &func_kwargs, &timer
     )
   ) {
     return NULL;
@@ -267,14 +267,8 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
   int bases[] = {1, 2, 5};
   // total of the time reported by timeit_once
   double time_total;
-  /**
-   * Py_XINCREF kwargs. it may be NULL, in which case we will create a new dict
-   * with the number = number mapping which will be Py_XDECREF'd at the end of
-   * the function. otherwise, the borrowed ref gets its refcount incremented
-   * now and then decremented at the end of the function.
-   */
-  Py_XINCREF(kwargs);
-  // if NULL, create new dict
+  // if kwargs NULL, create new dict to hold number=number mapping that will be
+  // used in call to timeit_once along with self, args.
   if (kwargs == NULL) {
     kwargs = PyDict_New();
     // return NULL on failure
@@ -282,9 +276,13 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
       return NULL;
     }
   }
-  // PyLongObject * that will be used to hold the loop count in Python, the
-  // returned time from timeit_once, timeit_time temp variable, error ref
-  PyObject *number_, *timeit_time, *timeit_time_temp, *err_type;
+  // else simply Py_INCREF kwargs as it will be Py_DECREF'd later
+  else {
+    Py_INCREF(kwargs);
+  }
+  // PyLongObject * wrapper for number, the returned time from timeit_once.
+  // timeit_time is either PyFloatObject * or a subtype.
+  PyObject *number_, *timeit_time;
   // keep going as long as number < PY_SSIZE_T_MAX / 10
   while (true) {
     // for each of the bases
@@ -296,9 +294,8 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
       if (number_ == NULL) {
         goto except_kwargs;
       }
-      // set time_total to 0 to initialize
+      // set time_total to 0 to start + add number_ to kwargs. NULL on error
       time_total = 0;
-      // add number_ to kwargs. Py_DECREF kwargs, number_ on failure
       if (PyDict_SetItemString(kwargs, "number", number_) < 0) {
         goto except_number_;
       }
@@ -308,31 +305,22 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
       if (timeit_time == NULL) {
         goto except_number_;
       }
-      // convert timeit_time to Python float and Py_DECREF timeit_time_temp
-      timeit_time_temp = timeit_time;
-      timeit_time = PyNumber_Float(timeit_time);
-      Py_DECREF(timeit_time_temp);
-      // on error, exit. Py_DECREF kwargs and number_
-      if (timeit_time == NULL) {
-        goto except_number_;
-      }
-      // attempt to get time_total from timeit_time (Py_DECREF'd when done)
+      // attempt to get time_total from timeit_time, which we know is float or
+      // some subclass, i.e. PyFloat_Check returns true. Py_DECREF when done.
       time_total = PyFloat_AsDouble(timeit_time);
       Py_DECREF(timeit_time);
-      // check if error occurred (borrowed ref)
-      err_type = PyErr_Occurred();
       // if not NULL, then exit. error indicator already set. do Py_DECREFs
-      if (err_type != NULL) {
+      if (PyErr_Occurred()) {
         goto except_number_;
       }
-      // done with number_ so Py_DECREF it
-      Py_DECREF(number_);
       // computation of time_total complete. if time_total >= 0.2 s, Py_DECREF
-      // kwargs and return Python int from number (NULL on failure)
+      // kwargs and return number_, which wraps number.
       if (time_total >= 0.2) {
         Py_DECREF(kwargs);
-        return PyLong_FromSsize_t(number);
+        return number_;
       }
+      // done with number_ in this loop iteration so Py_DECREF it
+      Py_DECREF(number_);
     }
     // if number > PY_SSIZE_T_MAX / 10, then break the while loop. emit warning
     // and if an exception is raised (return == -1), Py_DECREF kwargs
@@ -350,7 +338,7 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
     // multiply multiplier by 10. we want 1, 2, 5, 10, 20, 50, ...
     multipler *= 10;
   }
-  // done with kwargs; Py_DECREF it number_, timeit_time alread Py_DECREF'd
+  // done with kwargs so Py_DECREF it. number_, timeit_time already Py_DECREF'd
   Py_DECREF(kwargs);
   // return Python int from number. NULL returned on failure
   return PyLong_FromSsize_t(number);

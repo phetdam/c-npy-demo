@@ -49,24 +49,23 @@ def test_timeit_once_sanity(pytype_raise, pyvalue_raise, timeargs):
         timeit_once(*timeargs, timer=lambda: None)
 
 
-@pytest.mark.skip(reason="not yet refactored")
-def test_autorange_sanity(timeargs):
-    """Sanity checks for :func:`~c_npy_demo.autorange`.
+def test_autorange_sanity(pytype_raise, pyvalue_raise, timeargs):
+    """Sanity checks for _timeapi.autorange`.
 
-    :param timeargs: ``pytest`` fixture.
-    :type timeargs: tuple
+    Parameters
+    ----------
+    pytype_raise : function
+        pytest fixture. See top-level package conftest.py.
+    pyvalue_raise : function
+        pytest fixture. See top-level package conftest.py.
+    timeargs : tuple
+        pytest fixture. See timeargs.
     """
     # one positional argument required
     with pytype_raise():
         autorange(args=())
-    # args must be a tuple (raised by timeit_once)
-    with pytest.raises(TypeError, match="args must be a tuple"):
-        autorange(max, args=[1, 2])
-    # kwargs must be a dict (raised by timeit_once)
-    with pytest.raises(TypeError, match="kwargs must be a dict"):
-        autorange(max, args=((),), kwargs=["also bogus"])
     # timer must be callable (raised by timeit_once)
-    with pytype_raise():
+    with pyvalue_raise("timer must be callable"):
         autorange(*timeargs, timer=None)
 
 
