@@ -74,10 +74,19 @@ timeit_once(PyObject *self, PyObject *args, PyObject *kwargs)
   // parse args and kwargs; sets appropriate exception so no need to check
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OO$On", (char **) timeit_once_argnames,
-      &func, &func_args, &func_kwargs, &timer, &number
+      args, kwargs, "O|O!O!$On", (char **) timeit_once_argnames, &func,
+      &PyTuple_Type, &func_args, &PyDict_Type, &func_kwargs, &timer, &number
     )
   ) {
+    return NULL;
+  }
+  // check that func is callable and that timer, if not NULL, is callable
+  if (!PyCallable_Check(func)) {
+    PyErr_SetString(PyExc_ValueError, "func must be callable");
+    return NULL;
+  }
+  if (timer != NULL && !PyCallable_Check(timer)) {
+    PyErr_SetString(PyExc_ValueError, "timer must be callable");
     return NULL;
   }
   // check that number is greater than 0. if not, set exception and exit
@@ -85,33 +94,17 @@ timeit_once(PyObject *self, PyObject *args, PyObject *kwargs)
     PyErr_SetString(PyExc_ValueError, "number must be positive");
     return NULL;
   }
-  /**
-   * Py_XINCREF func_args. we do this because if func_args is NULL (not given
-   * by user), then we get new PyObject * reference for it. thus, at the end of
-   * the function, we will have to Py_DECREF func_args. doing Py_XINCREF
-   * increments borrowed reference count if func_args is provided by user so
-   * Py_DECREF doesn't decrement BORROWED refs, which is of course bad.
-   * 
-   * note we don't need to do this for func_kwargs since PyObject_Call lets us
-   * pass NULL if there are no keyword arguments to pass.
-   */
-  Py_XINCREF(func_args);
-  // if func_args is NULL, no args specified, so set it to be empty tuple
+  // if func_args is NULL, no args specified, so set it to be empty tuple. this
+  // is required by PyObject_Call; kwargs (func_kwargs) however can be NULL.
   if (func_args == NULL) {
     func_args = PyTuple_New(0);
     if (func_args == NULL) {
       return NULL;
     }
   }
-  // check that func_args is tuple and that func_kwargs is a dict (or is NULL).
-  // need to also Py_DECREF func_args to clean up the garbage
-  if (!PyTuple_CheckExact(func_args)) {
-    PyErr_SetString(PyExc_TypeError, "args must be a tuple");
-    goto except_func_args;
-  }
-  if ((func_kwargs != NULL) && !PyDict_CheckExact(func_kwargs)) {
-    PyErr_SetString(PyExc_TypeError, "kwargs must be a dict");
-    goto except_func_args;
+  // else Py_INCREF func_args since it will by Py_DECREF'd at finalization
+  else {
+    Py_INCREF(func_args);
   }
   /**
    * if timer is NULL, then import time module and then attempt to import
