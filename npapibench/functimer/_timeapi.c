@@ -140,7 +140,7 @@ timeit_once(PyObject *self, PyObject *args, PyObject *kwargs)
   // we also need to Py_DECREF start_time since it's a new reference
   if (!PyFloat_Check(start_time)) {
     PyErr_SetString(
-      PyExc_TypeError, "timer must return a float starting value"
+      PyExc_ValueError, "timer must return a float starting value"
     );
     goto except_start_time;
   }
@@ -162,7 +162,7 @@ timeit_once(PyObject *self, PyObject *args, PyObject *kwargs)
   // if not float, raise exception. Py_DECREF and Py_XDECREF as needed; also
   // need to Py_DECREF end_time since we got a new reference for it
   if (!PyFloat_Check(end_time)) {
-    PyErr_SetString(PyExc_TypeError, "timer must return a float ending value");
+    PyErr_SetString(PyExc_ValueError, "timer must return a float ending value");
     goto except_end_time;
   }
   // compute time difference
