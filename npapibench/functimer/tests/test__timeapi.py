@@ -84,9 +84,6 @@ def test_timeit_repeat_sanity(pytype_raise, pyvalue_raise, timeargs):
     timeargs : tuple
         pytest fixture. See timeargs.
     """
-    # one positional argument required
-    with pytype_raise():
-        timeit_repeat()
     # repeat must be positive
     with pyvalue_raise(match="repeat must be positive"):
         timeit_repeat(*timeargs, repeat=-1)
