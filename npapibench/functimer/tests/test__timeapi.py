@@ -68,7 +68,7 @@ def test_autorange(timeargs):
     assert n == 1 or (n % 2 == 0) or (n % 5 == 0) or (n % 10 == 0)
 
 
-def test_timeit_repeat_sanity(pytype_raise, pyvalue_raise, timeargs):
+def test_timeit_repeat_sanity(pyvalue_raise, timeargs):
     """Sanity checks for _timeapi.timeit_repeat.
 
     Don't need to check if args is tuple and if kwargs is dict since
@@ -77,8 +77,6 @@ def test_timeit_repeat_sanity(pytype_raise, pyvalue_raise, timeargs):
 
     Parameters
     ----------
-    pytype_raise : function
-        pytest fixture. See top-level package conftest.py.
     pyvalue_raise : function
         pytest fixture. See top-level package conftest.py.
     timeargs : tuple
