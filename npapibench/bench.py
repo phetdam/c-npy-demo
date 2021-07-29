@@ -9,7 +9,7 @@ import numpy as np
 
 # pylint: disable=no-name-in-module,relative-beyond-top-level
 from . import cimpl, pyimpl
-from .functimer import timeit_enh
+from .functimer import timeit_plus
 
 _BENCH_DESC = """\
 Benchmarking script comparing the Python and C stdscale implementations.
@@ -18,12 +18,12 @@ Compares the speed of the Python and C stdscale implementations on a relatively
 large random multidimensional numpy.ndarray using the timeit module. Random
 ndarray is created with a call to numpy.random.normal.
 
-Timing is performed with the npapibench.functimer module, a purpose-built
-timing module implemented as a C extension. The reason timeit is not used is
+Timing is performed with the npapibench.functimer subpackage, a purpose-built
+timing library implemented using C extensions. The reason timeit is not used is
 because subsequent calls to timeit cannot be used to time different functions
 with shared arguments. Since the requested numpy.ndarray can be rather large,
 using timeit would result in double allocation. The npapibench.functimer
-module allows sharing arguments between separate timing calls for different
+library allows sharing arguments between separate timing calls for different
 functions and so avoids this double allocation issue.\
 """
 _HELP_SHAPE = """\
@@ -32,13 +32,13 @@ must be specified with a comma-separated list of positive integers.\
 """
 _HELP_NUMBER = """\
 Number of times to execute each function in a trial. If not specified, this is
-automatically determined by npapibench.functimer.timeit_enh using the same
+automatically determined by npapibench.functimer.timeit_plus using the same
 strategy employed by timeit.Timer.autorange.\
 """
 _HELP_REPEAT = "Number of timing trials for each function, default 5"
 _HELP_UNIT = """\
-Time unit to display result with. If not specified, this automatically
-determined by npapibench.functimer.timeit_enh using the same strategy employed
+Time unit to display result with. If not specified, this is automatically
+determined by npapibench.functimer.timeit_plus using the same strategy employed
 by timeit.main, the method invoked by `python3 -m timeit`. Available options
 are sec, msec, usec, nsec, the same options given by timeit.main.\
 """
@@ -99,9 +99,9 @@ def main(args=None):
     )
     # parse arguments
     args = arp.parse_args(args=args)
-    # collect named args for npapibench.functimer.timeit_enh that are not None
+    # collect named args for npapibench.functimer.timeit_plus that are not None
     # except for the shape argument. functimer_args will be directly unpacked
-    # into npapibench.functimer.timeit_enh
+    # into npapibench.functimer.timeit_plus
     dict_args = vars(args)
     functimer_args = {}
     for k, v in dict_args.items():
@@ -111,7 +111,7 @@ def main(args=None):
     print(f"numpy.ndarray shape {args.shape}, size {np.prod(args.shape)}")
     ar = np.random.normal(size=args.shape)
     # get results for pyimpl.stdscale and cimpl.stdscale + print results
-    py_res = timeit_enh(pyimpl.stdscale, (ar,), **functimer_args)
+    py_res = timeit_plus(pyimpl.stdscale, (ar,), **functimer_args)
     print(f"pyimpl.stdscale -- {py_res.brief}")
-    c_res = timeit_enh(cimpl.stdscale, (ar,), **functimer_args)
+    c_res = timeit_plus(cimpl.stdscale, (ar,), **functimer_args)
     print(f" cimpl.stdscale -- {c_res.brief}")

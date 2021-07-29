@@ -6,7 +6,7 @@
 import pytest
 
 # pylint: disable=no-name-in-module,relative-beyond-top-level
-from .._timeapi import autorange, timeit_enh, timeit_once, timeit_repeat
+from .._timeapi import autorange, timeit_plus, timeit_once, timeit_repeat
 
 
 @pytest.fixture(scope="session")
@@ -74,7 +74,7 @@ def test_autorange_sanity(pytype_raise, pyvalue_raise, timeargs):
         autorange()
 
 
-def test_repeat_sanity(pytype_raise, pyvalue_raise, timeargs):
+def test_timeit_repeat_sanity(pytype_raise, pyvalue_raise, timeargs):
     """Sanity checks for _timeapi.timeit_repeat.
 
     Don't need to check if args is tuple and if kwargs is dict since
@@ -102,8 +102,8 @@ def test_repeat_sanity(pytype_raise, pyvalue_raise, timeargs):
 
 
 @pytest.mark.skip(reason="not yet refactored")
-def test_timeit_enh_sanity(timeargs):
-    """Sanity checks for :func:`~c_npy_demo.timeit_enh`.
+def test_timeit_plus_sanity(timeargs):
+    """Sanity checks for _timeapi.timeit_plus.
 
     Only includes checks for ``number``, ``repeat``, ``unit``, ``precision``
     since ``func``, ``args``, ``kwargs``, ``timer`` are checked by
@@ -114,28 +114,28 @@ def test_timeit_enh_sanity(timeargs):
     """
     # number must be positive
     with pytest.raises(ValueError, match="number must be positive"):
-        timeit_enh(*timeargs, number=0)
+        timeit_plus(*timeargs, number=0)
     # repeat must be positive
     with pytest.raises(ValueError, match="repeat must be positive"):
-        timeit_enh(*timeargs, repeat=0)
+        timeit_plus(*timeargs, repeat=0)
     # unit must be valid
     with pytest.raises(ValueError, match="unit must be one of"):
-        timeit_enh(*timeargs, unit="bloops")
+        timeit_plus(*timeargs, unit="bloops")
     # precision must be positive and less than TimeitResult.MAX_PRECISION
     with pytest.raises(ValueError, match="precision must be positive"):
-        timeit_enh(*timeargs, precision=0)
+        timeit_plus(*timeargs, precision=0)
     with pytest.raises(
         ValueError,
         match=f"precision is capped at {TimeitResult.MAX_PRECISION}"
     ):
-        timeit_enh(
+        timeit_plus(
             *timeargs, precision=TimeitResult.MAX_PRECISION + 1
         )
     # warning will be raised if precision >= TimeitResult.MAX_PRECISION // 2
     with pytest.warns(UserWarning, match="precision is rather high"):
-        timeit_enh(
+        timeit_plus(
             *timeargs, precision=TimeitResult.MAX_PRECISION // 2
         )
     # this should run normally
-    tir = timeit_enh(*timeargs)
+    tir = timeit_plus(*timeargs)
     print(tir.brief)

@@ -1,7 +1,7 @@
 /**
  * @file _timeunit.c
  * @brief Defines time unit related globals and functions used by both the
- *     `_timeitresult` and `_functimer` C extension modules through a C API and
+ *     `_timeresult` and `_timeapi` C extension modules through a C API and
  *     also exposes these names in the Python layer through wrappers.
  */
 
@@ -12,7 +12,7 @@
 #include "timeunit.h"
 
 // NULL-terminated array of strings indicating valid unit values. these are
-// used both by the TimeitResult_new function and by _functimer functions.
+// used both by the TimeitResult_new function and by _timeapi functions.
 static const char * const valid_units[] = {Py__timeunit_UNIT_LIST, NULL};
 /**
  * bases corresponding to valid_units. each ith value corresponds to
@@ -55,7 +55,7 @@ validate_unit(const char *unit)
 /**
  * Automatically determine units a time should be displayed in.
  * 
- * Used when `unit` is not passed to `_functimer.timeit_enh` and will choose
+ * Used when `unit` is not passed to `_timeapi.timeit_enh` and will choose
  * the largest unit of time such that `fabs(best) >= 1`.
  * 
  * @param best Time in units of seconds
@@ -95,7 +95,7 @@ PyDoc_STRVAR(
   "Exposes ``VALID_UNITS``, ``VALID_UNIT_BASES``, and ``MAX_PRECISION``."
   "\n\n"
   "``VALID_UNITS`` is a tuple of valid time units that may be passed to the\n"
-  "``TimeitResult`` constructor or to ``_functimer.timeit_enh``.\n"
+  "``TimeitResult`` constructor or to ``_timeapi.timeit_enh``.\n"
   "``VALID_UNIT_BASES`` is a tuple of the float bases corresponding to the\n"
   "choices in ``VALID_UNITS`` indicating the value a time in seconds would\n"
   "have to be multiplied by to be converted to the respective unit in\n"

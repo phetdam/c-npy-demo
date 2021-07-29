@@ -358,7 +358,7 @@ static PyGetSetDef TimeResult_getters[] = {
 
 PyDoc_STRVAR(
   TimeResult_doc,
-  "An immutable type for holding timing results from functimer.timeit_enh."
+  "An immutable type for holding timing results from _timeapi.timeit_plus."
   "\n\n"
   "All attributes are read-only. The ``loop_times`` and ``brief`` attributes\n"
   "are cached properties computed on demand when they are first accessed."

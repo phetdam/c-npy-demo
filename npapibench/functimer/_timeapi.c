@@ -482,10 +482,10 @@ except:
   return NULL;
 }
 
-// timeit_enh docstring
+// timeit_plus docstring
 PyDoc_STRVAR(
-  timeit_enh_doc,
-  "timeit_enh(func, args=None, kwargs=None, *, timer=None, number=None, "
+  timeit_plus_doc,
+  "timeit_plus(func, args=None, kwargs=None, *, timer=None, number=None, "
   "repeat=5, unit=None, precision=1)"
   "\n--\n\n"
   "A callable, approximate C implementation of ``timeit.main``. Returns a\n"
@@ -524,8 +524,8 @@ PyDoc_STRVAR(
   "-------\n"
   "TimeResult\n"
 );
-// argument names for timeit_enh
-static const char *timeit_enh_argnames[] = {
+// argument names for timeit_plus
+static const char *timeit_plus_argnames[] = {
   "func", "args", "kwargs", "timer", "number",
   "repeat", "unit", "precision", NULL
 };
@@ -537,7 +537,7 @@ static const char *timeit_enh_argnames[] = {
  * @returns New reference to `TimeResult *`, `NULL` with exception on error
  */
 PyObject *
-timeit_enh(PyObject *self, PyObject *args, PyObject *kwargs)
+timeit_plus(PyObject *self, PyObject *args, PyObject *kwargs)
 {
   // callable, args, kwargs, timer function
   PyObject *func, *func_args, *func_kwargs, *timer;
@@ -554,7 +554,7 @@ timeit_enh(PyObject *self, PyObject *args, PyObject *kwargs)
   // to timeit_once and so must check number, repeat, unit, precision.
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OO$Onnsi", (char **) timeit_enh_argnames, &func,
+      args, kwargs, "O|OO$Onnsi", (char **) timeit_plus_argnames, &func,
       &func_args, &func_kwargs, &timer, &number, &repeat, &unit, &precision
     )
   ) {
@@ -793,8 +793,8 @@ static PyMethodDef _timeapi_methods[] = {
     METH_VARARGS | METH_KEYWORDS, autorange_doc
   },
   {
-    "timeit_enh", (PyCFunction) timeit_enh,
-    METH_VARARGS | METH_KEYWORDS, timeit_enh_doc
+    "timeit_plus", (PyCFunction) timeit_plus,
+    METH_VARARGS | METH_KEYWORDS, timeit_plus_doc
   },
   // sentinel required; needs to have at least one NULL in it
   {NULL, NULL, 0, NULL}

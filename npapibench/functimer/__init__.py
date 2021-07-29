@@ -10,6 +10,6 @@ the same args avoids multiple setup statement calls.
 """
 
 # pylint: disable=no-name-in-module
-from ._timeapi import autorange, timeit_enh, timeit_once, timeit_repeat
+from ._timeapi import autorange, timeit_plus, timeit_once, timeit_repeat
 from ._timeresult import TimeResult
 from ._timeunit import MAX_PRECISION, VALID_UNITS, VALID_UNIT_BASES
