@@ -412,8 +412,9 @@ timeit_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
   // parse args and kwargs, NULL on error
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OO$Onn", (char **) timeit_repeat_argnames,
-      &func, &func_args, &func_kwargs, &timer, &number, &repeat
+      args, kwargs, "O|O!O!$Onn", (char **) timeit_repeat_argnames,
+      &func, &PyTuple_Type, &func_args,
+      &PyDict_Type, &func_kwargs, &timer, &number, &repeat
     )
   ) {
     return NULL;

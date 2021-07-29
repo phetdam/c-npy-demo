@@ -4,7 +4,6 @@
 """
 
 import pytest
-import sys
 
 # pylint: disable=no-name-in-module,relative-beyond-top-level
 from .._timeapi import autorange, timeit_enh, timeit_once, timeit_repeat
@@ -24,6 +23,9 @@ def timeargs():
 def test_timeit_once_sanity(pytype_raise, pyvalue_raise, timeargs):
     """Sanity checks for _timeapi.timeit_once.
 
+    Don't need to check if args is tuple and if kwargs is dict since
+    PyArg_ParseTupleAndKeywords handles this for us.
+
     Parameters
     ----------
     pytype_raise : function
@@ -41,16 +43,22 @@ def test_timeit_once_sanity(pytype_raise, pyvalue_raise, timeargs):
         timeit_once("not callable")
     with pyvalue_raise("timer must be callable"):
         timeit_once(*timeargs, timer=22)
+    # timer must return a float value and not take arguments
+    with pyvalue_raise("timer must return a float starting value"):
+        timeit_once(*timeargs, timer=lambda: None)
+    with pytype_raise():
+        timeit_once(*timeargs, timer=lambda x: x)
     # number of function calls in the trial must be positive
     with pyvalue_raise("number must be positive"):
         timeit_once(*timeargs, number=0)
-    # timer must return a float value
-    with pyvalue_raise("timer must return a float starting value"):
-        timeit_once(*timeargs, timer=lambda: None)
 
 
 def test_autorange_sanity(pytype_raise, pyvalue_raise, timeargs):
     """Sanity checks for _timeapi.autorange`.
+
+    Don't need to check if args is tuple and if kwargs is dict since
+    PyArg_ParseTupleAndKeywords handles this for us. Don't need to check timer
+    since timeit_once is called and will do checks for timer.
 
     Parameters
     ----------
@@ -63,49 +71,34 @@ def test_autorange_sanity(pytype_raise, pyvalue_raise, timeargs):
     """
     # one positional argument required
     with pytype_raise():
-        autorange(args=())
-    # timer must be callable (raised by timeit_once)
-    with pyvalue_raise("timer must be callable"):
-        autorange(*timeargs, timer=None)
+        autorange()
 
 
-@pytest.mark.skip(reason="not yet refactored")
-def test_repeat_sanity(timeargs):
-    """Sanity checks for :func:`~c_npy_demo.functier.repeat`.
+def test_repeat_sanity(pytype_raise, pyvalue_raise, timeargs):
+    """Sanity checks for _timeapi.timeit_repeat.
 
-    :param timeargs: ``pytest`` fixture.
-    :type timeargs: tuple
+    Don't need to check if args is tuple and if kwargs is dict since
+    PyArg_ParseTupleAndKeywords handles this for us. Don't need to check timer,
+    number since timeit_once is called and will do checks for these.
+
+    Parameters
+    ----------
+    pytype_raise : function
+        pytest fixture. See top-level package conftest.py.
+    pyvalue_raise : function
+        pytest fixture. See top-level package conftest.py.
+    timeargs : tuple
+        pytest fixture. See timeargs.
     """
     # one positional argument required
     with pytype_raise():
-        repeat(args=())
-    # args must be a tuple (raised by timeit_once)
-    with pytest.raises(TypeError, match="args must be a tuple"):
-        repeat(max, args=[1, 2])
-    # kwargs must be dict (raised by timeit_once)
-    with pytest.raises(TypeError, match="kwargs must be a dict"):
-        repeat(max, args=((),), kwargs=["bogus"])
-    # timer must be callable (raised by timeit_once)
-    with pytype_raise():
-        repeat(*timeargs, timer=None)
-    # timer must have correct signature (raised by timeit_once)
-    with pytype_raise():
-        repeat(*timeargs, timer=lambda x: x)
+        timeit_repeat()
     # number must be int (raised by timeit_once)
     with pytype_raise():
-        repeat(*timeargs, number=1.2)
-    # number must be positive (raised by timeit_once)
-    with pytest.raises(ValueError):
-        repeat(*timeargs, number=-1)
-    # number must be <= sys.maxsize (PY_SSIZE_T_MAX). raised by timeit_once
-    with pytest.raises(OverflowError):
-        repeat(*timeargs, number=sys.maxsize + 999)
+        timeit_repeat(*timeargs, number=1.2)
     # repeat must be positive
-    with pytest.raises(ValueError, match="repeat must be positive"):
-        repeat(*timeargs, repeat=-1)
-    # repeat must be <= sys.maxsize (PY_SSIZE_T_MAX)
-    with pytest.raises(OverflowError):
-        repeat(*timeargs, repeat=sys.maxsize + 999)
+    with pyvalue_raise(match="repeat must be positive"):
+        timeit_repeat(*timeargs, repeat=-1)
 
 
 @pytest.mark.skip(reason="not yet refactored")
