@@ -3,6 +3,7 @@
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
 
+import numpy as np
 import pytest
 
 # pylint: disable=no-name-in-module,relative-beyond-top-level
@@ -51,6 +52,24 @@ def test_timeit_once_sanity(pytype_raise, pyvalue_raise, timeargs):
         timeit_once(*timeargs, number=0)
 
 
+def test_timeit_once_number(timeargs):
+    """Test that number is used correctly in _timeapi.timeit_once.
+
+    Parameters
+    ----------
+    timeargs : tuple
+        pytest fixture. See timeargs.
+    """
+    # values of number to pass. time should increase as number increases
+    numbers = [10, 1000, 10000, 100000, 1000000]
+    # compute times for each value of number
+    times = np.empty(5)
+    for i, number in enumerate(numbers):
+        times[i] = timeit_once(*timeargs, number=number)
+    # check that times are in ascending order
+    assert np.all(times[:-1] < times[1:])
+
+
 def test_autorange(timeargs):
     """Test that _timeapi.autorange returns values as expected.
 
@@ -63,9 +82,8 @@ def test_autorange(timeargs):
     timeargs : tuple
         pytest fixture. See timeargs.
     """
-    # use autorange on timeargs + check return is divisible by 2, 5, 10 or is 1
-    n = autorange(*timeargs)
-    assert n == 1 or (n % 2 == 0) or (n % 5 == 0) or (n % 10 == 0)
+    # max is a fast function so we should expect result divisible by 10
+    assert autorange(*timeargs) % 10 == 0
 
 
 def test_timeit_repeat_sanity(pyvalue_raise, timeargs):
