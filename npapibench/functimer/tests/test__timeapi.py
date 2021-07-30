@@ -74,8 +74,8 @@ def test_autorange(timeargs):
     """Test that _timeapi.autorange returns values as expected.
 
     Don't need to check if args is tuple and if kwargs is dict since
-    PyArg_ParseTupleAndKeywords handles this for us. Don't need to check timer
-    since timeit_once is called and will do checks for timer.
+    PyArg_ParseTupleAndKeywords handles this for us. timeit_once is called
+    internally and will do checks for func, timer.
 
     Parameters
     ----------
@@ -90,8 +90,8 @@ def test_timeit_repeat_sanity(pyvalue_raise, timeargs):
     """Sanity checks for _timeapi.timeit_repeat.
 
     Don't need to check if args is tuple and if kwargs is dict since
-    PyArg_ParseTupleAndKeywords handles this for us. Don't need to check timer,
-    number since timeit_once is called and will do checks for these.
+    PyArg_ParseTupleAndKeywords handles this for us. timeit_once is called
+    internally and will do checks for func, timer, number.
 
     Parameters
     ----------
@@ -102,7 +102,7 @@ def test_timeit_repeat_sanity(pyvalue_raise, timeargs):
     """
     # repeat must be positive
     with pyvalue_raise(match="repeat must be positive"):
-        timeit_repeat(*timeargs, repeat=-1)
+        timeit_repeat(*timeargs, repeat=0)
 
 
 @pytest.mark.skip(reason="not yet refactored")

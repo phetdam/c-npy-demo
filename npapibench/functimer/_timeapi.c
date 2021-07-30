@@ -425,8 +425,8 @@ timeit_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyErr_SetString(PyExc_ValueError, "repeat must be positive");
     return NULL;
   }
-  // check if repeat was passed as a named arg. if so, we remove it from kwargs
-  // so we can directly pass args, kwargs into timeit_once
+  // if kwargs is not NULL, we must check that kwargs contains repeat, which we
+  // will remove so kwargs can be directly sent with args to timeit_once.
   if (kwargs != NULL) {
     // Python string for "repeat", NULL on error
     PyObject *repeat_obj = PyUnicode_FromString("repeat");
