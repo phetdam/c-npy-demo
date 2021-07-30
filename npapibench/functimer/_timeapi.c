@@ -550,23 +550,15 @@ timeit_plus(PyObject *self, PyObject *args, PyObject *kwargs)
   char const *unit = NULL;
   // precision to display brief output with
   int precision = 1;
-  // parse args and kwargs. we defer checking of func, func_args, func_kwargs
-  // to timeit_once and so must check number, repeat, unit, precision.
+  // parse args and kwargs. we defer checking of func, timer, number, repeat
+  // to timeit_repeat and so must check unit, precision.
   if (
     !PyArg_ParseTupleAndKeywords(
-      args, kwargs, "O|OO$Onnsi", (char **) timeit_plus_argnames, &func,
-      &func_args, &func_kwargs, &timer, &number, &repeat, &unit, &precision
+      args, kwargs, "O|O!O!$Onnsi", (char **) timeit_plus_argnames,
+      &func, &PyTuple_Type, &func_args, &PyDict_Type, &func_kwargs,
+      &timer, &number, &repeat, &unit, &precision
     )
   ) {
-    return NULL;
-  }
-  // number must be positive (unless PY_SSIZE_T_MIN), repeat must be positive
-  if ((number != PY_SSIZE_T_MIN) && (number < 1)) {
-    PyErr_SetString(PyExc_ValueError, "number must be positive");
-    return NULL;
-  }
-  if (repeat < 1) {
-    PyErr_SetString(PyExc_ValueError, "repeat must be positive");
     return NULL;
   }
   // unit must be valid. if NULL, chosen by Py__timeunit_autoselect_unit
@@ -608,8 +600,7 @@ timeit_plus(PyObject *self, PyObject *args, PyObject *kwargs)
    * autorange to give a value for number; then a PyFloatObject * wrapper for
    * number will be added to the new kwargs dict. A PyLongObject * wrapper for
    * repeat is then added to the new kwargs dict before the timeit_repeat call.
-   * 
-   * first, count number of positional arguments going into new args tuple.
+   * but first, count number of positional arguments going into new args tuple.
    * n_new_args incremented for each of non-NULL func_args, func_kwargs.
    */
   int n_new_args = 1;
