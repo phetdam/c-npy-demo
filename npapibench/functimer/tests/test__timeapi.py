@@ -8,7 +8,7 @@ import pytest
 
 # pylint: disable=no-name-in-module,relative-beyond-top-level
 from .._timeapi import autorange, timeit_plus, timeit_once, timeit_repeat
-from .._timeunit import MAX_PRECISION
+from .._timeunit import MAX_PRECISION, VALID_UNITS
 
 
 @pytest.fixture(scope="session")
@@ -105,13 +105,12 @@ def test_timeit_repeat_sanity(pyvalue_raise, timeargs):
         timeit_repeat(*timeargs, repeat=0)
 
 
-@pytest.mark.skip(reason="not yet refactored")
 def test_timeit_plus_sanity(pyvalue_raise, timeargs):
     """Sanity checks for _timeapi.timeit_plus.
 
     Don't need to check if args is tuple and if kwargs is dict since
-    PyArg_ParseTupleAndKeywords handles this for us. Don't need to check timer,
-    number, repeat since timeit_repeat is called and will do checks for these.
+    PyArg_ParseTupleAndKeywords handles this for us. timeit_repeat is called
+    internally and will check func, timer, number, repeat for us.
 
     Parameters
     ----------
@@ -120,26 +119,21 @@ def test_timeit_plus_sanity(pyvalue_raise, timeargs):
     timeargs : tuple
         pytest fixture. See timeargs.
     """
-    # number must be positive
-    with pyvalue_raise(match="number must be positive"):
-        timeit_plus(*timeargs, number=0)
-    # repeat must be positive
-    with pyvalue_raise(match="repeat must be positive"):
-        timeit_plus(*timeargs, repeat=0)
-    # unit must be valid
-    with pyvalue_raise(match="unit must be one of"):
-        timeit_plus(*timeargs, unit="bloops")
-    # precision must be positive and less than TimeitResult.MAX_PRECISION
-    with pyvalue_raise(match="precision must be positive"):
+    # get VALID_UNITS as a string of comma-separated double-quoted strings
+    units = str(VALID_UNITS)[1:-1].replace("'", "\"")
+    # unit must be valid (note escaped brackets)
+    with pyvalue_raise(rf"unit must be one of \[{units}\]"):
+        timeit_plus(*timeargs, unit="bloop")
+    # precision must be positive and less than _timeunit.MAX_PRECISION
+    with pyvalue_raise("precision must be positive"):
         timeit_plus(*timeargs, precision=0)
-    with pytest.raises(
-        ValueError,
-        match=f"precision is capped at {MAX_PRECISION}"
-    ):
+    with pyvalue_raise(f"precision is capped at {MAX_PRECISION}"):
         timeit_plus(*timeargs, precision=MAX_PRECISION + 1)
-    # warning will be raised if precision >= TimeitResult.MAX_PRECISION // 2
+    # warning will be raised if precision >= _timeunit.MAX_PRECISION // 2
     with pytest.warns(UserWarning, match="precision is rather high"):
         timeit_plus(*timeargs, precision=MAX_PRECISION // 2)
-    # this should run normally
-    tir = timeit_plus(*timeargs)
-    print(tir.brief)
+
+
+@pytest.mark.skip(reason="not yet implemented")
+def test_timeit_plus_return():
+    pass
