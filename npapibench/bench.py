@@ -27,7 +27,7 @@ library allows sharing arguments between separate timing calls for different
 functions and so avoids this double allocation issue.\
 """
 _HELP_SHAPE = """\
-The shape of the random ndarray to allocate, default 40,5,10,10,50,5. Shape
+The shape of the random ndarray to allocate, default 40,5,10,10,20,5. Shape
 must be specified with a comma-separated list of positive integers.\
 """
 _HELP_NUMBER = """\
@@ -87,7 +87,7 @@ def main(args=None):
         formatter_class=partial(argparse.RawDescriptionHelpFormatter, width=80)
     )
     arp.add_argument(
-        "-s", "--shape", default=(40, 5, 10, 10, 50, 5),
+        "-s", "--shape", default=(40, 5, 10, 10, 20, 5),
         type=comma_list_to_shape, help=_HELP_SHAPE
     )
     arp.add_argument("-n", "--number", type=int, help=_HELP_NUMBER)
