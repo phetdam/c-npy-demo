@@ -11,15 +11,27 @@ from .._timeapi import autorange, timeit_plus, timeit_once, timeit_repeat
 from .._timeunit import MAX_PRECISION, VALID_UNITS
 
 
-@pytest.fixture(scope="session")
-def timeargs():
-    """Default function and positional args to use with timing functions.
+@pytest.fixture(scope="session", params=[None, "args", "kwargs"])
+def timeargs(request):
+    """Fixture for default function and args to use with timing functions.
+
+    Covers no arg, positional-only args, and keyword-only args cases.
+
+    Parameters
+    ----------
+    request : _pytest.fixtures.FixtureRequest
+        Built-in pytest fixture. See the pytest documentation for details.
 
     Returns
     -------
     tuple
     """
-    return max, (1, 2)
+    if request.param == "args":
+        return max, (1, 2)
+    elif request.param == "kwargs":
+        return lambda x=None: x, (), {"x": "identity"}
+    else:
+        return lambda: 1, ()
 
 
 def test_timeit_once_sanity(pytype_raise, pyvalue_raise, timeargs):
@@ -134,6 +146,22 @@ def test_timeit_plus_sanity(pyvalue_raise, timeargs):
         timeit_plus(*timeargs, precision=MAX_PRECISION // 2)
 
 
-@pytest.mark.skip(reason="not yet implemented")
-def test_timeit_plus_return():
-    pass
+def test_timeit_plus_return(timeargs):
+    """Check that _timeapi.timeit_plus works as intended.
+
+    Parameters
+    ----------
+    timeargs : tuple
+        pytest fixture. See timeargs.
+    """
+    # run timeit_plus with some manually specified arguments
+    time_kwargs = dict(number=1000, repeat=3, unit="msec", precision=2)
+    res = timeit_plus(*timeargs, **time_kwargs)
+    # check that TimeResult attributes match specified arguments
+    assert res.unit == time_kwargs["unit"]
+    assert res.number == time_kwargs["number"]
+    assert res.repeat == time_kwargs["repeat"]
+    assert res.precision == time_kwargs["precision"]
+    # check that TimeResult times are the right shape
+    assert res.times.size == time_kwargs["repeat"]
+    # TimeResult unit tests already checked repr, loop_times, brief
