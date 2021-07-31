@@ -594,46 +594,39 @@ timeit_plus(PyObject *self, PyObject *args, PyObject *kwargs)
   }
   /**
    * now that all the parameters have been checked, we need to delegate the
-   * right arguments to the right functions. func, func_args, and func_kwargs
-   * need to be put together into a tuple, while timer needs to be put in a new
-   * dict (if not NULL). if number == PY_SSIZE_T_MIN, then we need to call
-   * autorange to give a value for number; then a PyFloatObject * wrapper for
-   * number will be added to the new kwargs dict. A PyLongObject * wrapper for
-   * repeat is then added to the new kwargs dict before the timeit_repeat call.
-   * but first, count number of positional arguments going into new args tuple.
-   * n_new_args incremented for each of non-NULL func_args, func_kwargs.
+   * right arguments to the right functions. to simplify the case where we
+   * might have one of func_args, func_kwargs NULL, we put func into a tuple
+   * and func_args, func_kwargs, timer in a new dict (if not NULL). if
+   * number == PY_SSIZE_T_MIN, then we need to call autorange to give a value
+   * for number; a PyFloatObject * wrapper for number will be added to the new
+   * kwargs dict. A PyLongObject * wrapper for repeat is then added to the new
+   * kwargs dict before the timeit_repeat call.
    */
-  int n_new_args = 1;
-  if (func_args != NULL) {
-    n_new_args++;
-  }
-  if(func_kwargs != NULL) {
-    n_new_args++;
-  }
-  // new args tuple (for autorange, repeat)
-  PyObject *new_args = PyTuple_New(n_new_args);
+  // new positional tuple (for autorange, repeat). on success, add func to it.
+  // must Py_INCREF since else a borrowed ref will be stolen.
+  PyObject *new_args = PyTuple_New(1);
   if (new_args == NULL) {
     return NULL;
   }
-  // pass func reference to new_args. Py_INCREF obviously needed (ref stolen)
   Py_INCREF(func);
   PyTuple_SET_ITEM(new_args, 0, func);
-  // if func_args is not NULL, then Py_INCREF and add to position 1
-  if (func_args != NULL) {
-    Py_INCREF(func_args);
-    PyTuple_SET_ITEM(new_args, 1, func_args);
-  }
-  // if func_kwargs is not NULL, Py_INCREF and add to last position
-  if (func_kwargs != NULL) {
-    Py_INCREF(func_kwargs);
-    PyTuple_SET_ITEM(new_args, n_new_args - 1, func_args);
-  }
   // new kwargs dict (for autorange, repeat). NULL on error.
   PyObject *new_kwargs = PyDict_New();
   if (new_kwargs == NULL) {
     goto except_new_args;
   }
-  // if timer is not NULL, add timer to new_kwargs (borrow ref), -1 on failure
+  // if func_args is not NULL, add to new_kwargs (ref borrowed). -1 on error.
+  // repeat for func_kwargs and for timer.
+  if (func_args != NULL) {
+    if (PyDict_SetItemString(new_kwargs, "args", func_args) < 0) {
+      goto except_new_kwargs;
+    }
+  }
+  if (func_kwargs != NULL) {
+    if (PyDict_SetItemString(new_kwargs, "kwargs", func_kwargs) < 0) {
+      goto except_new_kwargs;
+    }
+  }
   if (timer != NULL) {
     if (PyDict_SetItemString(new_kwargs, "timer", timer) < 0) {
       goto except_new_kwargs;
@@ -647,6 +640,7 @@ timeit_plus(PyObject *self, PyObject *args, PyObject *kwargs)
     // get result from autorange; we pass new_args, new_kwargs. NULL on error
     number_ = autorange(self, new_args, new_kwargs);
     if (number_ == NULL) {
+      printf("here's the problem\n");
       goto except_new_kwargs;
     }
     // attempt to convert number_ into Py_ssize_t. -1 on error, which is an
