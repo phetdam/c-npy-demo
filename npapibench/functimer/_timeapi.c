@@ -640,7 +640,6 @@ timeit_plus(PyObject *self, PyObject *args, PyObject *kwargs)
     // get result from autorange; we pass new_args, new_kwargs. NULL on error
     number_ = autorange(self, new_args, new_kwargs);
     if (number_ == NULL) {
-      printf("here's the problem\n");
       goto except_new_kwargs;
     }
     // attempt to convert number_ into Py_ssize_t. -1 on error, which is an
