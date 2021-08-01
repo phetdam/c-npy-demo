@@ -276,9 +276,13 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
       return NULL;
     }
   }
-  // else simply Py_INCREF kwargs as it will be Py_DECREF'd later
+  // else set kwargs to a copy of the original dict it points to. this is ok
+  // since kwargs is a borrowed reference to a dict.
   else {
-    Py_INCREF(kwargs);
+    kwargs = PyDict_Copy(kwargs);
+    if (kwargs == NULL) {
+      return NULL;
+    }
   }
   // PyLongObject * wrapper for number, the returned time from timeit_once.
   // timeit_time is either PyFloatObject * or a subtype.
@@ -342,10 +346,9 @@ autorange(PyObject *self, PyObject *args, PyObject *kwargs)
   Py_DECREF(kwargs);
   // return Python int from number. NULL returned on failure
   return PyLong_FromSsize_t(number);
-// clean up number_ on exception
+// clean up on exception
 except_number_:
   Py_DECREF(number_);
-// clean up kwargs on exception
 except_kwargs:
   Py_DECREF(kwargs);
   return NULL;
@@ -425,26 +428,30 @@ timeit_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyErr_SetString(PyExc_ValueError, "repeat must be positive");
     return NULL;
   }
-  // if kwargs is not NULL, we must check that kwargs contains repeat, which we
-  // will remove so kwargs can be directly sent with args to timeit_once.
+  // if kwargs is not NULL, we copy it. we must check that kwargs contains
+  // repeat, which we remove so kwargs can be sent with args to timeit_once.
   if (kwargs != NULL) {
+    kwargs = PyDict_Copy(kwargs);
+    if (kwargs == NULL) {
+      return NULL;
+    }
     // Python string for "repeat", NULL on error
     PyObject *repeat_obj = PyUnicode_FromString("repeat");
     if (repeat_obj == NULL) {
-      return NULL;
+      goto except_kwargs;
     }
     // get return value from PyDict_Contains and Py_DECREF unneeded repeat_obj
     int has_repeat = PyDict_Contains(kwargs, repeat_obj);
     Py_DECREF(repeat_obj);
     // if error, has_repeat < 0. return NULL
     if (has_repeat < 0) {
-      return NULL;
+      goto except_kwargs;
     }
     // if repeat is in kwargs, then remove it from kwargs
     if (has_repeat) {
       // if failed, PyDict_DelItemString returns -1. return NULL
       if (PyDict_DelItemString(kwargs, "repeat") < 0) {
-        return NULL;
+        goto except_kwargs;
       }
     }
     // else do nothing
@@ -455,7 +462,7 @@ timeit_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
   func_times = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_DOUBLE);
   // NULL on error. on success, get data pointer
   if (func_times == NULL) {
-    return NULL;
+    goto except_kwargs;
   }
   double *func_times_data = (double *) PyArray_DATA(func_times);
   // write the time result for each trial into func_times
@@ -463,22 +470,24 @@ timeit_repeat(PyObject *self, PyObject *args, PyObject *kwargs) {
     // get time result from timeit_once, a PyFloatObject *. NULL on error
     PyObject *func_time = timeit_once(self, args, kwargs);
     if (func_time == NULL) {
-      goto except;
+      goto except_func_times;
     }
     // else write double value from func_time to func_times. use PyErr_Occurred
     // to check if PyFloat_AsDouble returned error. Py_DECREF in all cases.
     func_times_data[i] = PyFloat_AsDouble(func_time);
     if (PyErr_Occurred()) {
       Py_DECREF(func_time);
-      goto except;
+      goto except_func_times;
     }
     Py_DECREF(func_time);
   }
   // return the ndarray of times returned from timeit_once
   return (PyObject *) func_times;
 // clean up on error
-except:
+except_func_times:
   Py_DECREF(func_times);
+except_kwargs:
+  Py_XDECREF(kwargs);
   return NULL;
 }
 
