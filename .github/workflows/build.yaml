@@ -37,9 +37,9 @@ jobs:
         # python versions to build (skip PyPy). skip other manylinux archs
         CIBW_BUILD: cp36-* cp37-* cp38-* cp39-*
         CIBW_SKIP: "*-manylinux_aarch64 *-manylinux_ppc64le *-manylinux_s390x"
-        # always use pip to build. note NumPy is Python version dependent.
+        # always use pip to build. install required pre-install requirements
         CIBW_BUILD_FRONTEND: pip
-        CIBW_BEFORE_BUILD: pip install numpy>=1.19
+        CIBW_BEFORE_BUILD: pip install -r tools/requirements.txt
         # build both manylinux1 and manylinux2010 for x86-64 and i686
         CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux }}
         CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux }}
@@ -61,8 +61,9 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Update setuptools
-      run: pip3 install setuptools>=49.6.0
+    # setup.py uses numpy.get_include, so we have to also install NumPy
+    - name: Install sdist requirements
+      run: pip install -r tools/requirements.txt
     - name: Create tar.gz sdist
       run: python3 setup.py sdist
     - name: Upload sdist artifact
