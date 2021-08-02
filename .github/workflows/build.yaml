@@ -46,7 +46,7 @@ jobs:
         # extras_requires extras to install (also pytest) + testing command
         CIBW_TEST_EXTRAS: tests
         CIBW_TEST_COMMAND: >
-          pytest -rsxXP -v --pyargs npapibench.tests
+          pytest -rsxXP -v --pyargs npapibench.tests &&
           pytest -rsxXP -v --pyargs npapibench.functimer.tests
     - name: Upload wheel artifacts
       uses: actions/upload-artifact@v2
@@ -61,8 +61,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Install Python dependencies from requirements.txt
-      run: pip3 install -r tools/requirements.txt
+    - name: Update setuptools
+      run: pip3 install setuptools>=49.6.0
     - name: Create tar.gz sdist
       run: python3 setup.py sdist
     - name: Upload sdist artifact
