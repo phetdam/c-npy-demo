@@ -44,14 +44,12 @@ that make use of the `NumPy C API`__ [#]_.
 
 .. __: https://numpy.org/devdocs/user/c-info.html
 
-.. [#] This package is a fork of the latest version of `c-npy-demo`__
-   with more concise and efficient code as well as a new name. ``c-npy-demo``
-   was written at a time when I was still struggling with the Python and NumPy
-   C APIs and had no idea how to test them, but now that I am much more
-   practiced with both APIs, I felt it right to use my new knowledge to rework
-   my old code.
-
-   .. __: https://pypi.org/project/c-npy-demo/
+.. [#] This package is a fork of the latest version of an old PyPI project of
+   mine called ``c-npy-demo`` with more concise and efficient code as well as a
+   new name. ``c-npy-demo`` was written at a time when I was still struggling
+   with the Python and NumPy C APIs and had no idea how to test them, but now
+   that I am much more practiced with both APIs, I felt it right to use my new
+   knowledge to rework my old code into something better.
 
 
 Installation
@@ -60,16 +58,31 @@ Installation
 From source
 ~~~~~~~~~~~
 
-Local extension builds are done on WSL Ubuntu 18.04 with gcc 9.3 while builds
-on Github Actions runners were done within the `manylinux1 Docker images`__
-provided by PyPA. To build, you will need ``numpy>=1.19`` and the latest
+Linux, Mac, and Windows binary wheels have been built from source on Github
+Actions runners using the excellent `cibuildwheel`__ tool, which eases the
+process of building binary wheels from compiled code for different platforms.
+``cibuildwheel`` especially helps with the process of building wheels that
+comply with the different PyPA `manylinux`__ specifications.
+
+.. __: https://cibuildwheel.readthedocs.io/en/stable/
+
+.. __: https://github.com/pypa/manylinux
+
+To build locally, you will need ``numpy>=1.19`` and the latest
 `setuptools`__ [#]_ installed on your system. Your C compiler should be
 appropriate for your platform, ex. gcc for Linux, MSVC for Windows, but
 ``setuptools`` will (hopefully) sort out the details.
 
 First, use ``git clone`` or download + unzip to get the repo source code and
-install ``numpy>=1.19``. With the current working directory the repository
-root, you can build the C extension modules and install directly with
+install the NumPy and ``setuptools`` requirements in ``install_requires.txt``
+with [#]
+
+.. code:: bash
+
+   pip3 install -r install_requires.txt
+
+After you ``cd`` into the repository root, you can build the C extension
+modules in-place and install the package files directly with
 
 .. code:: bash
 
@@ -86,6 +99,9 @@ If you don't have or don't wish to use ``make``, you may instead use
    ``setup.py`` method of building distributions still has to be used. Note that
    the `distutils.core.Extension`__ class is present in ``setuptools`` as the
    ``setuptools.extension.Extension`` class.
+
+.. [#] Only Linux users need worry about using ``pip3``. Use ``pip`` for
+   Windows and Mac.
 
 .. __: https://github.com/pypa/manylinux
 
