@@ -50,13 +50,15 @@ def _get_ext_modules():
         Extension(
             name="functimer._timeapi",
             sources=[f"{__package__}/functimer/_timeapi.c"],
-            include_dirs=[_FUNCTIMER_INCLUDE_DIR, _NUMPY_INCLUDE_DIR]
+            include_dirs=[_FUNCTIMER_INCLUDE_DIR, _NUMPY_INCLUDE_DIR],
+            extra_compile_args=_EXTRA_COMPILE_ARGS
         ),
         # _timeresult module of the functimer subpackage
         Extension(
             name="functimer._timeresult",
             sources=[f"{__package__}/functimer/_timeresult.c"],
-            include_dirs=[_FUNCTIMER_INCLUDE_DIR, _NUMPY_INCLUDE_DIR]
+            include_dirs=[_FUNCTIMER_INCLUDE_DIR, _NUMPY_INCLUDE_DIR],
+            extra_compile_args=_EXTRA_COMPILE_ARGS
         ),
         # _timeunit module of the functimer subpackage
         Extension(
