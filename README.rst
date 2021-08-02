@@ -61,8 +61,7 @@ From source
 Linux, Mac, and Windows binary wheels have been built from source on Github
 Actions runners using the excellent `cibuildwheel`__ tool, which eases the
 process of building binary wheels from compiled code for different platforms.
-``cibuildwheel`` especially helps with the process of building wheels that
-comply with the different PyPA `manylinux`__ specifications.
+``cibuildwheel`` especially helps with building `manylinux`__ wheels.
 
 .. __: https://cibuildwheel.readthedocs.io/en/stable/
 
@@ -70,8 +69,8 @@ comply with the different PyPA `manylinux`__ specifications.
 
 To build locally, you will need ``numpy>=1.19`` and the latest
 `setuptools`__ [#]_ installed. Your C compiler should be appropriate for your
-platform, ex. GCC for Linux, MSVC for Windows, but ``setuptools`` will
-(hopefully) sort out the details.
+platform, ex. GCC for Linux, MSVC for Windows, but let ``setuptools`` do the
+work.
 
 .. __: https://setuptools.readthedocs.io/en/latest/
 
