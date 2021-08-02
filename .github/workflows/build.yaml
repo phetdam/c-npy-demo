@@ -17,6 +17,12 @@ jobs:
       matrix:
         os: [ubuntu-18.04, windows-latest, macos-latest]
         manylinux: [manylinux1, manylinux2010]
+        # prevent windows, mac wheels from being built twice
+        exclude:
+        - os: windows-latest
+          manylinux: manylinux2010
+        - os: macos-latest
+          manylinux: manylinux2010
 
     steps:
     - uses: actions/checkout@v2
