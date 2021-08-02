@@ -7,15 +7,14 @@
 **/*~
 **/*.so
 /.vscode
-# ignore sphinx build output
+# ignore sphinx build output, libcheck test runner, unused tools directory
 /doc/_build/*
-# ignore libcheck test runner
 /runner
+/tools
 # other random files to ignore
 /test
 /test.c
 /.lessons.rst
-/tools/download_artifact.py
-# ignore check directory and docs directory
+# ignore libcheck testing directory and docs directory
 /check
 /doc
