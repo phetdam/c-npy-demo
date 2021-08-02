@@ -1,89 +1,55 @@
-# build and test. need to be able to build on manylinux1 image + pass tests.
-# run after passing local unit tests using pytest wrapped with libcheck and
-# after valgrind has produced satisfactory results.
-#
-# can also deploy if commit is tagged with version-like tag.
+# build and test. also deploy if commit is tagged with version-like tag.
 
 name: build
 
-# make manual to disable any automatic running until repo is reorganized
-on: workflow_dispatch
+on: push
 
 env:
-  # where to mount the top-level directory of the repo in docker
-  DOCKER_MNT: /_build
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  # build manylinux1 wheels
-  build_manylinux:
-    runs-on: ubuntu-18.04
+  # build wheels for linux (manylinux2010 and up), mac, windows
+  build_wheels:
+    runs-on: ${{ matrix.os }}
+
     strategy:
+      # define virtual machines to build on + manylinux types to build for
       matrix:
-        # docker images for manylinux building (i686 and x86_64)
-        docker_image:
-        - quay.io/pypa/manylinux1_x86_64
-        - quay.io/pypa/manylinux1_i686
-      # no need to specify max-parallel as we upload wheels with different
-      # names to the same artifact; this can be done in parallel.
+        os: [ubuntu-18.04, windows-latest, macos-latest]
+        manylinux: [manylinux1, manylinux2010]
+
     steps:
     - uses: actions/checkout@v2
-    - name: Pull manylinux docker image
-      run: docker pull ${{ matrix.docker_image }}
-    - name: Build manylinux wheels on docker image
-      # platform the wheels are built for is taken from matrix.docker_image.
-      # current dir is mounted in docker as $DOCKER_MNT. run script in bash
-      # shell so there's no need to make the file executable in docker image.
-      # builds wheels for python versions 3.6-3.8 inclusive.
-      run: > 
-        docker container run -e DOCKER_MNT=$DOCKER_MNT -e
-        DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
-        ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/build_manylinux.sh
-    - name: Install and test manylinux wheels on docker image with pytest
-      # use --rm option to clean up afterwards. install and test wheels
-      run: >
-        docker container run -e DOCKER_MNT=$DOCKER_MNT -e
-        DOCKER_IMAGE=${{ matrix.docker_image }} -v `pwd`:$DOCKER_MNT
-        ${{ matrix.docker_image }} bash $DOCKER_MNT/tools/test_manylinux.sh
-    - name: Upload manylinux wheel artifacts
+    # cibuildwheel hopefully will simplify a series of bash scripts previously
+    # used for building manylinux1 wheels on the required PyPA Docker images.
+    - name: Build and test wheels
+      uses: pypa/cibuildwheel@v2.0.1
+      with:
+        # to use the PyPA publish action, we want everything in dist
+        output-dir: dist
+      env:
+        # python versions to build (skip PyPy). skip other manylinux archs
+        CIBW_BUILD: cp36-* cp37-* cp38-* cp39-*
+        CIBW_SKIP: "*-manylinux_aarch64 *-manylinux_ppc64le *-manylinux_s390x"
+        # always use pip to build. note NumPy is Python version dependent.
+        CIBW_BUILD_FRONTEND: pip
+        CIBW_BEFORE_BUILD: pip install numpy>=1.19
+        # build both manylinux1 and manylinux2010 for x86-64 and i686
+        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux }}
+        CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux }}
+        # extras_requires extras to install (also pytest) + testing command
+        CIBW_TEST_EXTRAS: tests
+        CIBW_TEST_COMMAND: >
+          pytest -rsxXP -v --pyargs npapibench.tests
+          pytest -rsxXP -v --pyargs npapibench.functimer.tests
+    - name: Upload wheel artifacts
       uses: actions/upload-artifact@v2
       with:
         name: dist_artifact
-        path: dist
+        path: dist/*.whl
         # if no files, error
         if-no-files-found: error
-  # build windows wheels
-  build_windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        # python versions to test with
-        python-version: [3.6, 3.7, 3.8]
-      # no need to specify max-parallel as we upload wheels with different
-      # names to the same artifact; this can be done in parallel.
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    # numpy get_include is used in setup.py so we need numpy
-    - name: Install Python dependencies from requirements.txt
-      run: pip3 install -r tools/requirements.txt
-    - name: Build Windows wheel
-      run: python setup.py bdist_wheel
-    - name: Install and test Windows wheel with pytest
-      run: |
-        pip install $(find dist/*.whl)
-        pytest -rsxXP -v --pyargs c_npy_demo.tests
-        c_npy_demo.bench -s 20,10
-      # use bash shell since i don't know PowerShell
-      shell: bash
-    - name: Upload Windows wheel artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: dist_artifact
-        path: dist
-        if-no-files-found: error
+
   # simply create tar.gz in dist which is uploaded to dist_artifact
   build_sdist:
     runs-on: ubuntu-18.04
@@ -99,23 +65,22 @@ jobs:
         name: dist_artifact
         path: dist
         if-no-files-found: error
-  # deploy job, depends on build_manylinux, build_windows, build_sdist
+
+  # deploy job, depends on build_wheels and build_sdist
   deploy:
     runs-on: ubuntu-18.04
-    # can only deploy after building wheels and tar.gz
-    needs: [build_manylinux, build_windows, build_sdist]
+    needs: [build_wheels, build_sdist]
     # run only if version tag is present
     if: ${{ contains(github.ref, 'refs/tags/v') }}
     steps:
     - uses: actions/checkout@v2
-    - name: Download .tar.gz, manylinux wheel, and windows wheel artifacts
+    - name: Download .tar.gz and wheel artifacts
       uses: actions/download-artifact@v2
       with:
         name: dist_artifact
         path: dist
-    - name: >
-        Create new env variables SRC_ARTIFACT_PATH, SRC_ARTIFACT_NAME
-      # appends definition to the GITHUB_ENV environment file.
+    - name: Create new env variables SRC_ARTIFACT_PATH, SRC_ARTIFACT_NAME
+      # appends definitions to the GITHUB_ENV environment file.
       # SRC_ARTIFACT_PATH is the path to the .tar.gz source, RELEASE_VERSION
       # gives the version specified by the git tag, SRC_ARTIFACT_NAME is the
       # name of the .tar.gz that we upload to the release
