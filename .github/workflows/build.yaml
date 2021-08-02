@@ -2,7 +2,15 @@
 
 name: build
 
-on: push
+# only build on schedule, during releases, or upon manual request
+on:
+  schedule:
+  # daily 0423 UTC job, 0023 EST during DST and 2323 EST otherwise
+  - cron: "23 4 * * *"
+  push:
+    tags:
+    - v*
+  workflow_dispatch:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

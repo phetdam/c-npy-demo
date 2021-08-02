@@ -49,7 +49,7 @@ that make use of the `NumPy C API`__ [#]_.
    new name. ``c-npy-demo`` was written at a time when I was still struggling
    with the Python and NumPy C APIs and had no idea how to test them, but now
    that I am much more practiced with both APIs, I felt it right to use my new
-   knowledge to rework my old code into something better.
+   knowledge to rework my old code.
 
 
 Installation
@@ -69,20 +69,21 @@ comply with the different PyPA `manylinux`__ specifications.
 .. __: https://github.com/pypa/manylinux
 
 To build locally, you will need ``numpy>=1.19`` and the latest
-`setuptools`__ [#]_ installed on your system. Your C compiler should be
-appropriate for your platform, ex. gcc for Linux, MSVC for Windows, but
-``setuptools`` will (hopefully) sort out the details.
+`setuptools`__ [#]_ installed. Your C compiler should be appropriate for your
+platform, ex. GCC for Linux, MSVC for Windows, but ``setuptools`` will
+(hopefully) sort out the details.
+
+.. __: https://setuptools.readthedocs.io/en/latest/
 
 First, use ``git clone`` or download + unzip to get the repo source code and
-install the NumPy and ``setuptools`` requirements in ``install_requires.txt``
-with [#]
+install the requirements with [#]_
 
 .. code:: bash
 
    pip3 install -r install_requires.txt
 
-After you ``cd`` into the repository root, you can build the C extension
-modules in-place and install the package files directly with
+After you ``cd`` into the repository root, you can build the C extensions
+in-place and install the package files with
 
 .. code:: bash
 
@@ -94,18 +95,14 @@ If you don't have or don't wish to use ``make``, you may instead use
 
    python3 setup.py build_ext --inplace && pip3 install .
 
-.. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__, but
-   since a C extension modules have to be built in this package the legacy
-   ``setup.py`` method of building distributions still has to be used. Note that
-   the `distutils.core.Extension`__ class is present in ``setuptools`` as the
-   ``setuptools.extension.Extension`` class.
+.. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__,
+   but since a C extension modules have to be built in this package the legacy
+   ``setup.py`` method of building distributions still has to be used. Note
+   that the `distutils.core.Extension`__ class is present in ``setuptools`` as
+   the ``setuptools.extension.Extension`` class.
 
 .. [#] Only Linux users need worry about using ``pip3``. Use ``pip`` for
    Windows and Mac.
-
-.. __: https://github.com/pypa/manylinux
-
-.. __: https://setuptools.readthedocs.io/en/latest/
 
 .. __: https://www.python.org/dev/peps/pep-0517/
 
