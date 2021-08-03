@@ -23,7 +23,7 @@ _NUMPY_INCLUDE_DIR = get_include()
 
 # extra extension compilation args. must specify C99+ for older Linux gccs.
 if platform.system() == "Linux":
-    _EXTRA_COMPILE_ARGS = ["-std=gnu11"]
+    _EXTRA_COMPILE_ARGS = ["-std=c11"]
 else:
     _EXTRA_COMPILE_ARGS = None
 
