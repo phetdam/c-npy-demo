@@ -22,10 +22,10 @@ _FUNCTIMER_INCLUDE_DIR = f"{__package__}/functimer/include"
 _NUMPY_INCLUDE_DIR = get_include()
 
 # extra extension compilation args. must specify C99+ for older Linux gccs.
-if platform.system() == "Linux":
-    _EXTRA_COMPILE_ARGS = ["-std=c11"]
+if platform.system() == "Windows":
+    _EXTRA_COMPILE_ARGS = ["/std:c11"]
 else:
-    _EXTRA_COMPILE_ARGS = None
+    _EXTRA_COMPILE_ARGS = ["-std=c11"]
 
 
 def _get_ext_modules():
