@@ -127,9 +127,9 @@ Package contents
 ----------------
 
 The ``numpy-api-bench`` package contains a pure Python module and two C
-extension modules. The pure Python module is ``npapibench.pyscale``, which
+extension modules. The pure Python module is ``npapibench.pyimpl``, which
 contains one function that is two lines of ``numpy``\ -enabled Python code. It
-is the "benchmark" for the C extension module ``npapibench.cscale`` as both
+is the "benchmark" for the C extension module ``npapibench.cimpl`` as both
 modules contain a single function that centers and scales to unit variance a
 ``numpy.ndarray``. The other C extension module is ``npapibench.functimer``,
 which provides a callable API for timing the execution of a function with
@@ -142,8 +142,8 @@ of the entry point in the terminal should produce the ``timeit``\ -like output
 .. code:: text
 
    numpy.ndarray shape (40, 5, 10, 10, 50, 5), size 5000000
-   pyscale.stdscale -- 2 loops, best of 5: 157.1 msec per loop
-    cscale.stdscale -- 5 loops, best of 5: 57.9 msec per loop
+   pyimpl.stdscale -- 2 loops, best of 5: 157.1 msec per loop
+    cimpl.stdscale -- 5 loops, best of 5: 57.9 msec per loop
 
 For usage details, try ``npapibench --help``.
 
