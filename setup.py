@@ -88,13 +88,14 @@ def _setup():
         classifiers=[
             "License :: OSI Approved :: MIT License",
             "Operating System :: POSIX :: Linux",
+            "Operating System :: Microsoft :: Windows",
+            "Operating System :: MacOS",
             "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
-            "Programming Language :: Python :: 3.8"
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9"
         ],
-        project_urls={
-            "Source": "https://github.com/phetdam/numpy-api-bench"
-        },
+        project_urls={"Source": "https://github.com/phetdam/numpy-api-bench"},
         python_requires=">=3.6",
         packages=find_packages(),
         # benchmarking script
