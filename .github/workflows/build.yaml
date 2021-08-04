@@ -103,7 +103,6 @@ jobs:
       # need id so we can reference the upload URL later to upload SRC_ARTIFACT
       id: create_release
       uses: actions/create-release@v1
-      # tag and release name are identical
       with:
         # don't use RELEASE_VERSION since instances of refs/tags/ are 
         # automatically stripped from tag_name and release_name
