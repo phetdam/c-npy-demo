@@ -12,9 +12,6 @@ on:
     - v*
   workflow_dispatch:
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
   # build wheels for manylinux1, manylinux2010, MacOS, Windows
   build_wheels:
