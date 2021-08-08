@@ -95,7 +95,7 @@ If you don't have or don't wish to use ``make``, you may instead use
    python3 setup.py build_ext --inplace && pip3 install .
 
 .. [#] ``setuptools`` has seen a lot of change, especially post `PEP 517`__,
-   but since a C extension modules have to be built in this package the legacy
+   but since C extension modules have to be built in this package the legacy
    ``setup.py`` method of building distributions still has to be used. Note
    that the `distutils.core.Extension`__ class is present in ``setuptools`` as
    the ``setuptools.extension.Extension`` class.
@@ -116,10 +116,12 @@ From PyPI
 
 ..    pip3 install numpy-api-bench
 
-.. Currently wheels support only Python 3.6-3.8, but Python 3.9 wheels will be
-   available soon.
+TBD. Currently builds for Python 3.6-3.9 wheels for Windows, MacOS,
+`manylinux1__`, and manylinux2010 wheels have succeeded, with both 32-bit
+wheels for Windows (x86) and Linux (i686) and 64-bit wheels for Windows, MacOS,
+and Linux built.
 
-.. .. __: https://github.com/pypa/manylinux
+.. __: https://github.com/pypa/manylinux
 
 Not yet available.
 
