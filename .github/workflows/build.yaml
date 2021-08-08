@@ -12,7 +12,48 @@ on:
     - v*
   workflow_dispatch:
 
+env:
+  # bot token required by github-action-slack-notify-build
+  SLACK_BOT_TOKEN: ${{ secrets.SLACK_ACTIONS_COURIER_TOKEN }}
+  # delimiter separating job statuses from step statuses
+  STEP_DELIM: ==============================
+  # deployment status sent by notify_build_ok, yes if deploying, no otherwise.
+  # note that yes, no evaluate to bool so we need to quote to keep as string.
+  DEPLOYING: "no"
+
 jobs:
+  # simply create tar.gz in dist which is uploaded to dist_artifact
+  build_sdist:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    # setup.py uses NumPy's get_include function and setuptools
+    - name: Install sdist requirements
+      id: before-install
+      run: pip3 install -r install_requires.txt
+    - name: Create tar.gz sdist
+      id: create-sdist
+      run: python3 setup.py sdist
+    - name: Upload sdist artifact
+      id: upload-sdist
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist_artifact
+        path: dist/*.tar.gz
+        if-no-files-found: error
+    - name: Notify Slack on job failure if job did not succeed
+      if: failure()
+      uses: voxmedia/github-action-slack-notify-build@v2
+      with:
+        channel: gh-actions-alerts
+        status: |
+          [job] ${{ github.job }}: ${{ job.status }}
+          ${{ env.STEP_DELIM }}
+          [step] before-install: ${{ steps.before-install.outcome }}
+          [step] create-sdist: ${{ steps.create-sdist.outcome }}
+          [step] upload-sdist: ${{ steps.upload-sdist.outcome }}
+        color: danger
+
   # build wheels for manylinux1, manylinux2010, MacOS, Windows
   build_wheels:
     runs-on: ${{ matrix.os }}
@@ -32,6 +73,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build and test wheels
+      id: cibuildwheel
       uses: pypa/cibuildwheel@v2.0.1
       with:
         # to use the PyPA publish action, we want everything in dist
@@ -54,38 +96,53 @@ jobs:
         # increase pip verbosity during build so we can see compiler output
         CIBW_BUILD_VERBOSITY: 1
     - name: Upload wheel artifacts
+      id: upload-wheels
       uses: actions/upload-artifact@v2
       with:
         name: dist_artifact
         path: dist/*.whl
         if-no-files-found: error
-
-  # simply create tar.gz in dist which is uploaded to dist_artifact
-  build_sdist:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    # setup.py uses NumPy's get_include function and setuptools
-    - name: Install sdist requirements
-      run: pip3 install -r install_requires.txt
-    - name: Create tar.gz sdist
-      run: python3 setup.py sdist
-    - name: Upload sdist artifact
-      uses: actions/upload-artifact@v2
+    - name: Notify Slack on job failure and where the failure occurred
+      if: failure()
+      uses: voxmedia/github-action-slack-notify-build@v2
       with:
-        name: dist_artifact
-        path: dist/*.tar.gz
-        if-no-files-found: error
+        channel: gh-actions-alerts
+        status: |
+          [job] ${{ github.job }}: ${{ job.status }}
+          ${{ env.STEP_DELIM }}
+          [step] cibuildwheel: ${{ steps.cibuildwheel.outcome }}
+          [step] upload-wheels: ${{ steps.upload-wheels.outcome }}
+        color: danger
 
-  # deploy job, depends on build_wheels and build_sdist
+  # notifies build success if all build jobs succeeded
+  notify_build_ok:
+    runs-on: ubuntu-latest
+    needs: [build_sdist, build_wheels]
+    steps:
+    - name: Set env.DEPLOYING to yes on tag push
+      # runs only if version tag is present
+      if: ${{ contains(github.ref, 'refs/tags/v') }}
+      run: echo "DEPLOYING=yes" >> $GITHUB_ENV
+    - name: Notify Slack on workflow build success
+      uses: voxmedia/github-action-slack-notify-build@v2
+      with:
+        channel: gh-actions-alerts
+        status: |
+          [job] build_sdist: success
+          [job] build_wheels: success
+
+          deploying? ${{ env.DEPLOYING }}
+        color: good
+
+  # deploy job, depends on build_wheels and build_sdist, run when tags pushed
   deploy:
     runs-on: ubuntu-latest
-    needs: [build_wheels, build_sdist]
-    # run only if version tag is present
+    needs: [build_wheels, build_sdist, notify_build_ok]
     if: ${{ contains(github.ref, 'refs/tags/v') }}
     steps:
     - uses: actions/checkout@v2
     - name: Download .tar.gz and wheel artifacts
+      id: download-dist
       uses: actions/download-artifact@v2
       with:
         name: dist_artifact
@@ -101,7 +158,7 @@ jobs:
         echo "SRC_ARTIFACT_NAME=$RELEASE_VERSION.tar.gz" >> $GITHUB_ENV
     - name: Create production release
       # need id so we can reference the upload URL later to upload SRC_ARTIFACT
-      id: create_release
+      id: create-release
       uses: actions/create-release@v1
       with:
         # don't use RELEASE_VERSION since instances of refs/tags/ are 
@@ -112,10 +169,11 @@ jobs:
           ${{ format('Release {0} deployed by GitHub Actions build. This text
           is auto-generated by create-release action.', env.RELEASE_VERSION) }}
     - name: Upload .tar.gz to release URL
+      id: upload-release
       uses: actions/upload-release-asset@v1
       with:
         # use upload URL from the release creation step's outputs
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
         # path to the asset, given by SRC_ARTIFACT_PATH
         asset_path: ${{ env.SRC_ARTIFACT_PATH }}
         # upload name for the asset, given by SRC_ARTIFACT_NAME
@@ -123,7 +181,39 @@ jobs:
         # appropriate content type
         asset_content_type: application/gzip
     - name: Deploy manylinux1 wheels and .tar.gz source to PyPI
+      id: deploy-release
       uses: pypa/gh-action-pypi-publish@v1.4.1
       with:
         user: __token__
         password: ${{ secrets.LOCAL_PYPI_TOKEN }}
+    - name: Set Slack notification color to good if deploy successful
+      if: success()
+      run: echo "NOTIF_COLOR=good" >> $GITHUB_ENV
+    - name: Set Slack notification color to danger if deploy unsuccessful
+      if: failure()
+      run: echo "NOTIF_COLOR=danger" >> $GITHUB_ENV
+    - name: Notify Slack on workflow deploy status
+      # always run
+      if: always()
+      uses: voxmedia/github-action-slack-notify-build@v2
+      with:
+        channel: gh-actions-alerts
+        status: |
+          [job] ${{ github.job }}: ${{ job.status }}
+          ${{ env.STEP_DELIM }}
+          [step] download-dist: ${{ steps.download-dist.outcome }}
+          [step] create-release: ${{ steps.create-release.outcome }}
+          [step] upload-release: ${{ steps.upload-release.outcome }}
+          [step] deploy-release: ${{ steps.deploy-release.outcome }}
+        color: good
+
+  # test job that also depends on deploy
+  test_job:
+    runs-on: ubuntu-latest
+    needs: [build_sdist, build_wheels, deploy]
+    - name: Send SLack notification if triggered
+      uses: voxmedia/github-action-slack-notify-build@v2
+      with:
+        channel: gh-actions-alerts
+        status: ${{ github.job }} triggered
+        color: good
