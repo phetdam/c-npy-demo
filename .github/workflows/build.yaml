@@ -74,7 +74,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: dist_artifact
-        path: dist
+        path: dist/*.tar.gz
         if-no-files-found: error
 
   # deploy job, depends on build_wheels and build_sdist
