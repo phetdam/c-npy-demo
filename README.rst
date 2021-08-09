@@ -123,7 +123,6 @@ and Linux built.
 
 .. __: https://github.com/pypa/manylinux
 
-Not yet available.
 
 Package contents
 ----------------
