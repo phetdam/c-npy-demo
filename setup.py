@@ -1,6 +1,6 @@
 """setup.py for building numpy-api-bench package.
 
-Extension modules require setup.py so we can't use PEP 517 format.
+Extension modules require setup.py so we can't use PEP 517 setup.cfg.
 
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
