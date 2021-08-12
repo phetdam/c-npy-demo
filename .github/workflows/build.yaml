@@ -19,6 +19,8 @@ env:
   STEP_DELIM: ==============================
   # deployment status sent by notify_build_ok. running if deploy, else skipped
   DEPLOY_STATUS: skipped
+  # GitHub runner access token needed by actions/create-release
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   # simply create tar.gz in dist which is uploaded to dist_artifact
