@@ -120,8 +120,8 @@ callable API for timing the execution of a function with optional arguments in
 a `timeit`__\ -like fashion [#]_.
 
 On installation, ``setuptools`` will also create an entry point titled
-``npapibench`` [#]_ to access the benchmarking code. Just typing the name
-of the entry point in the terminal should produce the ``timeit``\ -like output
+``npapibench`` to access the benchmarking code. Just typing the name of the
+entry point in the terminal should produce the ``timeit``\ -like output
 
 .. code:: text
 
@@ -145,8 +145,6 @@ For usage details, try ``npapibench --help``.
 
 .. __: https://docs.python.org/3/library/timeit.html#command-line-interface
 
-.. [#] ``npapibench`` is the ``numpy-api-bench`` analogue to
-   ``c_npy_demo.bench``, provided by ``c-npy-demo``.
 
 Unit tests
 ----------
