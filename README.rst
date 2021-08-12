@@ -110,9 +110,9 @@ If you don't have or don't wish to use ``make``, you may instead use
 From PyPI
 ~~~~~~~~~
 
-Python 3.6-3.9 binary wheels for Windows, MacOS, manylinux1, and manylinux2010
-can be installed from PyPI, with both 32-bit wheels for Windows (x86) and Linux
-(i686) and 64-bit wheels for Windows, MacOS, and Linux available. Install with
+64-bit Python 3.6-3.9 binary wheels for Windows, MacOS, manylinux1, and
+manylinux2010 can be installed from PyPI, with 32-bit wheels for Windows (x86)
+and Linux (i686) also available. Install with
 
 .. code:: bash
 
