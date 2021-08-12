@@ -110,15 +110,13 @@ If you don't have or don't wish to use ``make``, you may instead use
 From PyPI
 ~~~~~~~~~
 
-.. `manylinux1`__ and Windows wheels may be installed directly from PyPI with
+Python 3.6-3.9 binary wheels for Windows, MacOS, manylinux1, and manylinux2010
+can be installed from PyPI, with both 32-bit wheels for Windows (x86) and Linux
+(i686) and 64-bit wheels for Windows, MacOS, and Linux available. Install with
 
-.. .. code:: bash
+.. code:: bash
 
-..    pip3 install numpy-api-bench
-
-TBD. Currently builds for Python 3.6-3.9 wheels for Windows, MacOS, manylinux1,
-and manylinux2010 wheels have succeeded, with both 32-bit wheels for Windows
-(x86) and Linux (i686) and 64-bit wheels for Windows, MacOS, and Linux built.
+   pip3 install numpy-api-bench
 
 
 Package contents
