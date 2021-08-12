@@ -3,15 +3,15 @@
 numpy-api-bench
 ===============
 
-.. .. image:: https://img.shields.io/pypi/v/numpy-api-bench
+.. image:: https://img.shields.io/pypi/v/numpy-api-bench
    :target: https://pypi.org/project/numpy-api-bench/
    :alt: PyPI
 
-.. .. image:: https://img.shields.io/pypi/wheel/numpy-api-bench
+.. image:: https://img.shields.io/pypi/wheel/numpy-api-bench
    :target: https://pypi.org/project/numpy-api-bench/
    :alt: PyPI - Wheel
 
-.. .. image:: https://img.shields.io/pypi/pyversions/numpy-api-bench
+.. image:: https://img.shields.io/pypi/pyversions/numpy-api-bench
    :target: https://pypi.org/project/numpy-api-bench/
    :alt: PyPI - Python Version
 
@@ -23,9 +23,9 @@ numpy-api-bench
 *We should forget about small efficiencies, say about 97% of the time:
 premature optimization is the root of all evil* [#]_.
 
-A small Python package comparing speed differences between NumPy's Python and
-C APIs that also serves as an example project for writing C extension modules
-that make use of the `NumPy C API`__ [#]_.
+**numpy-api-bench** is a small Python package comparing speed differences
+between NumPy's Python and C APIs that also serves as an example project for
+writing C extension modules that make use of the `NumPy C API`__ [#]_.
 
 .. [#] Attributed to Sir Tony Hoare, popularized by Donald Knuth.
 
