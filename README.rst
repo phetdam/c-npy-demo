@@ -196,7 +196,7 @@ For users
 
 To run the unit tests in the package, ``pytest>=6.0.1`` must be installed. If
 installing the wheel from PyPI, you can install ``pytest`` as an optional
-dependency with
+dependency alongside the package code with
 
 .. code:: bash
 
@@ -212,7 +212,8 @@ The unit tests are located in ``npapibench.tests`` and
 Other desired flags can be passed to ``pytest`` before the ``--pyargs`` flag.
 
 If building from source, follow the steps in `From source`_ but replace the
-final ``pip3 install .`` with ``pip3 install .[tests]``.
+final ``pip3 install .`` with ``pip3 install .[tests]``. The unit tests can
+be run after ``cd``\ ing to the repository root by simply calling ``pytest``.
 
 .. Lessons
 .. -------
