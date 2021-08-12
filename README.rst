@@ -111,13 +111,13 @@ Package contents
 
 The ``numpy-api-bench`` package contains a pure Python module and several C
 extension modules. The pure Python module is ``npapibench.pyimpl``, containing
-one function that is two lines of ``numpy``\ -enabled Python code. It is the
-"benchmark" for the C extension module ``npapibench.cimpl`` as both modules
-contain a single function that centers and scales to unit variance a
-``numpy.ndarray``. The other C extensions are part of the
-``npapibench.functimer`` subpackage, which provides a callable API for timing
-the execution of a function with optional arguments in a `timeit`__\ -like
-fashion [#]_.
+one function that centers and scales to unit variance a ``numpy.ndarray`` that
+is implemented with only one line of ``numpy``\ -enabled Python code. It is the
+"benchmark" for the C extension module ``npapibench.cimpl``, which implements
+a near-identical function by using the NumPy C API. The other C extensions are
+part of the ``npapibench.functimer`` subpackage, which provides a callable API
+for timing the execution of a function with optional arguments in a
+`timeit`__\ -like fashion [#]_.
 
 On installation, ``setuptools`` will also create an entry point titled
 ``npapibench`` [#]_ to access the benchmarking code. Just typing the name
