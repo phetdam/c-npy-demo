@@ -116,12 +116,9 @@ From PyPI
 
 ..    pip3 install numpy-api-bench
 
-TBD. Currently builds for Python 3.6-3.9 wheels for Windows, MacOS,
-`manylinux1__`, and manylinux2010 wheels have succeeded, with both 32-bit
-wheels for Windows (x86) and Linux (i686) and 64-bit wheels for Windows, MacOS,
-and Linux built.
-
-.. __: https://github.com/pypa/manylinux
+TBD. Currently builds for Python 3.6-3.9 wheels for Windows, MacOS, manylinux1,
+and manylinux2010 wheels have succeeded, with both 32-bit wheels for Windows
+(x86) and Linux (i686) and 64-bit wheels for Windows, MacOS, and Linux built.
 
 
 Package contents
