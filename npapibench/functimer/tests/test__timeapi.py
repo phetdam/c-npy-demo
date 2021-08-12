@@ -73,9 +73,9 @@ def test_timeit_once_number(timeargs):
         pytest fixture. See timeargs.
     """
     # values of number to pass. time should increase as number increases
-    numbers = [10, 1000, 10000, 100000, 1000000]
+    numbers = [10, 1000000]
     # compute times for each value of number
-    times = np.empty(5)
+    times = np.empty(len(numbers))
     for i, number in enumerate(numbers):
         times[i] = timeit_once(*timeargs, number=number)
     # check that times are in ascending order
