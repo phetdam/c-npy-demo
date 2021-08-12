@@ -160,7 +160,8 @@ Python-accessible functions by using Python unit testing tools. However, it is
 likely that the C extension module, which `by convention`__ is a single file
 with all members static except the module initialization function, may contain
 some internal functions that cannot be accessed directly from Python. So far,
-there does not seem to be a widely accepted method of testing these functions.
+there does not seem to be a widely accepted approach to unit testing code in
+Python C extensions, especially these internal C functions.
 
 .. __: https://docs.python.org/3/extending/extending.html#
    providing-a-c-api-for-an-extension-module
@@ -170,12 +171,17 @@ the internal functions I wanted to test, providing a C API for other extension
 modules by using the header file and ``PyCapsule`` method described in the
 `official tutorial`__ on writing Python C extensions. Then, I wrote unit tests
 in Python using the `pytest`__ API and simply invoked ``pytest`` to collect and
-run all unit tests. If there were any segmentation faults or need to more
-closely debug, I would just then use ``gdb`` to debug, for example with
+run all unit tests, as it produces far better unit test output compared to
+most C unit testing frameworks and is aware of Python objects. If there were
+any segmentation faults or need to more closely debug, I would just then invoke
+``gdb``, for example with
 
 .. code:: bash
 
    gdb --args python3 -m pytest
+
+Combining both ``pytest`` and ``gdb`` allowed me to hammer out some bugs that
+otherwise would have lain undiscovered.
 
 .. __: https://docs.python.org/3/extending/extending.html#
    providing-a-c-api-for-an-extension-module
@@ -186,7 +192,7 @@ For users
 ~~~~~~~~~
 
 To run the unit tests in the package, ``pytest>=6.0.1`` must be installed. If
-installing the wheel from PyPI, you can install `pytest`__ as an optional
+installing the wheel from PyPI, you can install ``pytest`` as an optional
 dependency with
 
 .. code:: bash
