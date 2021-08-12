@@ -3,7 +3,7 @@
 .. codeauthor:: Derek Huang <djh458@stern.nyu.edu>
 """
 
-import argparse
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from functools import partial
 import numpy as np
 
@@ -82,9 +82,9 @@ def main(args=None):
     """
     # instantiate ArgumentParse and add arguments. help width is set to 80 cols
     # although we are technically using the private argparse API.
-    arp = argparse.ArgumentParser(
+    arp = ArgumentParser(
         description=_BENCH_DESC,
-        formatter_class=partial(argparse.RawDescriptionHelpFormatter, width=80)
+        formatter_class=partial(RawDescriptionHelpFormatter, width=80)
     )
     arp.add_argument(
         "-s", "--shape", default=(40, 5, 10, 10, 20, 5),
@@ -100,18 +100,17 @@ def main(args=None):
     # parse arguments
     args = arp.parse_args(args=args)
     # collect named args for npapibench.functimer.timeit_plus that are not None
-    # except for the shape argument. functimer_args will be directly unpacked
-    # into npapibench.functimer.timeit_plus
-    dict_args = vars(args)
-    functimer_args = {}
-    for k, v in dict_args.items():
+    # except for the shape argument. timeit_args will be directly unpacked
+    # into the npapibench.functimer.timeit_plus function.
+    timeit_args = {}
+    for k, v in vars(args).items():
         if (k != "shape") and (v is not None):
-            functimer_args[k] = v
+            timeit_args[k] = v
     # print shape and number of elements in array + allocate random array
     print(f"numpy.ndarray shape {args.shape}, size {np.prod(args.shape)}")
     ar = np.random.normal(size=args.shape)
     # get results for pyimpl.stdscale and cimpl.stdscale + print results
-    py_res = timeit_plus(pyimpl.stdscale, (ar,), **functimer_args)
+    py_res = timeit_plus(pyimpl.stdscale, (ar,), **timeit_args)
     print(f"pyimpl.stdscale -- {py_res.brief}")
-    c_res = timeit_plus(cimpl.stdscale, (ar,), **functimer_args)
+    c_res = timeit_plus(cimpl.stdscale, (ar,), **timeit_args)
     print(f" cimpl.stdscale -- {c_res.brief}")

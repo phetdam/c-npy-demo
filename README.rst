@@ -139,9 +139,9 @@ of the entry point in the terminal should produce the ``timeit``\ -like output
 
 .. code:: text
 
-   numpy.ndarray shape (40, 5, 10, 10, 50, 5), size 5000000
-   pyimpl.stdscale -- 2 loops, best of 5: 157.1 msec per loop
-    cimpl.stdscale -- 5 loops, best of 5: 57.9 msec per loop
+   numpy.ndarray shape (40, 5, 10, 10, 20, 5), size 2000000
+   pyimpl.stdscale -- 10 loops, best of 5: 31.9 msec per loop
+    cimpl.stdscale -- 50 loops, best of 5: 13.6 msec per loop
 
 For usage details, try ``npapibench --help``.
 
