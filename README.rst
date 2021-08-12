@@ -174,14 +174,17 @@ in Python using the `pytest`__ API and simply invoked ``pytest`` to collect and
 run all unit tests, as it produces far better unit test output compared to
 most C unit testing frameworks and is aware of Python objects. If there were
 any segmentation faults or need to more closely debug, I would just then invoke
-``gdb``, for example with
+``gdb`` on the Python interpreter running ``pytest`` [#]_ with
 
 .. code:: bash
 
    gdb --args python3 -m pytest
 
-Combining both ``pytest`` and ``gdb`` allowed me to hammer out some bugs that
-otherwise would have lain undiscovered.
+Together, ``pytest`` and ``gdb`` allowed me to hammer out a significant number
+of bugs.
+
+.. [#] The ``pytest`` entry point is a Python script run by the interpreter so
+   ``gdb pytest`` does not work.
 
 .. __: https://docs.python.org/3/extending/extending.html#
    providing-a-c-api-for-an-extension-module
