@@ -205,4 +205,4 @@ jobs:
           [step] create-release: ${{ steps.create-release.outcome }}
           [step] upload-release: ${{ steps.upload-release.outcome }}
           [step] deploy-release: ${{ steps.deploy-release.outcome }}
-        color: good
+        color: ${{ env.NOTIF_COLOR }}
