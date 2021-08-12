@@ -212,8 +212,13 @@ The unit tests are located in ``npapibench.tests`` and
 Other desired flags can be passed to ``pytest`` before the ``--pyargs`` flag.
 
 If building from source, follow the steps in `From source`_ but replace the
-final ``pip3 install .`` with ``pip3 install .[tests]``. The unit tests can
-be run after ``cd``\ ing to the repository root by simply calling ``pytest``.
+final ``pip3 install .`` with
+
+.. code:: bash
+   pip3 install .[tests]
+
+The unit tests can be run after ``cd``\ ing to the repository root by simply
+calling ``pytest``.
 
 .. Lessons
 .. -------
