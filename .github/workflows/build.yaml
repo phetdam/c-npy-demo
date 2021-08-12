@@ -17,9 +17,8 @@ env:
   SLACK_BOT_TOKEN: ${{ secrets.SLACK_ACTIONS_COURIER_TOKEN }}
   # delimiter separating job statuses from step statuses
   STEP_DELIM: ==============================
-  # deployment status sent by notify_build_ok, yes if deploying, no otherwise.
-  # note that yes, no evaluate to bool so we need to quote to keep as string.
-  DEPLOYING: "no"
+  # deployment status sent by notify_build_ok. running if deploy, else skipped
+  DEPLOY_STATUS: skipped
 
 jobs:
   # simply create tar.gz in dist which is uploaded to dist_artifact
@@ -119,10 +118,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build_sdist, build_wheels]
     steps:
-    - name: Set env.DEPLOYING to yes on tag push
+    - name: Set env.DEPLOY_STATUS to yes on tag push
       # runs only if version tag is present
       if: ${{ contains(github.ref, 'refs/tags/v') }}
-      run: echo "DEPLOYING=yes" >> $GITHUB_ENV
+      run: echo "DEPLOY_STATUS=running" >> $GITHUB_ENV
     - name: Notify Slack on workflow build success
       uses: voxmedia/github-action-slack-notify-build@v2
       with:
@@ -130,8 +129,7 @@ jobs:
         status: |
           [job] build_sdist: success
           [job] build_wheels: success
-
-          deploying? ${{ env.DEPLOYING }}
+          [job] deploy: ${{ env.DEPLOY_STATUS }}
         color: good
 
   # deploy job, depends on build_wheels and build_sdist, run when tags pushed

@@ -23,19 +23,6 @@ numpy-api-bench
 *We should forget about small efficiencies, say about 97% of the time:
 premature optimization is the root of all evil* [#]_.
 
-.. leave note as comment
-
-.. The contents of this repository will see significant change in the near
-   future, as I have decided to greatly simplify the code being used. The
-   implied volatility stuff will be moved to a new repository, whose name will
-   be yet another play on snake-related stuff. There is more code than I
-   initially wanted, however, since I wrote my own alternative to `timeit`__
-   as a C extension module along with its necessary unit tests since using
-   ``timeit.main`` results in double allocation of a ``numpy`` array in the
-   benchmarking script.
-
-.. .. __: https://docs.python.org/3/library/timeit.html
-
 A small Python package comparing speed differences between NumPy's Python and
 C APIs that also serves as an example project for writing C extension modules
 that make use of the `NumPy C API`__ [#]_.
@@ -160,56 +147,63 @@ For usage details, try ``npapibench --help``.
 .. [#] ``npapibench`` is the ``numpy-api-bench`` analogue to
    ``c_npy_demo.bench``, provided by ``c-npy-demo``.
 
-.. Unit tests
-.. ----------
+Unit tests
+----------
 
-.. The unit test requirements for a C extension module are rather unique. Although
-   one is writing C code, the resulting shared object built by ``setuptools`` is
-   to be loaded by the Python interpreter, so it easier to conduct unit tests for
-   the Python-accessible functions by using Python unit testing tools. However, it
-   is possible that the extension module also contains some C functions that don't
-   use the Python C API and should be tested using a C unit testing framework.
-   It's also very possible that incorrectly written C code loaded as an extension
-   module may cause a segmentation fault and crash the interpreter. Ideally, unit
-   tests should be run in a separate address space so that the test runner doesn't
-   get killed by the operating system if a particular test causes a segfault.
+Testing internal functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. For this project, I used `pytest`__ and `Check`__, embedding the Python
-   interpreter into and using Check unit tests inside a test runner to test both
-   from the Python interpreter and directly from C. Check runs unit tests in a
-   separate address space so the test runner doesn't get killed when a unit test
-   segfaults, but this can be disabled so that ``gdb`` can be used on the test
-   runner to debug C extension module behavior when its members are accessed by
-   the Python interpreter.
+The unit testing requirements for a C extension module are rather unique.
+Although one is writing C code, the resulting shared object built by
+``setuptools`` is loaded by the Python interpreter, so it easier to test
+Python-accessible functions by using Python unit testing tools. However, it is
+likely that the C extension module, which `by convention`__ is a single file
+with all members static except the module initialization function, may contain
+some internal functions that cannot be accessed directly from Python. So far,
+there does not seem to be a widely accepted method of testing these functions.
 
-.. To build the test runner, you will need ``pytest`` and Check. ``pytest`` can be
-   easily installed with ``pip`` but Check is best built from source as the
-   versions available on some platforms are rather outdated. To build Check,
-   download the source from the `Check GitHub releases page`__ [#]_ and follow
-   the installation instructions in `the homepage`__ ``README.md`` [#]_. Then,
-   with the working directory the repository root, the test runner can be built
-   and run with
+.. __: https://docs.python.org/3/extending/extending.html#
+   providing-a-c-api-for-an-extension-module
 
-.. .. code:: bash
+For this project, in separate C extension modules, I wrote Python wrappers for
+the internal functions I wanted to test, providing a C API for other extension
+modules by using the header file and ``PyCapsule`` method described in the
+`official tutorial`__ on writing Python C extensions. Then, I wrote unit tests
+in Python using the `pytest`__ API and simply invoked ``pytest`` to collect and
+run all unit tests. If there were any segmentation faults or need to more
+closely debug, I would just then use ``gdb`` to debug, for example with
 
-..    make check
+.. code:: bash
 
-.. Type ``./runner --help`` for details on additional options that can be passed.
+   gdb --args python3 -m pytest
 
-.. .. [#] `Check 0.15.2`__ was used in this project.
+.. __: https://docs.python.org/3/extending/extending.html#
+   providing-a-c-api-for-an-extension-module
 
-.. .. [#] I built ``libcheck`` using the standard ``./configure && make`` method
-      with automake/autoconf.
+.. __: https://docs.pytest.org/en/stable/
 
-.. .. __: https://pytest.readthedocs.io/
+For users
+~~~~~~~~~
 
-.. .. __: https://libcheck.github.io/check/
+To run the unit tests in the package, ``pytest>=6.0.1`` must be installed. If
+installing the wheel from PyPI, you can install `pytest`__ as an optional
+dependency with
 
-.. .. __: https://github.com/libcheck/check/releases
+.. code:: bash
 
-.. .. __: https://github.com/libcheck/check
+   pip3 install numpy-api-bench[tests]
 
-.. .. __: https://github.com/libcheck/check/releases/tag/0.15.2
+The unit tests are located in ``npapibench.tests`` and
+``npapibench.functimer.tests`` and can be run with
+
+.. code:: bash
+
+   pytest --pyargs npapibench.tests && pytest --pyargs npapibench.functimer.tests
+
+Other desired flags can be passed to ``pytest`` before the ``--pyargs`` flag.
+
+If building from source, follow the steps in `From source`_ but replace the
+final ``pip3 install .`` with ``pip3 install .[tests]``.
 
 .. Lessons
 .. -------
